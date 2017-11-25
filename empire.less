@@ -1,0 +1,34 @@
+div.resource {
+    margin: 1rem 0 0 .5rem;
+    > .progress {
+        width: 10rem;
+        margin-right: 1rem;
+    }
+    > span {
+        position: relative;
+        bottom: .375rem;
+    }
+}
+
+.progress {
+    display: inline-block;
+    height: 1.5rem;
+    width: 100%;
+    background-color: #c9c9c9;
+    position: relative;
+}
+
+.progress:before {
+    content: attr(data-label);
+    position: absolute;
+    text-align: center;
+    top: .0625rem;
+    left: 0;
+    right: 0;
+}
+
+.progress .progressValue {
+    background-color: #7cc4ff;
+    display: inline-block;
+    height: 100%;
+}
