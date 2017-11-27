@@ -1,15 +1,18 @@
 var save = window.localStorage;
+var resources = {};
 
 $(function(){
-    // Definate Resources
-    var resources = {};
+    // Define Resources
     loadResource(resources, 'lumber', 'Harvest Lumber');
+    loadResource(resources, 'stone', 'Harvest Stone');
     loadResource(resources, 'coal', 'Mine Coal');
     loadResource(resources, 'copper', 'Mine Copper');
     loadResource(resources, 'iron', 'Mine Iron');
+    loadResource(resources, 'gold', 'Mine Gold');
+    loadResource(resources, 'titanium', 'Mine Titanium');
+    loadResource(resources, 'oil', 'Harvest Oil');
     resources.lumber.unlocked = 1;
-    resources.coal.unlocked = 1;
-    resources.copper.unlocked = 1;
+    resources.stone.unlocked = 1;
     
     // Load unlocked resources
     Object.keys(resources).forEach(function (key) { 
