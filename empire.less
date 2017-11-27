@@ -1,12 +1,61 @@
-div.resource {
-    margin: 1rem 0 0 .5rem;
-    > .progress {
-        width: 10rem;
-        margin-right: 1rem;
+div.resources {
+    display: inline-block;
+    width: 20rem;
+    vertical-align: top;
+    
+    div.resource {
+        width: 100%;
+        margin: 1rem 0 0 .5rem;
+        > .progress {
+            width: 10rem;
+            margin-right: 1rem;
+        }
+        > span {
+            position: relative;
+            bottom: .375rem;
+        }
     }
-    > span {
-        position: relative;
-        bottom: .375rem;
+}
+
+div.development {
+    display: inline-block;
+    width: 20rem;
+    vertical-align: top;
+}
+
+div.research {
+    display: inline-block;
+    width: 20rem;
+    vertical-align: top;
+    
+    div.tech {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 1rem;
+        border-radius: 1rem;
+        border: .0625rem solid #eff2de;
+        
+        .name {
+            padding: .25rem 0;
+            background-color: #3c3;
+            border-radius: 1rem 1rem 0 0;
+        }
+        .desc {
+            padding: .25rem;
+            background-color: #eff2de;
+        }
+        span {
+            display: inline-block;
+            text-align: center;
+            background-color: ##d6d6cf;
+            padding: .125rem 0;
+            width: 50%;
+        }
+        .footer {
+            padding: .5rem 0;
+            background-color: #3c3;
+            border-radius: 0 0 1rem 1rem;
+        }
     }
 }
 
@@ -16,19 +65,19 @@ div.resource {
     width: 100%;
     background-color: #c9c9c9;
     position: relative;
-}
-
-.progress:before {
-    content: attr(data-label);
-    position: absolute;
-    text-align: center;
-    top: .0625rem;
-    left: 0;
-    right: 0;
-}
-
-.progress .progressValue {
-    background-color: #7cc4ff;
-    display: inline-block;
-    height: 100%;
+    
+    .progressValue {
+        background-color: #7cc4ff;
+        display: inline-block;
+        height: 100%;
+    }
+    
+    &:before {
+        content: attr(data-label);
+        position: absolute;
+        text-align: center;
+        top: .0625rem;
+        left: 0;
+        right: 0;
+    }
 }
