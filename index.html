@@ -4,20 +4,34 @@
     <title>Empire</title>
     <meta http-equiv="Content-type" content="text/html;charset=utf-8">
     <link rel="icon" href="empire.ico" type="images/x-icon">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <link rel="stylesheet/less" type="text/css" href="empire.less"/>
     <script src="less.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script src="resources.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="variables.js"></script>
     <script src="research.js"></script>
     <script src="empire.js"></script>
 </head>
 <body>
-<div id="main" class="main">
+<div id="main" class="main container">
     <div id="top" class="top"></div>
-    <div id="game" class="game">
-        <div id="variables" class="resources"></div>
-        <div id="development" class="development"></div>
-        <div id="research" class="research"></div>
+    <ul id="menu" class="nav nav-tabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" href="#resources" data-toggle="tab" role="tab">Resources</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#research" data-toggle="tab" role="tab">Research</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="#development" data-toggle="tab" role="tab">Construction</a>
+        </li>
+    </ul>
+    <div id="game" class="tab-content">
+        <div id="resources" class="resources tab-pane fade show active" role="tabpanel"></div>
+        <div id="research" class="research tab-pane fade" role="tabpanel"></div>
+        <div id="development" class="development tab-pane fade" role="tabpanel"></div>
     </div>
 </div>
 </body>

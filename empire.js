@@ -38,9 +38,9 @@ function loadResource(resources, name, label) {
 // Bind resource function
 // This function adds the resource to the game world
 function createResourceBind(resources, name) {
-    var resource = $('<div class="resource"></div>');
-    var clicker = $('<div id="' + name + 'Clicker" class="progress" data-label="' + resources[name]['label'] + '"></div>');
-    var progress = $('<span id="' + name + 'ProgressBar" class="progressValue" style="width:0%"></span>');
+    var resource = $('<div class="resource col"></div>');
+    var clicker = $('<div id="' + name + 'Clicker" class="p-bar" data-label="' + resources[name]['label'] + '"></div>');
+    var progress = $('<span id="' + name + 'ProgressBar" class="p-value" style="width:0%"></span>');
     var counter = $('<span id="' + name + 'Value"></span>');
     clicker.append(progress);
     resource.append(clicker);
