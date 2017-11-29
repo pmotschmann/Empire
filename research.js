@@ -80,6 +80,10 @@ var research = {
             cost: { 
                 lumber: 10,
                 stone: 10
+            },
+            effect: function (){
+                resources['stone'].rate = 2;
+                save.setItem('stoneRate',2);
             }
         },
         {
@@ -88,6 +92,10 @@ var research = {
             cost: { 
                 lumber: 25,
                 copper: 25
+            },
+            effect: function (){
+                resources['stone'].rate = 3;
+                save.setItem('stoneRate',3);
             }
         },
         {
@@ -96,6 +104,10 @@ var research = {
             cost: { 
                 lumber: 250,
                 iron: 100
+            },
+            effect: function (){
+                resources['stone'].rate = 4;
+                save.setItem('stoneRate',4);
             }
         },
         {
@@ -104,6 +116,10 @@ var research = {
             cost: { 
                 lumber: 1000,
                 steel: 100
+            },
+            effect: function (){
+                resources['stone'].rate = 5;
+                save.setItem('stoneRate',5);
             }
         },
         {
@@ -123,6 +139,10 @@ var research = {
             cost: { 
                 lumber: 10,
                 stone: 10
+            },
+            effect: function (){
+                resources['lumber'].rate = 2;
+                save.setItem('lumberRate',2);
             }
         },
         {
@@ -131,6 +151,10 @@ var research = {
             cost: { 
                 lumber: 25,
                 copper: 25
+            },
+            effect: function (){
+                resources['lumber'].rate = 3;
+                save.setItem('lumberRate',3);
             }
         },
         {
@@ -139,6 +163,10 @@ var research = {
             cost: { 
                 lumber: 250,
                 iron: 100
+            },
+            effect: function (){
+                resources['lumber'].rate = 4;
+                save.setItem('lumberRate',4);
             }
         },
         {
@@ -147,6 +175,10 @@ var research = {
             cost: { 
                 lumber: 1000,
                 steel: 100
+            },
+            effect: function (){
+                resources['lumber'].rate = 5;
+                save.setItem('lumberRate',5);
             }
         },
         {

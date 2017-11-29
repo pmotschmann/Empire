@@ -11,6 +11,7 @@ $(function() {
     loadResource(resources, 'oil', 'Harvest Oil');
     resources.lumber.unlocked = 1;
     resources.stone.unlocked = 1;
+    
     // Set current research
     loadTech();
     
@@ -30,6 +31,7 @@ function loadResource(resources, name, label) {
         amount: Number(save.getItem(name) || 0),
         miners: Number(save.getItem(name+'Miners') || 0),
         rate: Number(save.getItem(name+'Rate') || 1),
+        yield: Number(save.getItem(name+'Yield') || 1),
         unlocked: Number(save.getItem(name+'Unlocked') || 0),
         label: label
     };
@@ -47,6 +49,14 @@ function createResourceBind(resources, name) {
     resource.append(counter);
     $('#resources').append(resource);
     $('#' + name + 'Value').html(resources[name]['amount'] + ' ' + nameCase(name));
+    var vm = new Vue({
+        //el: '#' + name + 'Value',
+        data: resources[name]
+    });
+    vm.$watch('amount', function (newValue, oldValue) {
+        save.setItem(name,resources[name]['amount']);
+        $('#' + name + 'Value').html(resources[name]['amount'] + ' ' + nameCase(name));
+    });
     
     $('#' + name + 'Clicker').on('click',function(e){
         e.preventDefault();
@@ -58,15 +68,13 @@ function createResourceBind(resources, name) {
         var refreshId = setInterval(function() {
             if (width >= 100) {
                 clearInterval(refreshId);
-                resources[name]['amount'] += resources[name]['rate'];
-                save.setItem(name,resources[name]['amount']);
+                resources[name]['amount'] += resources[name]['yield'];
                 bar.width('0');
-                $('#' + name + 'Value').html(resources[name]['amount'] + ' ' + nameCase(name));
             } else {
                 width++; 
                 bar.width(width + '%');
             }
-        }, 25);
+        }, (30 - (resources[name]['rate'] * 5)));
         
         return false;
     });
@@ -100,9 +108,7 @@ function showTech(techKey,techLevel) {
         });
         if (paid) {
             Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-                resources[cost]['amount'] = Number(save.getItem(cost)) - research[techKey][techLevel]['cost'][cost];
-                save.setItem(cost,resources[cost]['amount']);
-                $('#' + cost + 'Value').html(resources[cost]['amount'] + ' ' + nameCase(cost));
+                resources[cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
             });
             save.setItem(techKey,Number(save.getItem(techKey)+1));
             if (research[techKey][techLevel]['effect']) {
