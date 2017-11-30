@@ -1,5 +1,6 @@
-var research = {
-    tech: [ // General Technological Level of the Empire
+function defineTech() {
+    // General Technological Level of the Empire
+    research['tech'] = [ 
         {
             name: 'Simple Handtools',
             description: 'Knowledge of how to construct simple hand tools',
@@ -18,61 +19,10 @@ var research = {
                 steel: 500
             }
         }
-    ],
-    resource: [
-        {
-            name: 'Copper Mine',
-            require: { mining: 1 },
-            description: 'Construct a Copper Mine',
-            cost: { 
-                lumber: 25
-            },
-            effect: function (){
-                resources['copper'].unlocked = 1;
-                save.setItem('copperUnlocked',1);
-                createResourceBind(resources,'copper');
-            }
-        },
-        {
-            name: 'Iron Mine',
-            description: 'Construct an Iron Mine',
-            cost: { 
-                lumber: 250
-            },
-            effect: function (){
-                resources['iron'].unlocked = 1;
-                save.setItem('ironUnlocked',1);
-                createResourceBind(resources,'iron');
-            }
-        },
-        {
-            name: 'Coal Mine',
-            description: 'Construct a Coal Mine',
-            cost: { 
-                lumber: 1000
-            },
-            effect: function (){
-                resources['coal'].unlocked = 1;
-                save.setItem('coalUnlocked',1);
-                createResourceBind(resources,'coal');
-            }
-        },
-        {
-            name: 'Steel Mill',
-            description: 'Construct a Steel Mill',
-            cost: { 
-                coal: 250,
-                iron: 250,
-                lumber: 1000,
-            },
-            effect: function (){
-                resources['steel'].unlocked = 1;
-                save.setItem('steelUnlocked',1);
-                createResourceBind(resources,'steel');
-            }
-        }
-    ],
-    mining: [
+    ];
+    
+    // General technology related to mining
+    research['mining'] = [
         {
             name: 'Stone Pickaxe',
             require: { tech: 1 },
@@ -81,9 +31,8 @@ var research = {
                 lumber: 10,
                 stone: 10
             },
-            effect: function (){
+            effect: function () {
                 resources['stone'].rate = 2;
-                save.setItem('stoneRate',2);
             }
         },
         {
@@ -93,9 +42,9 @@ var research = {
                 lumber: 25,
                 copper: 25
             },
-            effect: function (){
+            effect: function () {
                 resources['stone'].rate = 3;
-                save.setItem('stoneRate',3);
+                resources['copper'].rate = 2;
             }
         },
         {
@@ -105,9 +54,11 @@ var research = {
                 lumber: 250,
                 iron: 100
             },
-            effect: function (){
+            effect: function () {
                 resources['stone'].rate = 4;
-                save.setItem('stoneRate',4);
+                resources['copper'].rate = 3;
+                resources['iron'].rate = 2;
+                resources['coal'].rate = 2;
             }
         },
         {
@@ -117,9 +68,12 @@ var research = {
                 lumber: 1000,
                 steel: 100
             },
-            effect: function (){
+            effect: function () {
                 resources['stone'].rate = 5;
-                save.setItem('stoneRate',5);
+                resources['copper'].rate = 4;
+                resources['iron'].rate = 3;
+                resources['coal'].rate = 3;
+                resources['aluminium'].rate = 2;
             }
         },
         {
@@ -128,10 +82,21 @@ var research = {
             cost: { 
                 lumber: 2500,
                 aluminium: 250
+            },
+            effect: function () {
+                resources['stone'].rate = 6;
+                resources['copper'].rate = 5;
+                resources['iron'].rate = 4;
+                resources['coal'].rate = 4;
+                resources['aluminium'].rate = 3;
+                resources['gold'].rate = 2;
+                resources['titanium'].rate = 2;
             }
         }
-    ],
-    timber: [
+    ];
+    
+    // Lumberjacking tech
+    research['timber'] = [
         {
             name: 'Stone Axe',
             require: { tech: 1 },
@@ -140,9 +105,8 @@ var research = {
                 lumber: 10,
                 stone: 10
             },
-            effect: function (){
+            effect: function () {
                 resources['lumber'].rate = 2;
-                save.setItem('lumberRate',2);
             }
         },
         {
@@ -152,9 +116,8 @@ var research = {
                 lumber: 25,
                 copper: 25
             },
-            effect: function (){
+            effect: function () {
                 resources['lumber'].rate = 3;
-                save.setItem('lumberRate',3);
             }
         },
         {
@@ -164,9 +127,8 @@ var research = {
                 lumber: 250,
                 iron: 100
             },
-            effect: function (){
+            effect: function () {
                 resources['lumber'].rate = 4;
-                save.setItem('lumberRate',4);
             }
         },
         {
@@ -176,9 +138,8 @@ var research = {
                 lumber: 1000,
                 steel: 100
             },
-            effect: function (){
+            effect: function () {
                 resources['lumber'].rate = 5;
-                save.setItem('lumberRate',5);
             }
         },
         {
@@ -187,6 +148,9 @@ var research = {
             cost: { 
                 lumber: 2500,
                 steel: 250
+            },
+            effect: function () {
+                resources['lumber'].rate = 6;
             }
         },
         {
@@ -195,6 +159,9 @@ var research = {
             cost: { 
                 aluminium: 2500,
                 steel: 5000
+            },
+            effect: function () {
+                resources['lumber'].rate = 7;
             }
         },
         {
@@ -205,7 +172,10 @@ var research = {
                 oil: 2500,
                 aluminium: 5000,
                 steel: 25000
+            },
+            effect: function () {
+                resources['lumber'].yield = 2;
             }
         }
-    ]
-};
+    ];
+}
