@@ -1,7 +1,4 @@
 function loadCity() {
-        
-    // # General Knowledge level
-    city['knowledge'] = Number(save.getItem('knowledge') || 0);
     
     // # Load structures
     Object.keys(city).forEach(function (key) { 
@@ -35,10 +32,12 @@ function loadCity() {
                 else {
                     save.setItem(key + '_' + subkey,city[key][subkey]);
                 }
-                
             });
         });
     });
+    
+    // # General Knowledge level
+    city['knowledge'] = Number(save.getItem('knowledge') || 0);
 }
 
 function defineBuildings() {
@@ -55,9 +54,6 @@ function defineBuildings() {
                 workers: 10,
                 cost: { 
                     lumber: 5
-                },
-                complete: function () {
-                    save.setItem('stoneUnlocked',1);
                 }
             }
         ],

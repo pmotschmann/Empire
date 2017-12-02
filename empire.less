@@ -3,37 +3,51 @@ div.main {
 }
 
 div.resources {
-    display: inline-block;
-    width: 20rem;
     vertical-align: top;
     
     div.resource {
-        width: 100%;
+        border-top: .0625rem solid #ddd;
+        width: 25rem;
         margin: 1rem 0 0 .5rem;
-        > .progress {
+        
+        .label {
             width: 10rem;
-            margin-right: 1rem;
         }
-        > span {
-            position: relative;
-            bottom: .375rem;
+        
+        .counter,
+        .workers { 
+            width: 50%;
+        }
+        
+        .progress {
+            cursor: pointer;
+            margin-top: .5rem;
+            padding: 0;
+            height: 1.5rem;
+            
+            .progress-bar-title {
+                position: absolute;
+                text-align: center;
+                overflow: hidden;
+                line-height: 1.5rem;
+                font-size: 1rem;
+                right: 0;
+                left: 0;
+                top: 0;
+            }
         }
     }
 }
 
 div.development {
-    display: inline-block;
-    width: 20rem;
     vertical-align: top;
 }
 
 div.research {
-    display: inline-block;
-    width: 20rem;
     vertical-align: top;
     
     div.tech {
-        width: 100%;
+        width: 25rem;
         text-align: center;
         margin-bottom: 1rem;
         border-radius: 1rem;
@@ -60,28 +74,5 @@ div.research {
             background-color: #3c3;
             border-radius: 0 0 1rem 1rem;
         }
-    }
-}
-
-.p-bar {
-    display: inline-block;
-    height: 1.5rem;
-    width: 100%;
-    background-color: #c9c9c9;
-    position: relative;
-    
-    .p-value {
-        background-color: #7cc4ff;
-        display: inline-block;
-        height: 100%;
-    }
-    
-    &:before {
-        content: attr(data-label);
-        position: absolute;
-        text-align: center;
-        top: .0625rem;
-        left: 0;
-        right: 0;
     }
 }

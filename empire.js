@@ -4,6 +4,7 @@ $(function() {
     defineBuildings();
     
     resources.lumber.unlocked = 1;
+    resources.stone.unlocked = 1;
     
     // Set current research
     loadTech();
