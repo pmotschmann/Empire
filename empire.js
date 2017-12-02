@@ -50,6 +50,8 @@ function showTech(techKey,techLevel) {
                 resources[cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
             });
             save.setItem(techKey,Number(save.getItem(techKey)+1));
+            city['knowledge']++;
+            save.setItem(city['knowledge']);
             if (research[techKey][techLevel]['effect']) {
                 research[techKey][techLevel]['effect']();
             }

@@ -1,27 +1,43 @@
 function loadCity() {
-    /*city['citizen'] = { 
-        total: Number(save.getItem('citizen') || 0,
-        free: Number(save.getItem('citizen') || 0,
-    };*/
         
+    // # General Knowledge level
+    city['knowledge'] = Number(save.getItem('knowledge') || 0);
+    
+    // # Load structures
     Object.keys(city).forEach(function (key) { 
         switch (building[key]['type']) {
             case 'factory':
                 city[key] = { 
-                    rank: Number(save.getItem(key)) || 0, 
-                    workers: Number(save.getItem(key+'_workers')) || 0
+                    rank: Number(save.getItem(key) || 0), 
+                    workers: Number(save.getItem(key+'_workers') || 0),
+                    owned: Number(save.getItem(key+'_owned') || 0)
                 };
                 var vm = new Vue({
                     data: city[key]
                 });
-                vm.$watch('workers', function (newValue, oldValue) {
-                    save.setItem(key + '_workers',city[key]['workers']);
-                });
-                vm.$watch('rank', function (newValue, oldValue) {
-                    save.setItem(key + '_workers',city[key]['workers']);
-                });
+                break;
+            case 'storage':
+                city[key] = { 
+                    rank: Number(save.getItem(key) || 0),
+                    owned: Number(save.getItem(key+'_owned') || 0)
+                };
                 break;
         }
+        
+        var vm = new Vue({
+            data: city[key]
+        });
+        Object.keys(key).forEach(function (subkey) {
+            vm.$watch(subkey, function (newValue, oldValue) {
+                if (subkey === 'rank') {
+                    save.setItem(key,city[key][subkey]);
+                }
+                else {
+                    save.setItem(key + '_' + subkey,city[key][subkey]);
+                }
+                
+            });
+        });
     });
 }
 
@@ -29,6 +45,7 @@ function defineBuildings() {
     
     building['stone_mine'] = {
         type: 'factory',
+        limit: 1,
         rank: [
             {
                 name: 'Rock Quarry',
@@ -51,6 +68,7 @@ function defineBuildings() {
     
     building['copper_mine'] = {
         type: 'factory',
+        limit: 1,
         rank: [
             {
                 name: 'Copper Mine',
@@ -72,6 +90,7 @@ function defineBuildings() {
     
     building['iron_mine'] = {
         type: 'factory',
+        limit: 1,
         rank: [
             {
                 name: 'Iron Mine',
@@ -93,6 +112,7 @@ function defineBuildings() {
     
     building['coal_mine'] = {
         type: 'factory',
+        limit: 1,
         rank: [
             {
                 name: 'Coal Mine',
@@ -114,6 +134,7 @@ function defineBuildings() {
     
     building['steel_mill'] = {
         type: 'factory',
+        limit: 1,
         rank: [
             {
                 name: 'Steel Mill',
@@ -133,5 +154,44 @@ function defineBuildings() {
         produce: function () {
             resources['steel']['amount'] += city['steel_mill']['workers'];
         }
+    };
+    
+    building['lumber_mill'] = {
+        type: 'factory',
+        limit: 1,
+        rank: [
+            {
+                name: 'Lumber Mill',
+                require: { knowledge: 5 },
+                description: 'Construct a Lumber Mill',
+                workers: 10,
+                cost: { 
+                    copper: 50,
+                    iron: 50,
+                    lumber: 250,
+                }
+            }
+        ],
+        produce: function () {
+            resources['lumber']['amount'] += city['lumber_mill']['workers'];
+        }
+    };
+    
+    building['small_house'] = {
+        type: 'storage',
+        rank: [
+            {
+                name: 'Stone Hut',
+                require: { stone_mine: 1 },
+                description: 'Construct a simple hut made out of stone and wood',
+                cost: { 
+                    stone: 25,
+                    lumber: 10
+                },
+                effect: function () {
+                    resources['citizen']['max'] += 2;
+                }
+            }
+        ]
     };
 }

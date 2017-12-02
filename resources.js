@@ -9,6 +9,24 @@ function defineResources() {
     loadResource('gold', 'Mine Gold');
     loadResource('titanium', 'Mine Titanium');
     loadResource('oil', 'Harvest Oil');
+    
+    // Special resource, doesn't follow standard rules
+    resources['citizen'] = {
+        amount: Number(save.getItem('citizen') || 0),
+        idle: Number(save.getItem('citizenIdle') || 0),
+        max: Number(save.getItem('citizenMax') || 0)
+    };
+    var vm = new Vue({
+        data: resources['citizen']
+    });
+    vm.$watch('amount', function (newValue, oldValue) {
+        save.setItem(name,resources['citizen']['amount']);
+        var dif = newValue - oldValue;
+        resources['citizen']['idle'] += dif;
+    });
+    vm.$watch('idle', function (newValue, oldValue) {
+        save.setItem(name,resources['citizen']['idle']);
+    });
 }
 
 // Load resource function
@@ -20,12 +38,16 @@ function loadResource(name, label) {
         rate: Number(save.getItem(name+'Rate') || 1),
         yield: Number(save.getItem(name+'Yield') || 1),
         unlocked: Number(save.getItem(name+'Unlocked') || 0),
+        max: Number(save.getItem(name+'Max') || 1000),
         label: label
     };
     var vm = new Vue({
         data: resources[name]
     });
     vm.$watch('amount', function (newValue, oldValue) {
+        if (newValue > resources[name]['max']) {
+            resources[name]['amount'] = resources[name]['max'];
+        }
         save.setItem(name,resources[name]['amount']);
         $('#' + name + 'Value').html(resources[name]['amount'] + ' ' + nameCase(name));
     });
@@ -34,6 +56,9 @@ function loadResource(name, label) {
     });
     vm.$watch('yield', function (newValue, oldValue) {
         save.setItem(name,resources[name]['yield']);
+    });
+    vm.$watch('max', function (newValue, oldValue) {
+        save.setItem(name,resources[name]['max']);
     });
 }
 

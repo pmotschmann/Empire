@@ -1,4 +1,5 @@
 function defineTech() {
+    
     // General Technological Level of the Empire
     research['tech'] = [ 
         {
