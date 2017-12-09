@@ -1,131 +1,95 @@
 function loadCity() {
     
-    // # Load structures
-    Object.keys(city).forEach(function (key) { 
-        switch (building[key]['type']) {
-            case 'factory':
-                city[key] = { 
-                    rank: Number(save.getItem(key) || 0), 
-                    workers: Number(save.getItem(key+'_workers') || 0),
-                    owned: Number(save.getItem(key+'_owned') || 0)
-                };
-                var vm = new Vue({
-                    data: city[key]
-                });
-                break;
-            case 'storage':
-                city[key] = { 
-                    rank: Number(save.getItem(key) || 0),
-                    owned: Number(save.getItem(key+'_owned') || 0)
-                };
-                break;
-        }
+    var city_data = save.getItem('city') || false;
+    if (city_data) {
+        city = JSON.parse(city_data);
+    }
+    else {
+        city['mine'] = [
+            {
+                id: 'mine0',
+                name: 'Basic Mine',
+                type: 'mine',
+                resources: {
+                    stone: 50000,
+                    copper: 25000,
+                    iron: 10000,
+                },
+                workers: 0
+            }
+        ];
         
-        var vm = new Vue({
-            data: city[key]
-        });
-        Object.keys(key).forEach(function (subkey) {
-            vm.$watch(subkey, function (newValue, oldValue) {
-                if (subkey === 'rank') {
-                    save.setItem(key,city[key][subkey]);
-                }
-                else {
-                    save.setItem(key + '_' + subkey,city[key][subkey]);
-                }
-            });
-        });
-    });
+        city['structure'] = {};
+        city['unique'] = {};
+        city['next_id'] = 0;
+        
+        save.setItem('knowledge',0);
+    }
     
-    // # General Knowledge level
-    city['knowledge'] = Number(save.getItem('knowledge') || 0);
+    loadMines();
+}
+
+// Load Mines into UI
+function loadMines() {
+    $('#mines').empty();
+    
+    Object.keys(city['mine']).forEach(function (key) {
+        var mine = $('<div id="' + city['mine'][key]['id'] + '" class="city mine"></div>');
+        var header = $('<div class="header">' + city['mine'][key]['name'] +'</div>');
+        mine.append(header);
+        
+        var management = $('<div class="d-flex flex-row"></div>');
+        var workers = $('<div id="' + city['mine'][key]['id'] + 'Workers" class="workers"></div>');
+        var add = $('<div id="' + city['mine'][key]['id'] + 'AddWorker" class="add"></div>');
+        var remove = $('<div id="' + city['mine'][key]['id'] + 'RemoveWorker" class="remove"></div>');
+        
+        management.append(workers);
+        management.append(add);
+        management.append(remove);
+        mine.append(management);
+        
+        var vm_r = new Vue({
+            data: city['mine'][key]['resources']
+        });
+        
+        var minerals = $('<div></div>');
+        Object.keys(city['mine'][key]['resources']).forEach(function (mineral) {
+            var row = $('<div></div>');
+            var type = $('<span>' + nameCase(mineral) + ' </span>');
+            var remain = $('<span id="' + city['mine'][key]['id'] + mineral + '">' + city['mine'][key]['resources'][mineral] + '</span>');
+            row.append(type);
+            row.append(remain);
+            
+            vm_r.$watch(mineral, function (newValue, oldValue) {
+                remain.html(newValue);
+            });
+            
+            mine.append(row);
+        });
+        
+        $('#mines').append(mine);
+    });
 }
 
 function defineBuildings() {
     
-    building['stone_mine'] = {
-        type: 'factory',
-        limit: 1,
+    building['mine'] = {
+        type: 'mine',
         rank: [
             {
-                name: 'Rock Quarry',
+                name: 'Mine',
                 require: { mining: 1 },
-                description: 'Construct a Rock Quarry',
-                upgrade_desc: 'Expand Quary',
+                description: 'Construct a Mine',
                 workers: 10,
                 cost: { 
-                    lumber: 5
-                }
-            }
-        ],
-        produce: function () {
-            resources['stone']['amount'] += city['stone_mine']['workers'];
-        }
-    };
-    
-    building['copper_mine'] = {
-        type: 'factory',
-        limit: 1,
-        rank: [
-            {
-                name: 'Copper Mine',
-                require: { mining: 2 },
-                description: 'Construct a Copper Mine',
-                workers: 10,
-                cost: { 
-                    lumber: 25
+                    lumber: 50,
+                    iron: 25
                 },
                 effect: function () {
-                    save.setItem('copperUnlocked',1);
+                    city['mine']
                 }
             }
-        ],
-        produce: function () {
-            resources['copper']['amount'] += city['copper_mine']['workers'];
-        }
-    };
-    
-    building['iron_mine'] = {
-        type: 'factory',
-        limit: 1,
-        rank: [
-            {
-                name: 'Iron Mine',
-                require: { mining: 3 },
-                description: 'Construct an Iron Mine',
-                workers: 10,
-                cost: { 
-                    lumber: 250
-                },
-                effect: function () {
-                    save.setItem('ironUnlocked',1);
-                }
-            }
-        ],
-        produce: function () {
-            resources['iron']['amount'] += city['iron_mine']['workers'];
-        }
-    };
-    
-    building['coal_mine'] = {
-        type: 'factory',
-        limit: 1,
-        rank: [
-            {
-                name: 'Coal Mine',
-                require: { mining: 3 },
-                description: 'Construct a Coal Mine',
-                workers: 10,
-                cost: { 
-                    lumber: 1000
-                },
-                effect: function () {
-                    save.setItem('coalUnlocked',1);
-                }
-            }
-        ],
-        produce: function () {
-            resources['coal']['amount'] += city['coal_mine']['workers'];
-        }
+        ]
     };
     
     building['steel_mill'] = {
@@ -178,7 +142,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Stone Hut',
-                require: { stone_mine: 1 },
+                require: { knowledge: 1 },
                 description: 'Construct a simple hut made out of stone and wood',
                 cost: { 
                     stone: 25,

@@ -1,4 +1,7 @@
 $(function() {
+    // For development, purge
+    save.clear();
+    
     defineResources();
     defineTech();
     defineBuildings();
@@ -18,6 +21,11 @@ $(function() {
     
     // Load city progression
     loadCity();
+    
+    // main game loop
+    setInterval(function() {
+        save.setItem('city',JSON.stringify(city));
+    }, 1000);
 });
     
 function showTech(techKey,techLevel) {
@@ -51,8 +59,7 @@ function showTech(techKey,techLevel) {
                 resources[cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
             });
             save.setItem(techKey,Number(save.getItem(techKey)+1));
-            city['knowledge']++;
-            save.setItem(city['knowledge']);
+            save.setItem('knowledge',Number(save.getItem('knowledge')) + 1);
             if (research[techKey][techLevel]['effect']) {
                 research[techKey][techLevel]['effect']();
             }
@@ -63,13 +70,29 @@ function showTech(techKey,techLevel) {
     });
 }
 
+function loadBuildings() {
+    // Load Research Listing
+    $('#development').empty();
+    Object.keys(building).forEach(function (key) { 
+        var rank = Number(save.getItem(key)) || 0;
+        if (building[key][rank].require) {
+            if (checkRequirements(building[key][rank].require)) {
+                showBuilding(key,techLevel);
+            }
+        }
+        else {
+            showBuilding(key,rank);
+        }
+    });
+}
+
 function loadTech() {
     // Load Research Listing
     $('#research').empty();
     Object.keys(research).forEach(function (key) { 
         var techLevel = Number(save.getItem(key)) || 0;
         if (research[key][techLevel].require) {
-            if (testTech(research[key][techLevel].require)) {
+            if (checkRequirements(research[key][techLevel].require)) {
                 showTech(key,techLevel);
             }
         }
@@ -79,7 +102,7 @@ function loadTech() {
     });
 }
 
-function testTech(requirements) {
+function checkRequirements(requirements) {
     var available = true;
     Object.keys(requirements).forEach(function (req) {
         var testTech = Number(save.getItem(req)) || 0;

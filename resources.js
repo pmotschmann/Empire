@@ -82,7 +82,7 @@ function createResourceBind(resources, name) {
     footer.append(clicker);
     resource.append(footer);
     
-    $('#resources').append(resource);
+    $('#resources div').first().append(resource);
     $('#' + name + 'Value').html(resources[name]['amount']);
     $('#' + name + 'Max').html(resources[name]['max']);
     

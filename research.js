@@ -22,6 +22,47 @@ function defineTech() {
         }
     ];
     
+    research['minerals'] = [
+        {
+            name: 'Copper Ore',
+            require: { knowledge: 2 },
+            description: 'Learn how to extract and smelt copper ore',
+            cost: { 
+                lumber: 10,
+                stone: 10
+            },
+            effect: function () {
+                save.setItem('copperUnlocked',1);
+            }
+        },
+        {
+            name: 'Iron Ore',
+            require: { knowledge: 4 },
+            description: 'Learn how to extract and smelt iron ore',
+            cost: { 
+                lumber: 10,
+                stone: 10,
+                copper: 10
+            },
+            effect: function () {
+                save.setItem('ironUnlocked',1);
+            }
+        },
+        {
+            name: 'Coal Ore',
+            require: { knowledge: 6 },
+            description: 'Learn how to extract coal ore',
+            cost: { 
+                lumber: 10,
+                stone: 10,
+                iron: 10
+            },
+            effect: function () {
+                save.setItem('coalUnlocked',1);
+            }
+        }
+    ];
+    
     // General technology related to mining
     research['mining'] = [
         {
