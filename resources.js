@@ -16,17 +16,29 @@ function defineResources() {
         idle: Number(save.getItem('citizenIdle') || 0),
         max: Number(save.getItem('citizenMax') || 0)
     };
+    
+    var followers = $('<div class="row"></div>');
+    var current = $('<div class="col">Citizens: <span id="citizens">' + resources['citizen']['amount'] + ' / ' + resources['citizen']['max'] + '</span></div>');
+    var idle = $('<div class="col">Idle: <span id="idleCitizens">' + resources['citizen']['idle'] + '</span></div>');
+    followers.append(current);
+    followers.append(idle);
+    $('#city_info').append(followers);
+    
     var vm = new Vue({
         data: resources['citizen']
     });
     vm.$watch('amount', function (newValue, oldValue) {
-        save.setItem(name,resources['citizen']['amount']);
+        save.setItem('citizen',resources['citizen']['amount']);
         var dif = newValue - oldValue;
         resources['citizen']['idle'] += dif;
     });
     vm.$watch('idle', function (newValue, oldValue) {
-        save.setItem(name,resources['citizen']['idle']);
+        save.setItem('citizenIdle',resources['citizen']['idle']);
     });
+    vm.$watch('max', function (newValue, oldValue) {
+        save.setItem('citizenMax',resources['citizen']['max']);
+    });
+    
 }
 
 // Load resource function
@@ -38,7 +50,7 @@ function loadResource(name) {
         rate: Number(save.getItem(name+'Rate') || 1),
         yield: Number(save.getItem(name+'Yield') || 1),
         unlocked: Number(save.getItem(name+'Unlocked') || 0),
-        max: Number(save.getItem(name+'Max') || 250)
+        max: Number(save.getItem(name+'Max') || 25)
     };
     var vm = new Vue({
         data: resources[name]

@@ -39,12 +39,51 @@ div.resources {
     }
 }
 
-div.development {
+div.city {
     vertical-align: top;
+    
+    div.info_bar {
+        width: 100%;
+        margin-top: 1rem;
+        min-height: 2rem;
+        border-bottom: solid .0625rem #ddd;
+        
+        > div > div {
+            width: 14rem;
+        }
+    }
+    
+    div.mine {
+        width: 18rem;
+        border: solid .0625rem grey;
+        margin-top: 1rem;
+        padding: 0 .9375rem .5rem;
+        
+        .header {
+            background: linear-gradient(to top, #bbb, #eee 20%, #eee 80%, #bbb);
+            border-bottom: solid .0625rem grey;
+            padding: .5rem 0;
+            
+            .workers {
+                margin: 0 .5rem;
+            }
+            .add,
+            .remove {
+                cursor: pointer;
+            }
+            
+            
+        }
+        
+        > div {
+            text-align: center;
+        }
+    }
 }
 
 div.research {
     vertical-align: top;
+    padding-top: 1rem;
     
     div.tech {
         width: 25rem;
