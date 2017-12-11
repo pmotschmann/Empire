@@ -5,9 +5,14 @@ div.main {
 div.resources {
     vertical-align: top;
     
+    > div {
+        flex-direction: column;
+        flex-flow: row wrap;
+    }
+    
     div.resource {
         border-top: .0625rem solid #ddd;
-        width: 25rem;
+        width: 20rem;
         margin: 1rem 0 0 .5rem;
         
         .label {
@@ -47,16 +52,37 @@ div.city {
         margin-top: 1rem;
         min-height: 2rem;
         border-bottom: solid .0625rem #ddd;
+        padding-left: 1rem;
         
         > div > div {
             width: 14rem;
         }
     }
     
+    > div > ul {
+        flex-direction: column;
+        width: 8rem;
+        min-width: 8rem;
+        margin-right: 1rem;
+        
+        &.nav-tabs {
+            border: none;
+            
+            .nav-link {
+                border: none;
+            }
+        }
+    }
+    
+    div.mines {
+        flex-flow: row wrap;
+    }
+    
     div.mine {
         width: 18rem;
+        min-width: 18rem;
         border: solid .0625rem grey;
-        margin-top: 1rem;
+        margin: 1rem 1rem 0 0;
         padding: 0 .9375rem .5rem;
         
         .header {
@@ -85,10 +111,15 @@ div.research {
     vertical-align: top;
     padding-top: 1rem;
     
+    > div {
+        flex-direction: column;
+        flex-flow: row wrap;
+    }
+    
     div.tech {
         width: 25rem;
         text-align: center;
-        margin-bottom: 1rem;
+        margin: 0 1rem 1rem 0;
         border-radius: 1rem;
         border: .0625rem solid #eff2de;
         cursor: pointer;

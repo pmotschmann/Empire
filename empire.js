@@ -1,7 +1,4 @@
-$(function() {
-    // For development, purge
-    save.clear();
-    
+$(function() {    
     defineResources();
     defineTech();
     defineBuildings();
@@ -42,7 +39,7 @@ function showTech(techKey,techLevel) {
     });
     var name = $('<div class="footer"></div>');
     tech.append(name);
-    $('#research').append(tech);
+    $('#research div').first().append(tech);
     
     $('#' + techKey + 'Clicker').on('click',function(e){
         e.preventDefault();
@@ -70,34 +67,20 @@ function showTech(techKey,techLevel) {
     });
 }
 
-function loadBuildings() {
-    // Load Research Listing
-    $('#development').empty();
-    Object.keys(building).forEach(function (key) { 
-        var rank = Number(save.getItem(key)) || 0;
-        if (building[key][rank].require) {
-            if (checkRequirements(building[key][rank].require)) {
-                showBuilding(key,techLevel);
-            }
-        }
-        else {
-            showBuilding(key,rank);
-        }
-    });
-}
-
 function loadTech() {
     // Load Research Listing
-    $('#research').empty();
+    $('#research div').first().empty();
     Object.keys(research).forEach(function (key) { 
         var techLevel = Number(save.getItem(key)) || 0;
-        if (research[key][techLevel].require) {
-            if (checkRequirements(research[key][techLevel].require)) {
+        if ( research[key][techLevel] ) {
+            if (research[key][techLevel].require) {
+                if (checkRequirements(research[key][techLevel].require)) {
+                    showTech(key,techLevel);
+                }
+            }
+            else {
                 showTech(key,techLevel);
             }
-        }
-        else {
-            showTech(key,techLevel);
         }
     });
 }

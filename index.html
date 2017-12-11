@@ -15,10 +15,11 @@
     <script src="resources.js"></script>
     <script src="research.js"></script>
     <script src="buildings.js"></script>
+    <script src="city.js"></script>
     <script src="empire.js"></script>
 </head>
 <body>
-<div id="main" class="main container">
+<div id="main" class="main container-fluid">
     <div id="top" class="top d-flex"></div>
     <ul id="menu" class="nav nav-tabs" role="tablist">
         <li class="nav-item">
@@ -32,14 +33,32 @@
         </li>
     </ul>
     <div id="game" class="tab-content">
-        <div id="resources" class="container resources tab-pane fade show active" role="tabpanel">
+        <div id="resources" class="resources tab-pane fade show active" role="tabpanel">
             <div class="d-flex"></div>
         </div>
-        <div id="research" class="container research tab-pane fade" role="tabpanel"></div>
-        <div id="city" class="container city tab-pane fade" role="tabpanel">
+        <div id="research" class="research tab-pane fade" role="tabpanel">
+            <div class="d-flex"></div>
+        </div>
+        <div id="city" class="city tab-pane fade" role="tabpanel">
             <div id="city_info" class="d-flex info_bar"></div>
-            <div id="structures" class="d-flex"></div>
-            <div id="mines" class="d-flex"></div>
+            <div class="d-flex">
+                <ul id="city_menu" class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#structures_tab" data-toggle="tab" role="tab">City Center</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#mines_tab" data-toggle="tab" role="tab">Mines</a>
+                    </li>
+                </ul>
+                <div id="sub_city" class="tab-content">
+                    <div id="structures_tab" class="resources tab-pane fade show active" role="tabpanel">
+                        <div id="structures" class="d-flex"></div>
+                    </div>
+                    <div id="mines_tab" class="resources tab-pane fade" role="tabpanel">
+                        <div id="mines" class="d-flex mines"></div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
