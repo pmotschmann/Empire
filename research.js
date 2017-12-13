@@ -103,6 +103,19 @@ function defineTech() {
             effect: function () {
                 save.setItem('coalUnlocked',1);
             }
+        },
+        {
+            name: 'Steel Smelting',
+            require: { knowledge: 6 },
+            description: 'Learn how to turn iron and coal into steel',
+            cost: { 
+                lumber: 10,
+                coal: 10,
+                iron: 25
+            },
+            effect: function () {
+                save.setItem('steelUnlocked',1);
+            }
         }
     ];
     

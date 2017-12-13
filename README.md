@@ -20,7 +20,7 @@ An idler game about building an empire through city building and colonization.
 
 4. __Farming system__
 
-	The farm will allow the player to assign idle citizens to work as farmers. The number of farmers will affect how fast you gain new citizes. Some unique buildings such as the green house will upgrade farm effectiveness.
+	The farm will allow the player to assign idle citizens to work as farmers. The number of farmers will affect how fast you gain new citizens. Some unique buildings such as the green house will upgrade farm effectiveness.
 
 5. __Mine prospecting__
 
@@ -77,6 +77,7 @@ An idler game about building an empire through city building and colonization.
 
 	Stuff to add flair to the game and reduce predictability.
 
-9. __ffline mode__
+9. __Offline mode__
+
 	When you reload progress should be advanced as if you had left the game window up and running unattended.
 

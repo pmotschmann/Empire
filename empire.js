@@ -26,7 +26,7 @@ $(function() {
 });
     
 function showTech(techKey,techLevel) {
-    var tech = $('<div id="' + techKey + 'Clicker" class="tech"></div>');
+    var tech = $('<div id="' + techKey + 'Clicker" class="tech" title="Research ' + nameCase(research[techKey][techLevel]['name']) +'"></div>');
     var name = $('<div class="name">' + research[techKey][techLevel]['name'] + '</div>');
     var desc = $('<div class="desc">' + research[techKey][techLevel]['description'] + '</div>');
     tech.append(name);
