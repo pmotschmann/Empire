@@ -76,6 +76,7 @@ function defineTech() {
             },
             effect: function () {
                 save.setItem('copperUnlocked',1);
+                createResourceBind(resources,'copper');
             }
         },
         {
@@ -89,6 +90,7 @@ function defineTech() {
             },
             effect: function () {
                 save.setItem('ironUnlocked',1);
+                createResourceBind(resources,'iron');
             }
         },
         {
@@ -102,6 +104,7 @@ function defineTech() {
             },
             effect: function () {
                 save.setItem('coalUnlocked',1);
+                createResourceBind(resources,'coal');
             }
         },
         {
@@ -115,6 +118,7 @@ function defineTech() {
             },
             effect: function () {
                 save.setItem('steelUnlocked',1);
+                createResourceBind(resources,'steel');
             }
         }
     ];
@@ -126,8 +130,8 @@ function defineTech() {
             require: { tech: 1 },
             description: 'A crude pickaxe made from a stone head attached to a stick. Increases manual mining speed.',
             cost: { 
-                lumber: 5,
-                stone: 5
+                lumber: 2,
+                stone: 2
             },
             effect: function () {
                 resources['stone'].rate = 2;
@@ -137,8 +141,8 @@ function defineTech() {
             name: 'Copper Pickaxe',
             description: 'A pickaxe made from a wooden shaft with a copper head. Increases manual mining speed.',
             cost: { 
-                lumber: 10,
-                copper: 10
+                lumber: 5,
+                copper: 5
             },
             effect: function () {
                 resources['stone'].rate = 3;
@@ -149,7 +153,7 @@ function defineTech() {
             name: 'Iron Pickaxe',
             description: 'A pickaxe made from a wooden shaft with an iron head. Increases manual mining speed.',
             cost: { 
-                lumber: 25,
+                lumber: 10,
                 iron: 10
             },
             effect: function () {
@@ -200,8 +204,8 @@ function defineTech() {
             require: { tech: 1 },
             description: 'A crude axe made from a stone head attached to a stick. Increases manual wood cutting speed.',
             cost: { 
-                lumber: 5,
-                stone: 5
+                lumber: 2,
+                stone: 2
             },
             effect: function () {
                 resources['lumber'].rate = 2;
@@ -211,8 +215,8 @@ function defineTech() {
             name: 'Copper Axe',
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
-                lumber: 10,
-                copper: 10
+                lumber: 5,
+                copper: 5
             },
             effect: function () {
                 resources['lumber'].rate = 3;
@@ -222,7 +226,7 @@ function defineTech() {
             name: 'Iron Axe',
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
-                lumber: 25,
+                lumber: 10,
                 iron: 10
             },
             effect: function () {

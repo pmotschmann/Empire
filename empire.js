@@ -19,8 +19,51 @@ $(function() {
     // Load city progression
     loadCity();
     
-    // main game loop
+    // Main game loop
     setInterval(function() {
+        for (var id=0; id < city.length; id++) {
+            // Resource mining
+            // Uses weird reverse loop so depleted mines can be pruned
+            for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
+                var mine = city[id]['mine'][key];
+                var remain = building['mine'].produce(mine);
+                
+                // Mine is depleted
+                if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
+                    city[id]['citizen']['idle'] += mine['workers'];
+                    $('#' + mine['id']).remove();
+                    Object.keys(mine['resources']).forEach(function (res) {
+                        unwatch[mine['id'] + res]();
+                        delete unwatch[mine['id'] + res];
+                    });
+                    unwatch[mine['id'] + 'workers']();
+                    delete unwatch[mine['id'] + 'workers'];
+                    city[id]['mine'].splice(key, 1);
+                }
+            }
+            // Triggers production
+            Object.keys(building).forEach(function (bld) {
+                if (building[bld].type === 'mine') {
+                    return;
+                }
+                else if (city[id][bld] && building[bld].produce) {
+                    building[bld].produce(city[id],bld);
+                }
+            });
+            
+            // Calculates citizen growth
+            if (city[id].citizen.max > city[id].citizen.amount) {
+                var num = (city[id].citizen.amount * 25) / biomes[city[id].biome].growth;
+                var farmers = 1;
+                if (city[id].farm) {
+                    farmers += city[id].farm.workers;
+                }
+                if (Math.random() * num < farmers) {
+                    city[id].citizen.amount++;
+                }
+            }
+            
+        }
         save.setItem('city',JSON.stringify(city));
     }, 1000);
 });
@@ -61,6 +104,9 @@ function showTech(techKey,techLevel) {
                 research[techKey][techLevel]['effect']();
             }
             loadTech();
+            for (var i=0; i < city.length; i++) {
+                loadCityCore(i);
+            }
         }
         
         return false;

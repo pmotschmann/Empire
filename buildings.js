@@ -8,13 +8,77 @@ function defineBuildings() {
                 name: 'Mine',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
-                workers: 10,
                 cost: { 
                     lumber: 50,
                     iron: 25
-                },
-                effect: function () {
-                    city['mine']
+                }
+            }
+        ],
+        produce: function (mine) {
+            var sum = Object.values(mine['resources']).reduce((a, b) => a + b);
+            
+            // Extract ores
+            var work = mine['workers'];
+            var unused = work;
+            Object.keys(mine['resources']).forEach(function (res) {
+                var remain = mine['resources'][res];
+                var ratio = remain / sum;
+                var harvesters = Math.ceil(work * ratio);
+                if (harvesters > resources[res]['max'] - resources[res]['amount']) {
+                    harvesters = resources[res]['max'] - resources[res]['amount'];
+                }
+                if (harvesters > mine['resources'][res]) {
+                    harvesters = mine['resources'][res];
+                }
+                if (harvesters > unused) {
+                    harvesters = unused;
+                }
+                unused -= harvesters;
+                resources[res]['amount'] += harvesters;
+                mine['resources'][res] -= harvesters;
+            });
+        }
+    };
+    
+    // Allows player to asign citizens as lumberjacks, who automatically harvest lumber
+    building['lumber_mill'] = {
+        type: 'factory',
+        limit: 1,
+        rank: [
+            {
+                name: 'Lumber Mill',
+                require: { knowledge: 5 },
+                description: 'Construct a Lumber Mill',
+                cost: { 
+                    copper: 25,
+                    iron: 25,
+                    lumber: 25
+                }
+            }
+        ],
+        produce: function (town, index) {
+            var workers = town[index].workers;
+            if (workers > resources['lumber']['max'] - resources['lumber']['amount']) {
+                workers = resources['lumber']['max'] - resources['lumber']['amount'];
+            }
+            resources['lumber']['amount'] += workers;
+        }
+    };
+    
+    // The number of farmers you have affects how fast you get new citizens
+    building['farm'] = {
+        type: 'factory',
+        limit: 1,
+        rank: [
+            {
+                name: 'Farm',
+                require: { knowledge: 4 },
+                description: 'The farm increases your food supply, which makes gaining new citizens easier',
+                cost: { 
+                    copper: 25,
+                    iron: 25,
+                    lumber: 100,
+                    stone: 100
                 }
             }
         ]
@@ -29,7 +93,6 @@ function defineBuildings() {
                 name: 'Steel Mill',
                 require: { mining: 4 },
                 description: 'Construct a Steel Mill',
-                workers: 10,
                 cost: { 
                     coal: 250,
                     iron: 250,
@@ -40,56 +103,12 @@ function defineBuildings() {
                 }
             }
         ],
-        produce: function () {
-            resources['steel']['amount'] += city['steel_mill']['workers'];
-        }
-    };
-    
-    // Allows player to asign citizens as lumberjacks, who automatically harvest lumber
-    building['lumber_mill'] = {
-        type: 'factory',
-        limit: 1,
-        rank: [
-            {
-                name: 'Lumber Mill',
-                require: { knowledge: 5 },
-                description: 'Construct a Lumber Mill',
-                workers: 10,
-                cost: { 
-                    copper: 25,
-                    iron: 25,
-                    lumber: 50
-                }
+        produce: function (town, index) {
+            var workers = town[index].workers;
+            if (workers > resources['steel']['max'] - resources['steel']['amount']) {
+                workers = resources['steel']['max'] - resources['steel']['amount'];
             }
-        ],
-        produce: function () {
-            resources['lumber']['amount'] += city['lumber_mill']['workers'];
-        }
-    };
-    
-    // The number of farmers you have affects how fast you get new citizens
-    building['farm'] = {
-        type: 'factory',
-        limit: 1,
-        rank: [
-            {
-                name: 'Farm',
-                require: { knowledge: 4 },
-                description: 'The farm increases your food supply, which makes attracting new citizens easier',
-                workers: 10,
-                cost: { 
-                    copper: 25,
-                    iron: 25,
-                    lumber: 100,
-                    stone: 100
-                },
-                effect: function () {
-                    
-                }
-            }
-        ],
-        produce: function () {
-            // Nothing
+            resources['steel']['amount'] += workers;
         }
     };
     
@@ -100,7 +119,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Green House',
-                require: { city: 3 },
+                require: { farming: 2 },
                 description: 'Construct a greenhouse which increases your farm effectiveness',
                 cost: { 
                     coal: 250,
@@ -108,7 +127,7 @@ function defineBuildings() {
                     lumber: 1000
                 },
                 effect: function () {
-                    save.setItem('steelUnlocked',1);
+                    
                 }
             }
         ]
@@ -116,14 +135,18 @@ function defineBuildings() {
     
     building['small_house'] = {
         type: 'storage',
+        inflation: { 
+            scale: 'linear',
+            ammount: 0.5
+        },
         rank: [
             {
                 name: 'Stone Hut',
                 require: { housing: 1 },
                 description: 'Construct a simple hut made out of stone and wood',
                 cost: { 
-                    stone: Math.ceil(12 * (city['storage']['small_house']['quantity'] || 0.5)),
-                    lumber: Math.ceil(8 * (city['storage']['small_house']['quantity'] || 0.5))
+                    stone: 12,
+                    lumber: 8
                 },
                 effect: function () {
                     resources['citizen']['max'] += 2;
@@ -134,9 +157,9 @@ function defineBuildings() {
                 require: { tech: 2 },
                 description: 'Construct a modern house, with all the conveniences',
                 cost: { 
-                    stone: Math.ceil(6 * (city['storage']['small_house']['quantity'] || 0.5)),
-                    lumber: Math.ceil(8 * (city['storage']['small_house']['quantity'] || 0.5)),
-                    copper: Math.ceil(2 * (city['storage']['small_house']['quantity'] || 0.5))
+                    stone: 6,
+                    lumber: 8,
+                    copper: 2
                 },
                 effect: function () {
                     resources['citizen']['max'] += 2;

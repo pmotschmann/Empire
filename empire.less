@@ -4,6 +4,10 @@ div.main {
 
 div.resources {
     vertical-align: top;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     
     > div {
         flex-direction: column;
@@ -46,6 +50,19 @@ div.resources {
 
 div.city {
     vertical-align: top;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    
+    .add,
+    .remove {
+        cursor: pointer;
+    }
+    
+    .workers {
+        margin: 0 .5rem;
+    }
     
     div.info_bar {
         width: 100%;
@@ -74,7 +91,9 @@ div.city {
         }
     }
     
-    div.mines {
+    div.mines,
+    div.structures {
+        flex-direction: column;
         flex-flow: row wrap;
     }
     
@@ -89,27 +108,25 @@ div.city {
             background: linear-gradient(to top, #bbb, #eee 20%, #eee 80%, #bbb);
             border-bottom: solid .0625rem grey;
             padding: .5rem 0;
-            
-            .workers {
-                margin: 0 .5rem;
-            }
-            .add,
-            .remove {
-                cursor: pointer;
-            }
-            
-            
         }
         
         > div {
             text-align: center;
         }
     }
+    
+    div.build {
+        cursor: pointer;
+    }
 }
 
 div.research {
     vertical-align: top;
     padding-top: 1rem;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     
     > div {
         flex-direction: column;

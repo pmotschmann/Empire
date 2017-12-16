@@ -1,18 +1,14 @@
 var save = window.localStorage;
+var unwatch = {};
 var resources = {};
 var building = {};
 var research = {};
-var city = {
-    storage: {
-        small_house: {},
-        medium_house: {},
-        large_house: {}
-    },
+var city = [{
+    storage: {},
     unique: {},
     factory: {},
-    mine: [],
-    next_id: 0
-};
+    mine: []
+}];
 
 var gatherRateTable = {
     1: 30, //3000 milliseconds
@@ -28,6 +24,7 @@ var biomes = {
     grassland: {
         desc: 'Grasslands are temparte climates dominated by large fields of grass, they make favorable farmland and are easy to develop settlements in.',
         cost: 1.0,
+        growth: 1.0,
         resources: {
             lumber: 1.0,
             stone: 1.0,
@@ -40,6 +37,7 @@ var biomes = {
     desert: {
         desc: 'Deserts are arid climents that can be hard to settle, they are often excellent sources of stone, oil, and rare metals.',
         cost: 1.2,
+        growth: 0.5,
         resources: {
             lumber: 0.1,
             stone: 2.0,
@@ -52,6 +50,7 @@ var biomes = {
     mountain: {
         desc: 'Mountain areas are often rich with mineral resources, but are tough to colonize. Mountain settlements however are generally easy to foriify.',
         cost: 1.2,
+        growth: 0.75,
         resources: {
             lumber: 0.5,
             stone: 1.0,
@@ -64,6 +63,7 @@ var biomes = {
     forest: {
         desc: 'Forests are rich in lumber but generally are poor sources of other resources.',
         cost: 1.0,
+        growth: 1.0,
         resources: {
             lumber: 2.5,
             stone: 0.5,
@@ -76,6 +76,7 @@ var biomes = {
     wetland: {
         desc: 'Wetlands are often treacherous terrain that are poorly suited for settlements, the conditions make it hard to extact minerals from the earth and are genrally tough to live in. However wetlands are tough to invade so they make great strongholds.',
         cost: 1.5,
+        growth: 0.5,
         resources: {
             lumber: 0.8,
             stone: 0.25,

@@ -8,7 +8,7 @@ function loadCity() {
     else {
         // New game, setup starter state
         // Player starts with a starter mine
-        city['mine'] = [
+        city[0]['mine'] = [
             {
                 id: 'mine0',
                 name: 'Basic Mine',
@@ -22,82 +22,268 @@ function loadCity() {
             }
         ];
         
+        city[0]['biome'] = 'grassland';
+        city[0]['storage'] = {
+            max: 100
+        };
+        city[0]['citizen'] = {
+            amount: 0,
+            idle: 0,
+            max: 0
+        };
+        
         // Set general knowledge to 0
         save.setItem('knowledge',0);
+        save.setItem('next_id',0);
     }
     
-    loadMines();
+    for (var i=0; i < city.length; i++) {
+        var structures = $('<div id="structures' + i + '" class="structures d-flex"></div>');
+        $('#structures_tab').append(structures);
+        var mines = $('<div id="mines' + i + '" class="mines d-flex"></div>');
+        $('#mines_tab').append(mines);
+        loadCityCore(i);
+        loadMines(i);
+        loadCitizens(i);
+    }
+}
+
+function loadCitizens(id) {
+    var followers = $('<div class="row"></div>');
+    var current = $('<div class="col">Citizens: <span id="citizens">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
+    var idle = $('<div class="col">Idle: <span id="idleCitizens">' + city[id]['citizen']['idle'] + '</span></div>');
+    followers.append(current);
+    followers.append(idle);
+    $('#city_info').append(followers);
+    
+    var vm = new Vue({
+        data: city[id]['citizen']
+    });
+    vm.$watch('amount', function (newValue, oldValue) {
+        save.setItem('citizen',city[id]['citizen']['amount']);
+        var dif = newValue - oldValue;
+        city[id]['citizen']['idle'] += dif;
+        $('#citizens').html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
+    });
+    vm.$watch('idle', function (newValue, oldValue) {
+        save.setItem('citizenIdle',city[id]['citizen']['idle']);
+        $('#idleCitizens').html(city[id]['citizen']['idle']);
+    });
+    vm.$watch('max', function (newValue, oldValue) {
+        save.setItem('citizenMax',city[id]['citizen']['max']);
+        $('#citizens').html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
+    });
+    
+    // for testing reasons
+    city[id]['citizen']['max'] = 5;
+}
+
+// Loads all core city elements
+function loadCityCore(id) {
+    $('#structures'+id).empty();
+    
+    Object.keys(building).forEach(function (key) {
+        switch (building[key]['type']) {
+            case 'mine':
+                // Mines are handled elsewhere, do nothing
+                break;
+            case 'factory':
+                // Load factory type buildings
+                loadFactory(id,key);
+                break;
+            case 'storage':
+                // Load storage type buildings
+                loadStorage(id,key);
+                break;
+            case 'unique':
+                // Load unique type buildings
+                loadUnique(id,key);
+                break;
+            default:
+                // Building type was not recognized, ignore it
+                break;
+        }
+    });
+}
+
+// Adds factory type building to city
+function loadFactory(id,factory) {
+    if (city[id][factory]) {
+        // Player has this building
+        var rank = city[id][factory]['rank'];
+        
+        var structure = $('<div id="' + factory + id + '" class="city mine"></div>');
+        var header = $('<div class="header row"><div class="col">' + building[factory]['rank'][rank]['name'] +'</div></div>');
+        var workers = $('<div class="col"></div>');
+        var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
+        var add = $('<span id="' + factory + id + 'AddWorker" class="add">&raquo;</span>');
+        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + ' Mill Workers</span>');
+        
+        workers.append(remove);
+        workers.append(count);
+        workers.append(add);
+        structure.append(header);
+        structure.append(workers);
+        
+        $('#structures' + id).append(structure);
+        
+        $('#' + factory + id + 'RemoveWorker').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(city[id][factory]['workers']) > 0) {
+                city[id][factory]['workers']--;
+                city[id]['citizen']['idle']++;
+                count.html(city[id][factory]['workers'] + ' Mill Workers');
+            }
+        });
+        
+        $('#' + factory + id + 'AddWorker').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(city[id]['citizen']['idle']) > 0) {
+                city[id][factory]['workers']++;
+                city[id]['citizen']['idle']--;
+                count.html(city[id][factory]['workers'] + ' Mill Workers');
+            }
+        });
+    }
+    else {
+        // Player does not have this building
+        if (checkRequirements(building[factory]['rank'][0].require)) {
+            var structure = $('<div id="' + factory + id + '" class="city mine"></div>');
+            var header = $('<div class="header row"><div class="col build">Construct ' + building[factory]['rank'][0]['name'] +'</div></div>');
+            structure.append(header);
+            
+            Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) { 
+                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                var price = $('<span class="cost col">' + building[factory]['rank'][0]['cost'][cost] + '</span>');
+                var row = $('<div class="row"></div>');
+                row.append(res);
+                row.append(price);
+                structure.append(row);
+            });
+            
+            $('#structures' + id).append(structure);
+            
+            header.on('click',function(e){
+                e.preventDefault();
+                
+                var paid = true;
+                Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
+                    if (Number(save.getItem(cost)) < building[factory]['rank'][0]['cost'][cost]) {
+                        paid = false;
+                        return;
+                    }
+                });
+                if (paid) {
+                    Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
+                        resources[cost]['amount'] -= building[factory]['rank'][0]['cost'][cost];
+                    });
+                    city[id][factory] = {
+                        rank: 0,
+                        workers: 0
+                    };
+                    loadCityCore(id);
+                }
+            });
+        }
+    }
+}
+
+// Adds storage type building to city
+function loadStorage(id,storage) {
+    var template = {};
+    if (city[storage]) {
+        // Player has this building
+        template['rank'] = city[id][storage]['rank'];
+        template['owned'] = city[id][storage]['owned']
+    }
+    else {
+        // Player does not have this building
+        template['rank'] = 0;
+        template['owned'] = 0;
+    }
+}
+
+// Adds unique type building to city
+function loadUnique(id,unique) {
+    if (city[unique]) {
+        // Player has this building
+    }
+    else {
+        // Player does not have this building
+    }
 }
 
 // Reloads all mines into UI
-function loadMines() {
-    $('#mines').empty();
+function loadMines(id) {
+    $('#mines' + id).empty();
     
-    Object.keys(city['mine']).forEach(function (key) {
-        registerMine(key);
+    Object.keys(city[id]['mine']).forEach(function (key) {
+        registerMine(id,city[id]['mine'][key]);
     });
 }
 
 // Adds an individual mine to the UI
-function registerMine(key) {
-    var mine = $('<div id="' + city['mine'][key]['id'] + '" class="city mine"></div>');
+function registerMine(id,mine) {
+    var container = $('<div id="' + mine['id'] + '" class="city mine"></div>');
     
-    var header = $('<div class="header row"><div class="col">' + city['mine'][key]['name'] +'</div></div>');
+    var header = $('<div class="header row"><div class="col">' + mine['name'] +'</div></div>');
     var workers = $('<div class="col"></div>');
-    var remove = $('<span id="' + city['mine'][key]['id'] + 'RemoveWorker" class="remove">&laquo;</span>');
-    var add = $('<span id="' + city['mine'][key]['id'] + 'AddWorker" class="add">&raquo;</span>');
-    var count = $('<span id="' + city['mine'][key]['id'] + 'Workers" class="workers">' + city['mine'][key]['workers'] + ' Miners</span>');
+    var remove = $('<span id="' + mine['id'] + 'RemoveWorker" class="remove">&laquo;</span>');
+    var add = $('<span id="' + mine['id'] + 'AddWorker" class="add">&raquo;</span>');
+    var count = $('<span id="' + mine['id'] + 'Workers" class="workers">' + mine['workers'] + ' Miners</span>');
     
     workers.append(remove);
     workers.append(count);
     workers.append(add);
     header.append(workers);
-    mine.append(header);
+    container.append(header);
     
-    $('#' + city['mine'][key]['id'] + 'RemoveWorker').on('click',function(e){
+    $('#mines' + id).append(container);
+    
+    $('#' + mine['id'] + 'RemoveWorker').on('click',function(e){
         e.preventDefault();
         
-        if (Number(city['mine'][key]['workers']) > 0) {
-            city['mine'][key]['workers']--;
-            resources['citizen']['idle']++;
+        if (Number(mine['workers']) > 0) {
+            mine['workers']--;
+            city[id]['citizen']['idle']++;
         }
     });
     
-    $('#' + city['mine'][key]['id'] + 'AddWorker').on('click',function(e){
+    $('#' + mine['id'] + 'AddWorker').on('click',function(e){
         e.preventDefault();
-                                       
-        if (Number(resources['citizen']['idle']) > 0) {
-            city['mine'][key]['workers']++;
-            resources['citizen']['idle']--;
+        
+        if (Number(city[id]['citizen']['idle']) > 0) {
+            mine['workers']++;
+            city[id]['citizen']['idle']--;
         }
     });
     
     var vm_w = new Vue({
-        data: city['mine'][key]
+        data: mine
     });
     
-    vm_w.$watch('workers', function (newValue, oldValue) {
+    unwatch[mine['id'] + 'workers'] = vm_w.$watch('workers', function (newValue, oldValue) {
         count.html(newValue + ' Miners');
     });
     
     var vm_r = new Vue({
-        data: city['mine'][key]['resources']
+        data: mine['resources']
     });
     
     var minerals = $('<div></div>');
-    Object.keys(city['mine'][key]['resources']).forEach(function (mineral) {
+    Object.keys(mine['resources']).forEach(function (mineral) {
         var row = $('<div class="row"></div>');
         var type = $('<span class="col">' + nameCase(mineral) + ' </span>');
-        var remain = $('<span class="col" id="' + city['mine'][key]['id'] + mineral + '">' + city['mine'][key]['resources'][mineral] + '</span>');
+        var remain = $('<span class="col" id="' + mine['id'] + mineral + '">' + mine['resources'][mineral] + '</span>');
         row.append(type);
         row.append(remain);
         
-        vm_r.$watch(mineral, function (newValue, oldValue) {
+        unwatch[mine['id'] + mineral] = vm_r.$watch(mineral, function (newValue, oldValue) {
             remain.html(newValue);
         });
         
-        mine.append(row);
+        container.append(row);
     });
-    
-    $('#mines').append(mine);
 }
