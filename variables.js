@@ -9,6 +9,7 @@ var city = [{
     factory: {},
     mine: []
 }];
+var global = {};
 
 var gatherRateTable = {
     1: 30, //3000 milliseconds

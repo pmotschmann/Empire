@@ -14,7 +14,7 @@ function defineBuildings() {
                 }
             }
         ],
-        produce: function (mine) {
+        produce: function (town,mine) {
             var sum = Object.values(mine['resources']).reduce((a, b) => a + b);
             
             // Extract ores
@@ -24,8 +24,9 @@ function defineBuildings() {
                 var remain = mine['resources'][res];
                 var ratio = remain / sum;
                 var harvesters = Math.ceil(work * ratio);
-                if (harvesters > resources[res]['max'] - resources[res]['amount']) {
-                    harvesters = resources[res]['max'] - resources[res]['amount'];
+                var storage_sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
+                if (harvesters > town['storage_cap'] - storage_sum) {
+                    harvesters = town['storage_cap'] - storage_sum;
                 }
                 if (harvesters > mine['resources'][res]) {
                     harvesters = mine['resources'][res];
@@ -34,7 +35,7 @@ function defineBuildings() {
                     harvesters = unused;
                 }
                 unused -= harvesters;
-                resources[res]['amount'] += harvesters;
+                town['storage'][res] = (town['storage'][res] || 0) + harvesters;
                 mine['resources'][res] -= harvesters;
             });
         }
@@ -58,10 +59,11 @@ function defineBuildings() {
         ],
         produce: function (town, index) {
             var workers = town[index].workers;
-            if (workers > resources['lumber']['max'] - resources['lumber']['amount']) {
-                workers = resources['lumber']['max'] - resources['lumber']['amount'];
+            var sum = Object.values(town[index].storage).reduce((a, b) => a + b);
+            if (workers > town[index].storage_cap - sum) {
+                workers = town[index].storage_cap - sum;
             }
-            resources['lumber']['amount'] += workers;
+            town[index]['storage']['lumber'] += workers;
         }
     };
     
@@ -98,17 +100,18 @@ function defineBuildings() {
                     iron: 250,
                     lumber: 1000
                 },
-                effect: function () {
+                effect: function (town) {
                     save.setItem('steelUnlocked',1);
                 }
             }
         ],
         produce: function (town, index) {
             var workers = town[index].workers;
-            if (workers > resources['steel']['max'] - resources['steel']['amount']) {
-                workers = resources['steel']['max'] - resources['steel']['amount'];
+            var sum = Object.values(town[index].storage).reduce((a, b) => a + b);
+            if (workers > town[index].storage_cap - sum) {
+                workers = town[index].storage_cap - sum;
             }
-            resources['steel']['amount'] += workers;
+            town[index]['storage']['steel'] += workers;
         }
     };
     
@@ -126,7 +129,7 @@ function defineBuildings() {
                     iron: 250,
                     lumber: 1000
                 },
-                effect: function () {
+                effect: function (town) {
                     
                 }
             }
@@ -148,8 +151,8 @@ function defineBuildings() {
                     stone: 12,
                     lumber: 8
                 },
-                effect: function () {
-                    resources['citizen']['max'] += 2;
+                effect: function (town) {
+                    town['citizen']['max'] += 2;
                 }
             },
             {
@@ -161,8 +164,8 @@ function defineBuildings() {
                     lumber: 8,
                     copper: 2
                 },
-                effect: function () {
-                    resources['citizen']['max'] += 2;
+                effect: function (town) {
+                    town['citizen']['max'] += 2;
                 }
             }
         ]

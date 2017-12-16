@@ -66,7 +66,7 @@ div.city {
     
     div.info_bar {
         width: 100%;
-        margin-top: 1rem;
+        margin: 1rem 0;
         min-height: 2rem;
         border-bottom: solid .0625rem #ddd;
         padding-left: 1rem;
@@ -76,18 +76,30 @@ div.city {
         }
     }
     
-    > div > ul {
+    div.storage_bar {
+        width: 100%;
+        border-bottom: solid .0625rem #ddd;
+        padding-left: 1rem;
+    }
+    
+    > div > p.side {
         flex-direction: column;
         width: 8rem;
         min-width: 8rem;
         margin-right: 1rem;
+        margin-top: .5rem;
         
-        &.nav-tabs {
-            border: none;
-            
-            .nav-link {
-                border: none;
-            }
+        a {
+            margin-top: .5rem;
+            width: 8rem;
+        }
+        a.collapsed {
+            background: #ddd;
+            color: #000;
+            border-color: #000;
+        }
+        a:focus {
+            box-shadow: none;
         }
     }
     

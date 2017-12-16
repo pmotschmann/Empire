@@ -23,8 +23,11 @@ function loadCity() {
         ];
         
         city[0]['biome'] = 'grassland';
+        city[0]['tax_rate'] = 1;
+        city[0]['tax_day'] = 60;
+        city[0]['storage_cap'] = 100;
         city[0]['storage'] = {
-            max: 100
+            
         };
         city[0]['citizen'] = {
             amount: 0,
@@ -32,29 +35,70 @@ function loadCity() {
             max: 0
         };
         
+        global['money'] = 0;
+        
         // Set general knowledge to 0
         save.setItem('knowledge',0);
         save.setItem('next_id',0);
     }
     
     for (var i=0; i < city.length; i++) {
+        var storages = $('<div id="storage' + i + '" class="storages d-flex"></div>');
+        $('#storage_pane').append(storages);
         var structures = $('<div id="structures' + i + '" class="structures d-flex"></div>');
-        $('#structures_tab').append(structures);
+        $('#structures_pane').append(structures);
         var mines = $('<div id="mines' + i + '" class="mines d-flex"></div>');
-        $('#mines_tab').append(mines);
+        $('#mines_pane').append(mines);
+        loadCityStorage(i);
         loadCityCore(i);
         loadMines(i);
-        loadCitizens(i);
+        loadInfoBar(i);
     }
 }
 
-function loadCitizens(id) {
-    var followers = $('<div class="row"></div>');
-    var current = $('<div class="col">Citizens: <span id="citizens">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
-    var idle = $('<div class="col">Idle: <span id="idleCitizens">' + city[id]['citizen']['idle'] + '</span></div>');
-    followers.append(current);
-    followers.append(idle);
-    $('#city_info').append(followers);
+function loadCityStorage(id) {
+    drawCityStorage(id);
+    
+    var vm = new Vue({
+        data: city[id]['storage']
+    });
+    vm.$watch('storage', function (newValue, oldValue) {
+        console.log(newValue);
+    });
+}
+
+function drawCityStorage(id) {
+    Object.keys(city[id]['storage']).forEach(function (res) {
+        var container = $('<div class="row"></div>');
+        var resource = $('<div class="col">' + nameCase(res) + '</div>');
+        var amount = $('<div class="col">' + city[id]['storage'][res] + '</div>');
+        container.append(resource);
+        container.append(amount);
+        $('#storage' + id).append(container);
+        vm.$watch('storage', function (newValue, oldValue) {
+            
+        });
+    });
+}
+
+function loadInfoBar(id) {
+    var container = $('<div id="info' + id + '" class="row"></div>');
+    var money = $('<div class="col-2">$' + Number(save.getItem('money')) + '</div>');
+    container.append(money);
+    
+    var current = $('<div class="col-3">Citizens: <span id="citizens">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
+    var idle = $('<div class="col-3">Idle: <span id="idleCitizens">' + city[id]['citizen']['idle'] + '</span></div>');
+    container.append(current);
+    container.append(idle);
+    
+    $('#city_info').append(container);
+    
+    var vm_cash = new Vue({
+        data: global
+    });
+    vm_cash.$watch('money', function (newValue, oldValue) {
+        money.html('$' + newValue);
+    });
     
     var vm = new Vue({
         data: city[id]['citizen']

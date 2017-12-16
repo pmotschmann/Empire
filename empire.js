@@ -1,4 +1,5 @@
 $(function() {    
+    save.clear();
     defineResources();
     defineTech();
     defineBuildings();
@@ -26,7 +27,7 @@ $(function() {
             // Uses weird reverse loop so depleted mines can be pruned
             for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
                 var mine = city[id]['mine'][key];
-                var remain = building['mine'].produce(mine);
+                var remain = building['mine'].produce(city[id],mine);
                 
                 // Mine is depleted
                 if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
@@ -53,7 +54,7 @@ $(function() {
             
             // Calculates citizen growth
             if (city[id].citizen.max > city[id].citizen.amount) {
-                var num = (city[id].citizen.amount * 25) / biomes[city[id].biome].growth;
+                var num = (city[id].citizen.amount * 25 * city[id]['tax_rate']) / biomes[city[id].biome].growth;
                 var farmers = 1;
                 if (city[id].farm) {
                     farmers += city[id].farm.workers;
@@ -63,8 +64,15 @@ $(function() {
                 }
             }
             
+            // Collect taxes
+            city[id]['tax_day'] -= 1;
+            if (city[id]['tax_day'] === 0) {
+                global['money'] += (city[id].citizen.amount - city[id].citizen.idle) * city[id]['tax_rate'];
+                city[id]['tax_day'] = 60;
+            }
         }
         save.setItem('city',JSON.stringify(city));
+        save.setItem('global',JSON.stringify(global));
     }, 1000);
 });
     
@@ -89,14 +97,14 @@ function showTech(techKey,techLevel) {
         
         var paid = true;
         Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-            if (Number(save.getItem(cost)) < research[techKey][techLevel]['cost'][cost]) {
+            if (city[0]['storage'][cost] < research[techKey][techLevel]['cost'][cost]) {
                 paid = false;
                 return;
             }
         });
         if (paid) {
             Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-                resources[cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
+                city[0]['storage'][cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
             });
             save.setItem(techKey,Number(save.getItem(techKey)+1));
             save.setItem('knowledge',Number(save.getItem('knowledge')) + 1);
