@@ -1,21 +1,24 @@
 $(function() {    
-    save.clear();
-    defineResources();
+    var global_data = save.getItem('global') || false;
+    if (global_data) {
+        // Load preexiting game data
+        global = JSON.parse(global_data);
+    }
+    else {
+        defineResources();
+        global.resource.lumber.unlocked = 1;
+        global.resource.lumber.stone = 1;
+        
+        global['money'] = 0;
+        global['knowledge'] = 0;
+        global['next_id'] = 0;
+    }
+    
     defineTech();
     defineBuildings();
     
-    resources.lumber.unlocked = 1;
-    resources.stone.unlocked = 1;
-    
     // Set current research
     loadTech();
-        
-    // Load unlocked resources
-    Object.keys(resources).forEach(function (key) { 
-        if (resources[key].unlocked) {
-            createResourceBind(resources,key);
-        }
-    });
     
     // Load city progression
     loadCity();
@@ -106,8 +109,13 @@ function showTech(techKey,techLevel) {
             Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
                 city[0]['storage'][cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
             });
-            save.setItem(techKey,Number(save.getItem(techKey)+1));
-            save.setItem('knowledge',Number(save.getItem('knowledge')) + 1);
+            if (global[techKey]) {
+                global[techKey]++;
+            }
+            else {
+                global[techKey] = 1;
+            }
+            global['knowledge']++;
             if (research[techKey][techLevel]['effect']) {
                 research[techKey][techLevel]['effect']();
             }
@@ -142,7 +150,7 @@ function loadTech() {
 function checkRequirements(requirements) {
     var available = true;
     Object.keys(requirements).forEach(function (req) {
-        var testTech = Number(save.getItem(req)) || 0;
+        var testTech = Number(global[req]) || 0;
         if (testTech < Number(requirements[req])) {
             available = false;
             return false;

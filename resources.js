@@ -1,47 +1,27 @@
 // Loads all resources from storage & sets up resource definitions
 function defineResources() {
-    loadResource('lumber');
-    loadResource('stone');
-    loadResource('copper');
-    loadResource('iron');
-    loadResource('coal');
-    loadResource('steel');
-    loadResource('aluminium');
-    loadResource('gold');
-    loadResource('titanium');
-    loadResource('oil');
+    loadResource('lumber',1);
+    loadResource('stone',1);
+    loadResource('copper',1);
+    loadResource('iron',1);
+    loadResource('coal',1);
+    loadResource('steel',0);
+    loadResource('aluminium',0);
+    loadResource('gold',0);
+    loadResource('titanium',0);
+    loadResource('oil',0);
 }
 
 // Load resource function
 // This function defines each resource, loads saved values from localStorage
 // And it creates Vue binds for various resource values
-function loadResource(name) {
-    resources[name] = {
-        amount: Number(save.getItem(name) || 0),
-        rate: Number(save.getItem(name+'Rate') || 1),
-        yield: Number(save.getItem(name+'Yield') || 1),
-        unlocked: Number(save.getItem(name+'Unlocked') || 0),
-        max: Number(save.getItem(name+'Max') || 25)
+function loadResource(name,manual) {
+    global['resource'][name] = {
+        manual: manual,
+        unlocked: 0,
+        rate: 1,
+        yield: 1
     };
-    var vm = new Vue({
-        data: resources[name]
-    });
-    vm.$watch('amount', function (newValue, oldValue) {
-        if (newValue > resources[name]['max']) {
-            resources[name]['amount'] = resources[name]['max'];
-        }
-        save.setItem(name,resources[name]['amount']);
-        $('#' + name + 'Value').html(resources[name]['amount']);
-    });
-    vm.$watch('rate', function (newValue, oldValue) {
-        save.setItem(name,resources[name]['rate']);
-    });
-    vm.$watch('yield', function (newValue, oldValue) {
-        save.setItem(name,resources[name]['yield']);
-    });
-    vm.$watch('max', function (newValue, oldValue) {
-        save.setItem(name,resources[name]['max']);
-    });
 }
 
 // Bind resource function

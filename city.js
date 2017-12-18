@@ -26,20 +26,12 @@ function loadCity() {
         city[0]['tax_rate'] = 1;
         city[0]['tax_day'] = 60;
         city[0]['storage_cap'] = 100;
-        city[0]['storage'] = {
-            
-        };
+        city[0]['storage'] = { lumber: 0, stone: 0 };
         city[0]['citizen'] = {
             amount: 0,
             idle: 0,
             max: 0
         };
-        
-        global['money'] = 0;
-        
-        // Set general knowledge to 0
-        save.setItem('knowledge',0);
-        save.setItem('next_id',0);
     }
     
     for (var i=0; i < city.length; i++) {
@@ -53,31 +45,72 @@ function loadCity() {
         loadCityCore(i);
         loadMines(i);
         loadInfoBar(i);
+        
+        Object.keys(global['resource']).forEach(function (key) { 
+            if (global['resource'][key].unlocked) {
+                //createResourceBind(resources,key);  
+            }
+        });
     }
 }
 
 function loadCityStorage(id) {
-    drawCityStorage(id);
-    
-    var vm = new Vue({
+    vue['storage' + id] = new Vue({
         data: city[id]['storage']
     });
-    vm.$watch('storage', function (newValue, oldValue) {
-        console.log(newValue);
+    Object.keys(city[id]['storage']).forEach(function (res) {
+        drawCityStorage(id,res);
     });
 }
 
-function drawCityStorage(id) {
-    Object.keys(city[id]['storage']).forEach(function (res) {
-        var container = $('<div class="row"></div>');
-        var resource = $('<div class="col">' + nameCase(res) + '</div>');
-        var amount = $('<div class="col">' + city[id]['storage'][res] + '</div>');
-        container.append(resource);
-        container.append(amount);
-        $('#storage' + id).append(container);
-        vm.$watch('storage', function (newValue, oldValue) {
+function drawCityStorage(id,res) {
+    var container = $('<div class="row"></div>');
+    var resource = $('<div class="col">' + nameCase(res) + '</div>');
+    var amount = $('<div class="col">' + city[id]['storage'][res] + '</div>');
+    container.append(resource);
+    container.append(amount);
+    
+    if (global['resource'][res] && global['resource'][res].manual && id === 0) {
+        var row2 = $('<div class="row"></div>');
+        var clicker = $('<div class="progress col"></div>');
+        var harvest = $('<div class="progress-bar-title">Gather</div>');
+        var progress = $('<div id="' + res + 'ProgressBar" class="progress-bar progress-bar-striped bg-success" style="width:0%" role="progress-bar"></div>');
+        clicker.append(progress);
+        clicker.append(harvest);
+        row2.append(clicker);
+        
+        var outer = $('<div class="row container"></div>');
+        outer.append(container);
+        outer.append(row2);
+        $('#storage' + id).append(outer);
+        
+        clicker.on('click',function(e){
+            e.preventDefault();
+            var bar = $('#' + res + 'ProgressBar');
+            if (parseInt(bar.width()) > 0) {
+                return false;
+            }
+            var width = 1;
+            var refreshId = setInterval(function() {
+                if (width >= 100) {
+                    clearInterval(refreshId);
+                    city[0]['storage'][res] += global['resource'][res]['yield'];
+                    bar.width('0');
+                } else {
+                    width++; 
+                    bar.width(width + '%');
+                }
+            }, gatherRateTable[global['resource'][res]['rate']]);
             
+            return false;
         });
+    }
+    else {
+        $('#storage' + id).append(container);
+    }
+    
+    unwatch['storage' + id + res] = vue['storage' + id].$watch(res, function (newValue, oldValue) {
+        amount.html(newValue);
     });
 }
 

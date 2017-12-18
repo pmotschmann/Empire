@@ -1,5 +1,6 @@
 var save = window.localStorage;
 var unwatch = {};
+var vue = {};
 var resources = {};
 var building = {};
 var research = {};
@@ -9,7 +10,9 @@ var city = [{
     factory: {},
     mine: []
 }];
-var global = {};
+var global = {
+    resource: {}
+};
 
 var gatherRateTable = {
     1: 30, //3000 milliseconds

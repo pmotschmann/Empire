@@ -75,8 +75,7 @@ function defineTech() {
                 stone: 10
             },
             effect: function () {
-                save.setItem('copperUnlocked',1);
-                createResourceBind(resources,'copper');
+                global.resource.copper.unlocked = 1;
             }
         },
         {
@@ -89,8 +88,7 @@ function defineTech() {
                 copper: 10
             },
             effect: function () {
-                save.setItem('ironUnlocked',1);
-                createResourceBind(resources,'iron');
+                global.resource.iron.unlocked = 1;
             }
         },
         {
@@ -103,8 +101,7 @@ function defineTech() {
                 iron: 10
             },
             effect: function () {
-                save.setItem('coalUnlocked',1);
-                createResourceBind(resources,'coal');
+                global.resource.coal.unlocked = 1;
             }
         },
         {
@@ -117,8 +114,7 @@ function defineTech() {
                 iron: 25
             },
             effect: function () {
-                save.setItem('steelUnlocked',1);
-                createResourceBind(resources,'steel');
+                global.resource.steel.unlocked = 1;
             }
         }
     ];
@@ -134,7 +130,7 @@ function defineTech() {
                 stone: 2
             },
             effect: function () {
-                resources['stone'].rate = 2;
+                global.resource.stone.rate = 2;
             }
         },
         {
@@ -145,8 +141,8 @@ function defineTech() {
                 copper: 5
             },
             effect: function () {
-                resources['stone'].rate = 3;
-                resources['copper'].rate = 2;
+                global.resource.stone.rate = 3;
+                global.resource.copper.rate = 2;
             }
         },
         {
@@ -157,10 +153,10 @@ function defineTech() {
                 iron: 10
             },
             effect: function () {
-                resources['stone'].rate = 4;
-                resources['copper'].rate = 3;
-                resources['iron'].rate = 2;
-                resources['coal'].rate = 2;
+                global.resource.stone.rate = 4;
+                global.resource.copper.rate = 3;
+                global.resource.iron.rate = 2;
+                global.resource.coal.rate = 2;
             }
         },
         {
@@ -171,11 +167,10 @@ function defineTech() {
                 steel: 25
             },
             effect: function () {
-                resources['stone'].rate = 5;
-                resources['copper'].rate = 4;
-                resources['iron'].rate = 3;
-                resources['coal'].rate = 3;
-                resources['aluminium'].rate = 2;
+                global.resource.stone.rate = 5;
+                global.resource.copper.rate = 4;
+                global.resource.iron.rate = 3;
+                global.resource.coal.rate = 3;
             }
         },
         {
@@ -186,13 +181,10 @@ function defineTech() {
                 aluminium: 100
             },
             effect: function () {
-                resources['stone'].rate = 6;
-                resources['copper'].rate = 5;
-                resources['iron'].rate = 4;
-                resources['coal'].rate = 4;
-                resources['aluminium'].rate = 3;
-                resources['gold'].rate = 2;
-                resources['titanium'].rate = 2;
+                global.resource.stone.rate = 6;
+                global.resource.copper.rate = 5;
+                global.resource.iron.rate = 4;
+                global.resource.coal.rate = 4;
             }
         }
     ];
@@ -208,7 +200,7 @@ function defineTech() {
                 stone: 2
             },
             effect: function () {
-                resources['lumber'].rate = 2;
+                global.resource.lumber.rate = 2;
             }
         },
         {
@@ -219,7 +211,7 @@ function defineTech() {
                 copper: 5
             },
             effect: function () {
-                resources['lumber'].rate = 3;
+                global.resource.lumber.rate = 3;
             }
         },
         {
@@ -230,7 +222,7 @@ function defineTech() {
                 iron: 10
             },
             effect: function () {
-                resources['lumber'].rate = 4;
+                global.resource.lumber.rate = 4;
             }
         },
         {
@@ -241,7 +233,7 @@ function defineTech() {
                 steel: 25
             },
             effect: function () {
-                resources['lumber'].rate = 5;
+                global.resource.lumber.rate = 5;
             }
         },
         {
@@ -252,7 +244,7 @@ function defineTech() {
                 steel: 100
             },
             effect: function () {
-                resources['lumber'].rate = 6;
+                global.resource.lumber.rate = 6;
             }
         },
         {
@@ -263,7 +255,7 @@ function defineTech() {
                 steel: 5000
             },
             effect: function () {
-                resources['lumber'].rate = 7;
+                global.resource.lumber.rate = 7;
             }
         },
         {
@@ -276,7 +268,7 @@ function defineTech() {
                 steel: 25000
             },
             effect: function () {
-                resources['lumber'].yield = 2;
+                global.resource.lumber.yield = 2;
             }
         }
     ];

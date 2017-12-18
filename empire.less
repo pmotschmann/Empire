@@ -2,48 +2,32 @@ div.main {
     padding-top: 2rem;
 }
 
-div.resources {
+div.storages  {
     vertical-align: top;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    
-    > div {
-        flex-direction: column;
-        flex-flow: row wrap;
+        
+    .label {
+        width: 10rem;
     }
     
-    div.resource {
-        border-top: .0625rem solid #ddd;
-        width: 20rem;
-        margin: 1rem 0 0 .5rem;
+    .progress {
+        cursor: pointer;
+        margin-top: .5rem;
+        padding: 0;
+        height: 1.5rem;
         
-        .label {
-            width: 10rem;
-        }
-        
-        .counter,
-        .workers { 
-            width: 50%;
-        }
-        
-        .progress {
-            cursor: pointer;
-            margin-top: .5rem;
-            padding: 0;
-            height: 1.5rem;
-            
-            .progress-bar-title {
-                position: absolute;
-                text-align: center;
-                overflow: hidden;
-                line-height: 1.5rem;
-                font-size: 1rem;
-                right: 0;
-                left: 0;
-                top: 0;
-            }
+        .progress-bar-title {
+            position: absolute;
+            text-align: center;
+            overflow: hidden;
+            line-height: 1.5rem;
+            font-size: 1rem;
+            right: 0;
+            left: 0;
+            top: 0;
         }
     }
 }
@@ -104,9 +88,14 @@ div.city {
     }
     
     div.mines,
-    div.structures {
+    div.structures,
+    div.storages {
         flex-direction: column;
         flex-flow: row wrap;
+    }
+    
+    div.storages .row {
+        margin-right: 1rem;
     }
     
     div.mine {
