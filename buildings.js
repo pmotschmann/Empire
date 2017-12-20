@@ -41,6 +41,25 @@ function defineBuildings() {
         }
     };
     
+    building['trading_post'] = {
+        type: 'unique',
+        limit: 1,
+        rank: [
+            {
+                name: 'Trading Post',
+                require: { farming: 2 },
+                description: 'Allows spare resources to be sold for money',
+                cost: { 
+                    lumber: 20,
+                    stone: 20
+                },
+                effect: function (town) {
+                    
+                }
+            }
+        ]
+    };
+    
     // Allows player to asign citizens as lumberjacks, who automatically harvest lumber
     building['lumber_mill'] = {
         type: 'factory',
@@ -59,11 +78,11 @@ function defineBuildings() {
         ],
         produce: function (town, index) {
             var workers = town[index].workers;
-            var sum = Object.values(town[index].storage).reduce((a, b) => a + b);
+            var sum = Object.values(town['storage']).reduce((a, b) => a + b);
             if (workers > town[index].storage_cap - sum) {
                 workers = town[index].storage_cap - sum;
             }
-            town[index]['storage']['lumber'] += workers;
+            town['storage']['lumber'] += workers;
         }
     };
     
@@ -74,7 +93,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Farm',
-                require: { knowledge: 4 },
+                require: { farming: 1 },
                 description: 'The farm increases your food supply, which makes gaining new citizens easier',
                 cost: { 
                     copper: 25,

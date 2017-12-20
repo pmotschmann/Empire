@@ -1,4 +1,4 @@
-$(function() {    
+$(function() {
     var global_data = save.getItem('global') || false;
     if (global_data) {
         // Load preexiting game data
@@ -6,12 +6,22 @@ $(function() {
     }
     else {
         defineResources();
-        global.resource.lumber.unlocked = 1;
-        global.resource.lumber.stone = 1;
         
         global['money'] = 0;
         global['knowledge'] = 0;
         global['next_id'] = 0;
+        global['research_lab'] = false;
+        global['trading_post'] = false;
+        global['tech'] = 0;
+    }
+    
+    if (!global['research_lab']) {
+        $('#research_tab').hide();
+    }
+    if (global['tech'] < 2) {
+        $('#city_info').hide();
+        $('#city_menu').hide();
+        $('#sub_city').hide();
     }
     
     defineTech();
@@ -22,6 +32,25 @@ $(function() {
     
     // Load city progression
     loadCity();
+    
+    if (!global['economics']) {
+        $('#city_info .money').hide();
+    }
+    if (!global['housing']) {
+        $('#city_info .citizen').hide();
+    }
+    
+    // Popover handling
+    $('[data-trigger="manual"]').click(function() {
+        $(this).popover('toggle');
+    })
+    $(document).on('click', function (e) {
+        $('[data-toggle="popover"],[data-original-title]').each(function () {
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {                
+                (($(this).popover('hide').data('bs.popover')||{}).inState||{}).click = false  // fix for BS 3.3.6
+            }
+        });
+    });
     
     // Main game loop
     setInterval(function() {
@@ -55,6 +84,10 @@ $(function() {
                 }
             });
             
+            // Updates remaining storage total
+            var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
+            $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
+            
             // Calculates citizen growth
             if (city[id].citizen.max > city[id].citizen.amount) {
                 var num = (city[id].citizen.amount * 25 * city[id]['tax_rate']) / biomes[city[id].biome].growth;
@@ -74,8 +107,16 @@ $(function() {
                 city[id]['tax_day'] = 60;
             }
         }
-        save.setItem('city',JSON.stringify(city));
+        
+        // Check for opening features
+        if (!global['research_lab'] && city[0]['storage'].lumber >= 2 && city[0]['storage'].stone >= 2) {
+            global['research_lab'] = true;
+            $('#research_tab').show();
+        }
+        
+        // Save game state
         save.setItem('global',JSON.stringify(global));
+        save.setItem('city',JSON.stringify(city));
     }, 1000);
 });
     
@@ -107,7 +148,7 @@ function showTech(techKey,techLevel) {
         });
         if (paid) {
             Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-                city[0]['storage'][cost]['amount'] -= research[techKey][techLevel]['cost'][cost];
+                city[0]['storage'][cost] -= research[techKey][techLevel]['cost'][cost];
             });
             if (global[techKey]) {
                 global[techKey]++;
@@ -133,7 +174,7 @@ function loadTech() {
     // Load Research Listing
     $('#research div').first().empty();
     Object.keys(research).forEach(function (key) { 
-        var techLevel = Number(save.getItem(key)) || 0;
+        var techLevel = Number(global[key]) || 0;
         if ( research[key][techLevel] ) {
             if (research[key][techLevel].require) {
                 if (checkRequirements(research[key][techLevel].require)) {

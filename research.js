@@ -11,6 +11,19 @@ function defineTech() {
             }
         },
         {
+            name: 'Construction',
+            description: 'Knowledge of how to build basic structures',
+            cost: { 
+                lumber: 3,
+                stone: 3
+            },
+            effect: function () {
+                $('#city_info').show();
+                $('#city_menu').show();
+                $('#sub_city').show();
+            }
+        },
+        {
             name: 'Electricity',
             require: { copperUnlocked: 1, knowledge: 6 },
             description: 'Discover electricity and advance into a new era',
@@ -31,14 +44,32 @@ function defineTech() {
         }
     ];
     
-    research['housing'] = [
+    research['economics'] = [ 
         {
-            name: 'Basic Housing',
-            require: { tech: 1, knowledge: 3 },
-            description: 'Learn how to build simple houses for citizens',
+            name: 'Basic Economics',
+            require: { knowledge: 5 },
+            description: 'Learn about how to build an economy through money and trade',
             cost: { 
                 lumber: 5,
                 stone: 5
+            },
+            effect: function () {
+                $('#city_info .money').show();
+            }
+        }
+    ];
+    
+    research['housing'] = [
+        {
+            name: 'Basic Housing',
+            require: { tech: 2, knowledge: 3 },
+            description: 'Learn how to build simple housing for citizens',
+            cost: { 
+                lumber: 5,
+                stone: 5
+            },
+            effect: function () {
+                $('#city_info .citizen').show();
             }
         }
     ];
@@ -71,8 +102,8 @@ function defineTech() {
             require: { knowledge: 2 },
             description: 'Learn how to extract and smelt copper ore',
             cost: { 
-                lumber: 10,
-                stone: 10
+                lumber: 5,
+                stone: 5
             },
             effect: function () {
                 global.resource.copper.unlocked = 1;
@@ -260,7 +291,7 @@ function defineTech() {
         },
         {
             name: 'Chainsaw',
-            require: { tech: 2 },
+            require: { tech: 3 },
             description: 'A lean mean tree cutting machine, chainsaws are way better then manual saws. Increased manual lumber yield.',
             cost: { 
                 oil: 2500,

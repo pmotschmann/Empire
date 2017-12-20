@@ -39,6 +39,8 @@ function loadCity() {
         $('#storage_pane').append(storages);
         var structures = $('<div id="structures' + i + '" class="structures d-flex"></div>');
         $('#structures_pane').append(structures);
+        var blueprints = $('<div id="blueprints' + i + '" class="blueprints d-flex"></div>');
+        $('#blueprints_pane').append(blueprints);
         var mines = $('<div id="mines' + i + '" class="mines d-flex"></div>');
         $('#mines_pane').append(mines);
         loadCityStorage(i);
@@ -64,13 +66,15 @@ function loadCityStorage(id) {
 }
 
 function drawCityStorage(id,res) {
-    var container = $('<div class="row"></div>');
-    var resource = $('<div class="col">' + nameCase(res) + '</div>');
+    var container = $('<div class="row ' + res + '"></div>');
+    var popover_content = '<a id="destroy' + id + res + '">Destroy ' + nameCase(res) + '</a>';
+    var resource = $('<div class="col"></div>');
+    var resource = $('<div class="col"><a id="pop' + id + res + '" tabindex="0" href="#" role="button" data-trigger="manual" data-toggle="popover">' + nameCase(res) + '</a></div>');
     var amount = $('<div class="col">' + city[id]['storage'][res] + '</div>');
     container.append(resource);
     container.append(amount);
     
-    if (global['resource'][res] && global['resource'][res].manual && id === 0) {
+    if (global['resource'][res] && global['resource'][res].manual && global['resource'][res].unlocked && id === 0) {
         var row2 = $('<div class="row"></div>');
         var clicker = $('<div class="progress col"></div>');
         var harvest = $('<div class="progress-bar-title">Gather</div>');
@@ -79,9 +83,11 @@ function drawCityStorage(id,res) {
         clicker.append(harvest);
         row2.append(clicker);
         
-        var outer = $('<div class="row container"></div>');
-        outer.append(container);
-        outer.append(row2);
+        var outer = $('<div class="row"></div>');
+        var inner = $('<div class="container"></div>');
+        inner.append(container);
+        inner.append(row2);
+        outer.append(inner);
         $('#storage' + id).append(outer);
         
         clicker.on('click',function(e){
@@ -95,6 +101,8 @@ function drawCityStorage(id,res) {
                 if (width >= 100) {
                     clearInterval(refreshId);
                     city[0]['storage'][res] += global['resource'][res]['yield'];
+                    var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
+                    $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
                     bar.width('0');
                 } else {
                     width++; 
@@ -109,6 +117,23 @@ function drawCityStorage(id,res) {
         $('#storage' + id).append(container);
     }
     
+    $('#pop' + id + res).popover({
+        html: true,
+        placement: 'top',
+        content: function() {
+            if (city[id]['trading_post']) {
+                return $('<a href="#">Sell</a>').on('click',function(e){
+                    city[id]['storage'][res] -= 1;
+                });
+            }
+            else {
+                return $('<a href="#">Destroy</a>').on('click',function(e){
+                    city[id]['storage'][res] -= 1;
+                });
+            }
+        }
+    });
+    
     unwatch['storage' + id + res] = vue['storage' + id].$watch(res, function (newValue, oldValue) {
         amount.html(newValue);
     });
@@ -116,13 +141,18 @@ function drawCityStorage(id,res) {
 
 function loadInfoBar(id) {
     var container = $('<div id="info' + id + '" class="row"></div>');
-    var money = $('<div class="col-2">$' + Number(save.getItem('money')) + '</div>');
+    var money = $('<div class="money col-2">$' + Number(save.getItem('money')) + '</div>');
     container.append(money);
     
-    var current = $('<div class="col-3">Citizens: <span id="citizens">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
-    var idle = $('<div class="col-3">Idle: <span id="idleCitizens">' + city[id]['citizen']['idle'] + '</span></div>');
+    var current = $('<div class="citizen col-3">Citizens: <span id="citizens' + id + '">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
+    var idle = $('<div class="citizen col-3">Idle: <span id="idleCitizens' + id + '">' + city[id]['citizen']['idle'] + '</span></div>');
+    
     container.append(current);
     container.append(idle);
+    
+    var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
+    var store = $('<div class="store col">Storage <span id="storage' + id + '">' + storage_sum + ' / ' + city[id]['storage_cap'] + '</span></div>');
+    container.append(store);
     
     $('#city_info').append(container);
     
@@ -137,18 +167,18 @@ function loadInfoBar(id) {
         data: city[id]['citizen']
     });
     vm.$watch('amount', function (newValue, oldValue) {
-        save.setItem('citizen',city[id]['citizen']['amount']);
         var dif = newValue - oldValue;
         city[id]['citizen']['idle'] += dif;
-        $('#citizens').html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
+        $('#citizens' + id).html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
     });
     vm.$watch('idle', function (newValue, oldValue) {
-        save.setItem('citizenIdle',city[id]['citizen']['idle']);
-        $('#idleCitizens').html(city[id]['citizen']['idle']);
+        $('#idleCitizens' + id).html(city[id]['citizen']['idle']);
     });
     vm.$watch('max', function (newValue, oldValue) {
-        save.setItem('citizenMax',city[id]['citizen']['max']);
-        $('#citizens').html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
+        $('#citizens' + id).html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
+    });
+    vm.$watch('storage_cap', function (newValue, oldValue) {
+        $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
     });
     
     // for testing reasons
@@ -158,6 +188,7 @@ function loadInfoBar(id) {
 // Loads all core city elements
 function loadCityCore(id) {
     $('#structures'+id).empty();
+    $('#blueprints'+id).empty();
     
     Object.keys(building).forEach(function (key) {
         switch (building[key]['type']) {
@@ -189,7 +220,7 @@ function loadFactory(id,factory) {
         // Player has this building
         var rank = city[id][factory]['rank'];
         
-        var structure = $('<div id="' + factory + id + '" class="city mine"></div>');
+        var structure = $('<div id="' + factory + id + '" class="city factory"></div>');
         var header = $('<div class="header row"><div class="col">' + building[factory]['rank'][rank]['name'] +'</div></div>');
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
@@ -227,7 +258,7 @@ function loadFactory(id,factory) {
     else {
         // Player does not have this building
         if (checkRequirements(building[factory]['rank'][0].require)) {
-            var structure = $('<div id="' + factory + id + '" class="city mine"></div>');
+            var structure = $('<div id="' + factory + id + '" class="city blueprint"></div>');
             var header = $('<div class="header row"><div class="col build">Construct ' + building[factory]['rank'][0]['name'] +'</div></div>');
             structure.append(header);
             
@@ -240,21 +271,21 @@ function loadFactory(id,factory) {
                 structure.append(row);
             });
             
-            $('#structures' + id).append(structure);
+            $('#blueprints' + id).append(structure);
             
             header.on('click',function(e){
                 e.preventDefault();
                 
                 var paid = true;
                 Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
-                    if (Number(save.getItem(cost)) < building[factory]['rank'][0]['cost'][cost]) {
+                    if (city[id]['storage'][cost] < building[factory]['rank'][0]['cost'][cost]) {
                         paid = false;
                         return;
                     }
                 });
                 if (paid) {
                     Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
-                        resources[cost]['amount'] -= building[factory]['rank'][0]['cost'][cost];
+                        city[id]['storage'][cost] -= building[factory]['rank'][0]['cost'][cost];
                     });
                     city[id][factory] = {
                         rank: 0,
