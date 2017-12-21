@@ -47,14 +47,31 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Trading Post',
-                require: { farming: 2 },
+                require: { economics: 1 },
                 description: 'Allows spare resources to be sold for money',
                 cost: { 
                     lumber: 20,
                     stone: 20
-                },
-                effect: function (town) {
-                    
+                }
+            }
+        ]
+    };
+    
+    // The number of farmers you have affects how fast you get new citizens
+    building['farm'] = {
+        type: 'factory',
+        limit: 1,
+        rank: [
+            {
+                name: 'Farm',
+                require: { minerals: 2, farming: 1 },
+                description: 'The farm increases your food supply, which makes gaining new citizens easier',
+                labor: 'Farmers',
+                cost: { 
+                    copper: 25,
+                    iron: 25,
+                    lumber: 100,
+                    stone: 100
                 }
             }
         ]
@@ -69,6 +86,7 @@ function defineBuildings() {
                 name: 'Lumber Mill',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Construct a Lumber Mill',
+                labor: 'Mill Workers',
                 cost: { 
                     copper: 10,
                     iron: 25,
@@ -76,8 +94,8 @@ function defineBuildings() {
                 }
             }
         ],
-        produce: function (town, index) {
-            var workers = town[index].workers;
+        produce: function (town, building) {
+            var workers = town[building].workers;
             var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
@@ -86,23 +104,30 @@ function defineBuildings() {
         }
     };
     
-    // The number of farmers you have affects how fast you get new citizens
-    building['farm'] = {
+    // Allows player to asign citizens as quarry workers, who automatically harvest lumber
+    building['rock_quarry'] = {
         type: 'factory',
         limit: 1,
         rank: [
             {
-                name: 'Farm',
-                require: { minerals: 2, farming: 1 },
-                description: 'The farm increases your food supply, which makes gaining new citizens easier',
+                name: 'Rock Quarry',
+                require: { minerals: 2, knowledge: 5 },
+                description: 'Construct a Rock Quarry',
+                labor: 'Quarry Workers',
                 cost: { 
-                    copper: 25,
-                    iron: 25,
-                    lumber: 100,
-                    stone: 100
+                    iron: 50,
+                    lumber: 50
                 }
             }
-        ]
+        ],
+        produce: function (town, building) {
+            var workers = town[building].workers;
+            var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
+            if (workers > town.storage_cap - sum) {
+                workers = town.storage_cap - sum;
+            }
+            town['storage']['stone'] += workers;
+        }
     };
     
     // Produces steel, requires workers
@@ -112,25 +137,23 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Steel Mill',
-                require: { minerals: 4, mining: 4 },
+                require: { minerals: 4, mining: 3 },
                 description: 'Construct a Steel Mill',
+                labor: 'Mill Workers',
                 cost: { 
-                    coal: 250,
-                    iron: 250,
-                    lumber: 1000
-                },
-                effect: function (town) {
-                    save.setItem('steelUnlocked',1);
+                    coal: 25,
+                    iron: 50,
+                    lumber: 100
                 }
             }
         ],
-        produce: function (town, index) {
-            var workers = town[index].workers;
-            var sum = Object.values(town[index].storage).reduce((a, b) => a + b);
-            if (workers > town[index].storage_cap - sum) {
-                workers = town[index].storage_cap - sum;
+        produce: function (town, building) {
+            var workers = town[building].workers;
+            var sum = Object.values(town.storage).reduce((a, b) => a + b);
+            if (workers > town.storage_cap - sum) {
+                workers = town.storage_cap - sum;
             }
-            town[index]['storage']['steel'] += workers;
+            town['storage']['steel'] += workers;
         }
     };
     
@@ -147,9 +170,6 @@ function defineBuildings() {
                     coal: 250,
                     iron: 250,
                     lumber: 1000
-                },
-                effect: function (town) {
-                    
                 }
             }
         ]
@@ -170,7 +190,7 @@ function defineBuildings() {
                     stone: 12,
                     lumber: 8
                 },
-                effect: function (town) {
+                effect: function (town, building) {
                     town['citizen']['max'] += 2;
                 }
             },
@@ -184,7 +204,7 @@ function defineBuildings() {
                     copper: 2,
                     iron: 3
                 },
-                effect: function (town) {
+                effect: function (town, building) {
                     town['citizen']['max'] += 2;
                 }
             }
@@ -207,8 +227,8 @@ function defineBuildings() {
                     lumber: 8,
                     iron: 2
                 },
-                effect: function (town) {
-                    town['storage_cap'] += 10;
+                effect: function (town, building) {
+                    town['storage_cap'] += 25;
                 }
             }
         ]

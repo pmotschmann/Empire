@@ -231,7 +231,7 @@ function loadFactory(id,factory) {
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
         var add = $('<span id="' + factory + id + 'AddWorker" class="add">&raquo;</span>');
-        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + ' Mill Workers</span>');
+        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor'] + '</span>');
         
         workers.append(remove);
         workers.append(count);
@@ -247,7 +247,7 @@ function loadFactory(id,factory) {
             if (Number(city[id][factory]['workers']) > 0) {
                 city[id][factory]['workers']--;
                 city[id]['citizen']['idle']++;
-                count.html(city[id][factory]['workers'] + ' Mill Workers');
+                count.html(city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor']);
             }
         });
         
@@ -257,7 +257,7 @@ function loadFactory(id,factory) {
             if (Number(city[id]['citizen']['idle']) > 0) {
                 city[id][factory]['workers']++;
                 city[id]['citizen']['idle']--;
-                count.html(city[id][factory]['workers'] + ' Mill Workers');
+                count.html(city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor']);
             }
         });
     }
@@ -297,6 +297,9 @@ function loadFactory(id,factory) {
                         rank: 0,
                         workers: 0
                     };
+                    if (building[factory]['rank'][0].effect) {
+                        building[factory]['rank'][0].effect(city[id],factory);
+                    }
                     loadCityCore(id);
                 }
             });
@@ -326,7 +329,7 @@ function loadStorage(id,storage) {
         
         Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) { 
             var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-            var price = $('<span class="cost col">' + building[storage]['rank'][rank]['cost'][cost] + '</span>');
+            var price = $('<span class="cost col">' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
             var row = $('<div class="row"></div>');
             row.append(res);
             row.append(price);
@@ -340,14 +343,14 @@ function loadStorage(id,storage) {
             
             var paid = true;
             Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
-                if (city[id]['storage'][cost] < building[storage]['rank'][0]['cost'][cost]) {
+                if (city[id]['storage'][cost] < inflation(id,storage,building[storage]['rank'][0]['cost'][cost])) {
                     paid = false;
                     return;
                 }
             });
             if (paid) {
                 Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
-                    city[id]['storage'][cost] -= building[storage]['rank'][0]['cost'][cost];
+                    city[id]['storage'][cost] -= inflation(id,storage,building[storage]['rank'][0]['cost'][cost]);
                 });
                 var owned = 0;
                 if (city[id][storage]) {
@@ -357,6 +360,9 @@ function loadStorage(id,storage) {
                     owned: owned + 1,
                     rank: rank
                 };
+                if (building[storage]['rank'][rank].effect) {
+                    building[storage]['rank'][rank].effect(city[id],storage);
+                }
                 loadCityCore(id);
             }
         });
@@ -364,12 +370,14 @@ function loadStorage(id,storage) {
     
     // Player has at least one of this building
     if (city[id][storage]) {
-        var structure = $('<div id="' + storage + id + 'bp" class="city blueprint"></div>');
+        var structure = $('<div id="' + storage + id + 'bp" class="city storage"></div>');
         var header = $('<div class="header row"><div class="col build">' + building[storage]['rank'][rank]['name'] + '</div></div>');
         structure.append(header);
         
         var owned = $('<div class="col">Constructed: ' + city[id][storage]['owned'] + '</div>');
         structure.append(owned);
+        
+        $('#structures' + id).append(structure);
     }
 }
 

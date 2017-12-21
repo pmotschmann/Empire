@@ -1,5 +1,4 @@
 $(function() {
-    save.clear();
     var global_data = save.getItem('global') || false;
     if (global_data) {
         // Load preexiting game data
@@ -19,7 +18,7 @@ $(function() {
     if (!global['research_lab']) {
         $('#research_tab').hide();
     }
-    if (global['tech'] < 2) {
+    if (Number(global['tech']) < 2) {
         $('#city_info').hide();
         $('#city_menu').hide();
         $('#sub_city').hide();
@@ -231,6 +230,22 @@ function checkRequirements(requirements) {
         }
     });
     return available;
+}
+
+function inflation(id,struct,cost) {
+    if (building[struct].inflation) {
+        var owned = 0;
+        if (city[id][struct]) {
+            if (city[id][struct]['owned']) {
+                owned = city[id][struct]['owned'];
+            }
+            else {
+                owned = 1;
+            }
+        }
+        cost += Number(cost * owned * building[struct].inflation.ammount);
+    }
+    return cost;
 }
 
 function nameCase(string) {

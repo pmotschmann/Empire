@@ -151,6 +151,7 @@ function defineTech() {
             },
             effect: function () {
                 global.resource.coal.unlocked = 1;
+                city[0]['storage']['coal'] = 0;
             }
         },
         {

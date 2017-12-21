@@ -93,7 +93,10 @@ div.city {
     
     div.mines,
     div.structures,
-    div.storages {
+    div.storages,
+    div.unique,
+    div.factory,
+    div.blueprints {
         flex-direction: column;
         flex-flow: row wrap;
     }
@@ -106,11 +109,11 @@ div.city {
     div.factory,
     div.storage,
     div.unique {
-        width: 18rem;
-        min-width: 18rem;
+        width: 15rem;
         border: solid .0625rem grey;
         margin: 1rem 1rem 0 0;
         padding: 0 .9375rem .5rem;
+        flex-flow: row wrap;
         
         .header {
             background: linear-gradient(to top, #bbb, #eee 20%, #eee 80%, #bbb);
@@ -123,18 +126,22 @@ div.city {
         }
     }
     
+    div.mine {
+        width: 18rem;
+    }
+    
     div.mine .header {
         background: linear-gradient(to top, #aba, #eee 20%, #eee 80%, #aba);
     }
     
     div.blueprint {
         width: 15rem;
-        min-width: 15rem;
         border: solid .0625rem grey;
         margin: 1rem 1rem 0 0;
         padding: 0 .9375rem .5rem;
         background: #88f;
         color: #fff;
+        flex-flow: row wrap;
         
         .header {
             background: linear-gradient(to top, #44f, #88f 20%, #88f 80%, #44f);
