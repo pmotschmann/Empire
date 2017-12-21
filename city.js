@@ -9,7 +9,7 @@ function loadCity() {
         // New game, setup starter state
         // Player starts with a starter mine
         city[0]['mine'] = [
-            {
+            /*{
                 id: 'mine0',
                 name: 'Basic Mine',
                 type: 'mine',
@@ -19,7 +19,7 @@ function loadCity() {
                     iron: 1000,
                 },
                 workers: 0
-            }
+            }*/
         ];
         
         city[0]['biome'] = 'grassland';
@@ -47,19 +47,14 @@ function loadCity() {
         loadCityCore(i);
         loadMines(i);
         loadInfoBar(i);
-        
-        Object.keys(global['resource']).forEach(function (key) { 
-            if (global['resource'][key].unlocked) {
-                //createResourceBind(resources,key);  
-            }
-        });
     }
 }
 
 function loadCityStorage(id) {
     vue['storage' + id] = new Vue({
-        data: city[id]['storage']
+        data: { store: city[id]['storage'] }
     });
+    unwatch[id] = {};
     Object.keys(city[id]['storage']).forEach(function (res) {
         drawCityStorage(id,res);
     });
@@ -100,9 +95,14 @@ function drawCityStorage(id,res) {
             var refreshId = setInterval(function() {
                 if (width >= 100) {
                     clearInterval(refreshId);
-                    city[0]['storage'][res] += global['resource'][res]['yield'];
+                    var yield = global['resource'][res]['yield'];
                     var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
-                    $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
+                    if (yield + storage_sum > city[0].storage_cap) {
+                        yield = city[0].storage_cap - storage_sum;
+                    }
+                    city[0]['storage'][res] += yield;
+                    storage_sum += yield;
+                    $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
                     bar.width('0');
                 } else {
                     width++; 
@@ -122,19 +122,28 @@ function drawCityStorage(id,res) {
         placement: 'top',
         content: function() {
             if (city[id]['trading_post']) {
-                return $('<a href="#">Sell</a>').on('click',function(e){
-                    city[id]['storage'][res] -= 1;
+                return $('<a href="#">Sell $' + global['resource'][res]['value'] + '/each</a>').on('click',function(e){
+                    if (city[id]['storage'][res] > 0) {
+                        city[id]['storage'][res]--;
+                        global['money'] += global['resource'][res]['value'];
+                    }
                 });
             }
             else {
                 return $('<a href="#">Destroy</a>').on('click',function(e){
-                    city[id]['storage'][res] -= 1;
+                    if (city[id]['storage'][res] > 0) {
+                        city[id]['storage'][res]--;
+                    }
                 });
             }
         }
     });
     
-    unwatch['storage' + id + res] = vue['storage' + id].$watch(res, function (newValue, oldValue) {
+    $('#pop' + id + res).click(function() {
+        $(this).popover('toggle');
+    });
+    
+    unwatch[id]['storage' + res] = vue['storage' + id].$watch('store.'+res, function (newValue, oldValue) {
         amount.html(newValue);
     });
 }
@@ -151,7 +160,7 @@ function loadInfoBar(id) {
     container.append(idle);
     
     var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
-    var store = $('<div class="store col">Storage <span id="storage' + id + '">' + storage_sum + ' / ' + city[id]['storage_cap'] + '</span></div>');
+    var store = $('<div class="store col">Storage <span id="cityStorage' + id + '">' + storage_sum + ' / ' + city[id]['storage_cap'] + '</span></div>');
     container.append(store);
     
     $('#city_info').append(container);
@@ -177,12 +186,9 @@ function loadInfoBar(id) {
     vm.$watch('max', function (newValue, oldValue) {
         $('#citizens' + id).html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
     });
-    vm.$watch('storage_cap', function (newValue, oldValue) {
-        $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
-    });
     
     // for testing reasons
-    city[id]['citizen']['max'] = 5;
+    //city[id]['citizen']['max'] = 5;
 }
 
 // Loads all core city elements
@@ -300,22 +306,76 @@ function loadFactory(id,factory) {
 
 // Adds storage type building to city
 function loadStorage(id,storage) {
-    var template = {};
-    if (city[storage]) {
-        // Player has this building
-        template['rank'] = city[id][storage]['rank'];
-        template['owned'] = city[id][storage]['owned']
+    
+    // Find newest plans
+    var rank = -1;
+    for (var i=0; i < building[storage]['rank'].length; i++) {
+        if (checkRequirements(building[storage]['rank'][i].require)) {
+            rank = i;
+        }
+        else {
+            break;
+        }
     }
-    else {
-        // Player does not have this building
-        template['rank'] = 0;
-        template['owned'] = 0;
+    
+    // Blueprint available
+    if (rank > -1) {
+        var structure = $('<div id="' + storage + id + '" class="city blueprint"></div>');
+        var header = $('<div class="header row"><div class="col build">Construct ' + building[storage]['rank'][rank]['name'] + '</div></div>');
+        structure.append(header);
+        
+        Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) { 
+            var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+            var price = $('<span class="cost col">' + building[storage]['rank'][rank]['cost'][cost] + '</span>');
+            var row = $('<div class="row"></div>');
+            row.append(res);
+            row.append(price);
+            structure.append(row);
+        });
+        
+        $('#blueprints' + id).append(structure);
+        
+        header.on('click',function(e){
+            e.preventDefault();
+            
+            var paid = true;
+            Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
+                if (city[id]['storage'][cost] < building[storage]['rank'][0]['cost'][cost]) {
+                    paid = false;
+                    return;
+                }
+            });
+            if (paid) {
+                Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
+                    city[id]['storage'][cost] -= building[storage]['rank'][0]['cost'][cost];
+                });
+                var owned = 0;
+                if (city[id][storage]) {
+                    owned = city[id][storage]['owned'];
+                }
+                city[id][storage] = {
+                    owned: owned + 1,
+                    rank: rank
+                };
+                loadCityCore(id);
+            }
+        });
+    }
+    
+    // Player has at least one of this building
+    if (city[id][storage]) {
+        var structure = $('<div id="' + storage + id + 'bp" class="city blueprint"></div>');
+        var header = $('<div class="header row"><div class="col build">' + building[storage]['rank'][rank]['name'] + '</div></div>');
+        structure.append(header);
+        
+        var owned = $('<div class="col">Constructed: ' + city[id][storage]['owned'] + '</div>');
+        structure.append(owned);
     }
 }
 
 // Adds unique type building to city
 function loadUnique(id,unique) {
-    if (city[unique]) {
+    if (city[id][unique]) {
         // Player has this building
     }
     else {

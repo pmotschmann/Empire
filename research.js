@@ -25,7 +25,7 @@ function defineTech() {
         },
         {
             name: 'Electricity',
-            require: { copperUnlocked: 1, knowledge: 6 },
+            require: { minerals: 3, knowledge: 20 },
             description: 'Discover electricity and advance into a new era',
             cost: { 
                 copper: 25,
@@ -62,11 +62,27 @@ function defineTech() {
     research['housing'] = [
         {
             name: 'Basic Housing',
-            require: { tech: 2, knowledge: 3 },
+            require: { tech: 2, knowledge: 5 },
             description: 'Learn how to build simple housing for citizens',
             cost: { 
                 lumber: 5,
                 stone: 5
+            },
+            effect: function () {
+                $('#city_info .citizen').show();
+            }
+        }
+    ];
+    
+    research['warehouse'] = [
+        {
+            name: 'Storage Shed',
+            require: { tech: 2, knowledge: 5 },
+            description: 'Learn how to build a simple shed to store materials',
+            cost: { 
+                lumber: 5,
+                stone: 5,
+                iron: 5
             },
             effect: function () {
                 $('#city_info .citizen').show();
@@ -107,6 +123,7 @@ function defineTech() {
             },
             effect: function () {
                 global.resource.copper.unlocked = 1;
+                city[0]['storage']['copper'] = 0;
             }
         },
         {
@@ -120,6 +137,7 @@ function defineTech() {
             },
             effect: function () {
                 global.resource.iron.unlocked = 1;
+                city[0]['storage']['iron'] = 0;
             }
         },
         {
@@ -137,7 +155,7 @@ function defineTech() {
         },
         {
             name: 'Steel Smelting',
-            require: { knowledge: 6 },
+            require: { knowledge: 8 },
             description: 'Learn how to turn iron and coal into steel',
             cost: { 
                 lumber: 10,

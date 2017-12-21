@@ -1,4 +1,5 @@
 $(function() {
+    save.clear();
     var global_data = save.getItem('global') || false;
     if (global_data) {
         // Load preexiting game data
@@ -40,10 +41,6 @@ $(function() {
         $('#city_info .citizen').hide();
     }
     
-    // Popover handling
-    $('[data-trigger="manual"]').click(function() {
-        $(this).popover('toggle');
-    })
     $(document).on('click', function (e) {
         $('[data-toggle="popover"],[data-original-title]').each(function () {
             if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {                
@@ -55,11 +52,13 @@ $(function() {
     // Main game loop
     setInterval(function() {
         for (var id=0; id < city.length; id++) {
+            var employed = 0;
             // Resource mining
             // Uses weird reverse loop so depleted mines can be pruned
             for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
                 var mine = city[id]['mine'][key];
                 var remain = building['mine'].produce(city[id],mine);
+                employed += mine['workers'];
                 
                 // Mine is depleted
                 if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
@@ -74,22 +73,25 @@ $(function() {
                     city[id]['mine'].splice(key, 1);
                 }
             }
+            
             // Triggers production
             Object.keys(building).forEach(function (bld) {
                 if (building[bld].type === 'mine') {
+                    // don't do anything with mines, handled already
                     return;
                 }
                 else if (city[id][bld] && building[bld].produce) {
                     building[bld].produce(city[id],bld);
+                    employed += city[id][bld]['workers'];
                 }
             });
             
             // Updates remaining storage total
             var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
-            $('#storage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
+            $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
             
             // Calculates citizen growth
-            if (city[id].citizen.max > city[id].citizen.amount) {
+            if (global['housing'] && city[id].citizen.max > city[id].citizen.amount) {
                 var num = (city[id].citizen.amount * 25 * city[id]['tax_rate']) / biomes[city[id].biome].growth;
                 var farmers = 1;
                 if (city[id].farm) {
@@ -103,9 +105,40 @@ $(function() {
             // Collect taxes
             city[id]['tax_day'] -= 1;
             if (city[id]['tax_day'] === 0) {
-                global['money'] += (city[id].citizen.amount - city[id].citizen.idle) * city[id]['tax_rate'];
+                global['money'] += employed * city[id]['tax_rate'];
                 city[id]['tax_day'] = 60;
             }
+            
+            // Correct labor pool
+            city[id].citizen.idle = city[id].citizen.amount - employed;
+            
+            // Ensure storage is displayed accurately
+            Object.keys(city[id]['storage']).forEach(function (key) { 
+                if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length) {
+                    // Do nothing
+                }
+                else if ($('#storage' + id + ' .' + key).length === 0){
+                    var clone = {};
+                    Object.keys(city[id]['storage']).forEach(function (res) {
+                        clone[res] = city[id]['storage'][res];
+                    });
+                    city[id]['storage'] = clone;
+                    Object.keys(unwatch[id]).forEach(function (watcher) {
+                        unwatch[id][watcher]();
+                        delete unwatch[id][watcher]
+                    });
+                    vue['storage' + id].$destroy();
+                    delete vue['storage' + id];
+                    $('#storage' + id).empty();
+                    loadCityStorage(id);
+                }
+                else if (city[id]['storage'][key] === 0) {
+                    delete city[id]['storage'][key];
+                    unwatch[id]['storage' + key]();
+                    delete unwatch[id]['storage' + key];
+                    $('#storage' + id + ' .' + key).remove();
+                }
+            });
         }
         
         // Check for opening features

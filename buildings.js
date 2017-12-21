@@ -67,10 +67,10 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Lumber Mill',
-                require: { knowledge: 5 },
+                require: { minerals: 2, knowledge: 5 },
                 description: 'Construct a Lumber Mill',
                 cost: { 
-                    copper: 25,
+                    copper: 10,
                     iron: 25,
                     lumber: 25
                 }
@@ -78,9 +78,9 @@ function defineBuildings() {
         ],
         produce: function (town, index) {
             var workers = town[index].workers;
-            var sum = Object.values(town['storage']).reduce((a, b) => a + b);
-            if (workers > town[index].storage_cap - sum) {
-                workers = town[index].storage_cap - sum;
+            var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
+            if (workers > town.storage_cap - sum) {
+                workers = town.storage_cap - sum;
             }
             town['storage']['lumber'] += workers;
         }
@@ -93,7 +93,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Farm',
-                require: { farming: 1 },
+                require: { minerals: 2, farming: 1 },
                 description: 'The farm increases your food supply, which makes gaining new citizens easier',
                 cost: { 
                     copper: 25,
@@ -112,7 +112,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Steel Mill',
-                require: { mining: 4 },
+                require: { minerals: 4, mining: 4 },
                 description: 'Construct a Steel Mill',
                 cost: { 
                     coal: 250,
@@ -141,7 +141,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Green House',
-                require: { farming: 2 },
+                require: { minerals: 2, farming: 2 },
                 description: 'Construct a greenhouse which increases your farm effectiveness',
                 cost: { 
                     coal: 250,
@@ -176,15 +176,39 @@ function defineBuildings() {
             },
             {
                 name: 'House',
-                require: { tech: 2 },
+                require: { minerals: 2, tech: 3 },
                 description: 'Construct a modern house, with all the conveniences',
                 cost: { 
                     stone: 6,
                     lumber: 8,
-                    copper: 2
+                    copper: 2,
+                    iron: 3
                 },
                 effect: function (town) {
                     town['citizen']['max'] += 2;
+                }
+            }
+        ]
+    };
+    
+    building['shed'] = {
+        type: 'storage',
+        inflation: { 
+            scale: 'linear',
+            ammount: 0.5
+        },
+        rank: [
+            {
+                name: 'Storage Shed',
+                require: { minerals: 2, warehouse: 1 },
+                description: 'Construct a simple shed to store resources',
+                cost: { 
+                    stone: 4,
+                    lumber: 8,
+                    iron: 2
+                },
+                effect: function (town) {
+                    town['storage_cap'] += 10;
                 }
             }
         ]
