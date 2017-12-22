@@ -122,8 +122,8 @@ function drawCityStorage(id,res) {
         html: true,
         placement: 'top',
         content: function() {
-            if (city[id]['trading_post']) {
-                return $('<a href="#">Sell $' + global['resource'][res]['value'] + '/each</a>').on('click',function(e){
+            if (city[id]['trading_post'] && city[id]['trading_post'].workers > 0) {
+                return $('<a href="#">Sell $' + global['resource'][res]['value'] + '/unit</a>').on('click',function(e){
                     if (city[id]['storage'][res] > 0) {
                         city[id]['storage'][res]--;
                         global['money'] += global['resource'][res]['value'];
@@ -151,7 +151,7 @@ function drawCityStorage(id,res) {
 
 function loadInfoBar(id) {
     var container = $('<div id="info' + id + '" class="row"></div>');
-    var money = $('<div class="money col-2">$' + Number(save.getItem('money')) + '</div>');
+    var money = $('<div class="money col-2">$' + global['money'] + '</div>');
     container.append(money);
     
     var current = $('<div class="citizen col-3">Citizens: <span id="citizens' + id + '">' + city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max'] + '</span></div>');
@@ -223,8 +223,9 @@ function loadFactory(id,factory) {
     if (city[id][factory]) {
         // Player has this building
         var rank = city[id][factory]['rank'];
+        var title = building[factory]['rank'][rank]['description'];
         
-        var structure = $('<div id="' + factory + id + '" class="city factory"></div>');
+        var structure = $('<div id="' + factory + id + '" class="city factory" title="' + title + '"></div>');
         var header = $('<div class="header row"><div class="col">' + building[factory]['rank'][rank]['name'] +'</div></div>');
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
@@ -262,7 +263,8 @@ function loadFactory(id,factory) {
     else {
         // Player does not have this building
         if (checkRequirements(building[factory]['rank'][0].require)) {
-            var structure = $('<div id="' + factory + id + '" class="city blueprint"></div>');
+            var title = building[factory]['rank'][0]['description'];
+            var structure = $('<div id="' + factory + id + '" class="city blueprint" title="' + title + '"></div>');
             var header = $('<div class="header row"><div class="col build">Construct ' + building[factory]['rank'][0]['name'] +'</div></div>');
             structure.append(header);
             
@@ -277,7 +279,7 @@ function loadFactory(id,factory) {
             
             $('#blueprints' + id).append(structure);
             
-            header.on('click',function(e){
+            structure.on('click',function(e){
                 e.preventDefault();
                 
                 var paid = true;
@@ -318,18 +320,27 @@ function loadStorage(id,storage) {
         }
     }
     
+    // Building not available yet
+    if (rank === -1) {
+        return;
+    }
+    
     // Get current number of constructed
     var owned = 0;
     if ( city[id][storage] ) {
         owned = city[id][storage]['owned'];
     }
     var title = building[storage]['rank'][rank]['description'];
+    var buildable = true;
     if (building[storage]['rank'][rank]['limit']) {
         title = title + ' (Limit ' + building[storage]['rank'][rank]['limit'] +')';
+        if (building[storage]['rank'][rank]['limit'] <= owned) {
+            buildable = false;
+        }
     }
     
     // Blueprint available
-    if (rank > -1 && building[storage]['rank'][rank]['limit'] < owned) {
+    if (buildable) {
         var structure = $('<div id="' + storage + id + '" class="city blueprint" title="' + title + '"></div>');
         var header = $('<div class="header row"><div class="col build">Construct ' + building[storage]['rank'][rank]['name'] + '</div></div>');
         structure.append(header);
@@ -345,7 +356,7 @@ function loadStorage(id,storage) {
         
         $('#blueprints' + id).append(structure);
         
-        header.on('click',function(e){
+        structure.on('click',function(e){
             e.preventDefault();
             
             var paid = true;
@@ -393,9 +404,11 @@ function loadUnique(id,unique) {
     if (city[id][unique]) {
         // Player has this building
         var rank = city[id][unique]['rank'];
+        var title = building[unique]['rank'][rank]['description'];
         
-        var structure = $('<div id="' + unique + id + '" class="city unique"></div>');
+        var structure = $('<div id="' + unique + id + '" class="city unique" title="' + title + '"></div>');
         var header = $('<div class="header row"><div class="col">' + building[unique]['rank'][rank]['name'] +'</div></div>');
+        structure.append(header);
         
         if (building[unique]['rank'][rank]['staff']) {
             var workers = $('<div class="col"></div>');
@@ -406,7 +419,6 @@ function loadUnique(id,unique) {
             workers.append(remove);
             workers.append(count);
             workers.append(add);
-            structure.append(header);
             structure.append(workers);
             
             $('#structures' + id).append(structure);
@@ -437,6 +449,56 @@ function loadUnique(id,unique) {
     }
     else {
         // Player does not have this building
+        if (checkRequirements(building[unique]['rank'][0].require)) {
+            var title = building[unique]['rank'][0]['description'];
+            
+            var structure = $('<div id="' + unique + id + '" class="city blueprint" title="' + title + '"></div>');
+            var header = $('<div class="header row"><div class="col">Construct ' + building[unique]['rank'][0]['name'] +'</div></div>');
+            structure.append(header);
+            
+            Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) { 
+                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                var price = $('<span class="cost col">' + building[unique]['rank'][0]['cost'][cost] + '</span>');
+                var row = $('<div class="row"></div>');
+                row.append(res);
+                row.append(price);
+                structure.append(row);
+            });
+                
+            $('#blueprints' + id).append(structure);
+            
+            structure.on('click',function(e){
+                e.preventDefault();
+                
+                var paid = true;
+                Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) {
+                    if (city[id]['storage'][cost] < building[unique]['rank'][0]['cost'][cost]) {
+                        paid = false;
+                        return;
+                    }
+                });
+                if (paid) {
+                    Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) {
+                        city[id]['storage'][cost] -= building[unique]['rank'][0]['cost'][cost];
+                    });
+                    if (building[unique]['rank'][0]['staff']) {
+                        city[id][unique] = {
+                            rank: 0,
+                            workers: 0
+                        };
+                    }
+                    else {
+                        city[id][unique] = {
+                            rank: 0
+                        };
+                    }
+                    if (building[unique]['rank'][0].effect) {
+                        building[unique]['rank'][0].effect(city[id],unique);
+                    }
+                    loadCityCore(id);
+                }
+            });
+        }
     }
 }
 

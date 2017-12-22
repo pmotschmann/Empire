@@ -79,6 +79,10 @@ $(function() {
                     building[bld].produce(city[id],bld);
                     employed += city[id][bld]['workers'];
                 }
+                else if (city[id][bld] && building[bld]['rank'][city[id][bld]['rank']].staff) {
+                    // needed for employment headcount
+                    employed += city[id][bld]['workers'];
+                }
             });
             
             // Updates remaining storage total
@@ -109,7 +113,7 @@ $(function() {
             
             // Ensure storage is displayed accurately
             Object.keys(city[id]['storage']).forEach(function (key) { 
-                if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length) {
+                if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length && global['resource'][key].manual) {
                     // Do nothing
                 }
                 else if ($('#storage' + id + ' .' + key).length === 0){
@@ -127,7 +131,7 @@ $(function() {
                     $('#storage' + id).empty();
                     loadCityStorage(id);
                 }
-                else if (city[id]['storage'][key] === 0) {
+                else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
                     delete city[id]['storage'][key];
                     unwatch[id]['storage' + key]();
                     delete unwatch[id]['storage' + key];
@@ -147,7 +151,7 @@ $(function() {
         save.setItem('city',JSON.stringify(city));
     }, 1000);
 });
-    
+
 function showTech(techKey,techLevel) {
     var tech = $('<div id="' + techKey + 'Clicker" class="tech" title="Research ' + nameCase(research[techKey][techLevel]['name']) +'"></div>');
     var name = $('<div class="name">' + research[techKey][techLevel]['name'] + '</div>');
@@ -239,7 +243,7 @@ function inflation(id,struct,cost) {
                 owned = 1;
             }
         }
-        cost += Number(cost * owned * building[struct].inflation.ammount);
+        cost += Math.ceil(cost * owned * building[struct].inflation.ammount);
     }
     return cost;
 }

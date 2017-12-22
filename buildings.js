@@ -36,8 +36,8 @@ function defineBuildings() {
                     harvesters = unused;
                 }
                 unused -= harvesters;
-                town['storage'][res] = (town['storage'][res] || 0) + harvesters;
-                mine['resources'][res] -= harvesters;
+                town['storage'][res] = (town['storage'][res] || 0) + Number(harvesters);
+                mine['resources'][res] -= Number(harvesters);
             });
         }
     };
@@ -69,7 +69,7 @@ function defineBuildings() {
             {
                 name: 'Farm',
                 require: { minerals: 2, farming: 1 },
-                description: 'The farm increases your food supply, which makes gaining new citizens easier',
+                description: 'The farm increases your food supply, which makes gaining new citizens easier. Assign farmers to boost citizen gain rate.',
                 labor: 'Farmers',
                 labor_cap: 5,
                 cost: { 
@@ -90,7 +90,7 @@ function defineBuildings() {
             {
                 name: 'Lumber Mill',
                 require: { minerals: 2, knowledge: 5 },
-                description: 'Construct a Lumber Mill',
+                description: 'Workers assgined to the Lumber Mill will automatically harvest lumber.',
                 labor: 'Mill Workers',
                 labor_cap: 5,
                 cost: { 
@@ -109,7 +109,12 @@ function defineBuildings() {
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
             }
-            town['storage']['lumber'] += workers;
+            if (town['storage']['lumber']) {
+                town['storage']['lumber'] += Number(workers);
+            }
+            else {
+                town['storage']['lumber'] = Number(workers);
+            }
         }
     };
     
@@ -121,7 +126,7 @@ function defineBuildings() {
             {
                 name: 'Rock Quarry',
                 require: { minerals: 2, knowledge: 5 },
-                description: 'Construct a Rock Quarry',
+                description: 'Workers assgined to the Rock Quarry will automatically mine stone.',
                 labor: 'Quarry Workers',
                 labor_cap: 5,
                 cost: { 
@@ -139,7 +144,12 @@ function defineBuildings() {
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
             }
-            town['storage']['stone'] += workers;
+            if (town['storage']['stone']) {
+                town['storage']['stone'] += Number(workers);
+            }
+            else {
+                town['storage']['stone'] = Number(workers);
+            }
         }
     };
     
@@ -151,7 +161,7 @@ function defineBuildings() {
             {
                 name: 'Cement Plant',
                 require: { minerals: 2, knowledge: 5 },
-                description: 'Construct a Rock Quarry',
+                description: 'The cemenet plant consumes stone and produces cement.',
                 labor: 'Plant Workers',
                 labor_cap: 5,
                 cost: { 
@@ -173,12 +183,12 @@ function defineBuildings() {
                 workers = town['storage']['stone'];
             }
             if (town['storage']['cement']) {
-                town['storage']['stone'] -= workers;
-                town['storage']['cement'] += workers;
+                town['storage']['stone'] -= Number(workers);
+                town['storage']['cement'] += Number(workers);
             }
             else {
-                town['storage']['stone'] -= workers;
-                town['storage']['cement'] = workers;
+                town['storage']['stone'] -= Number(workers);
+                town['storage']['cement'] = Number(workers);
             }
         }
     };
@@ -191,7 +201,7 @@ function defineBuildings() {
             {
                 name: 'Steel Mill',
                 require: { minerals: 4, mining: 3 },
-                description: 'Construct a Steel Mill',
+                description: 'The Steel Mill consumes iron and coal to make steel.',
                 labor: 'Mill Workers',
                 labor_cap: 5,
                 cost: { 
@@ -203,14 +213,27 @@ function defineBuildings() {
         ],
         produce: function (town, building) {
             var workers = town[building].workers;
-            if (workers === 0) {
+            if (workers === 0 || !town['storage']['iron'] || !town['storage']['coal']) {
                 return;
             }
             var sum = Object.values(town.storage).reduce((a, b) => a + b);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
             }
-            town['storage']['steel'] += workers;
+            if ( workers * 2 > town['storage']['iron'] ) {
+                workers = Math.floor(town['storage']['iron'] / 2);
+            }
+            if ( workers > town['storage']['coal'] ) {
+                workers = town['storage']['coal'];
+            }
+            town['storage']['iron'] -= Number(workers) * 2;
+            town['storage']['coal'] -= Number(workers);
+            if (town['storage']['steel']) {
+                town['storage']['steel'] += Number(workers);
+            }
+            else {
+                town['storage']['steel'] = Number(workers);
+            }
         }
     };
     
@@ -222,7 +245,7 @@ function defineBuildings() {
             {
                 name: 'Green House',
                 require: { minerals: 2, farming: 2 },
-                description: 'Construct a greenhouse which increases your farm effectiveness',
+                description: 'The greenhouse increases the effectiveness of your farmers.',
                 cost: { 
                     coal: 250,
                     iron: 250,
@@ -242,20 +265,20 @@ function defineBuildings() {
             {
                 name: 'Stone Hut',
                 require: { housing: 1 },
-                description: 'A simple hut made out of stone and wood, houses 2 citizens.',
+                description: 'A simple hut made out of stone and wood, houses one citizen.',
                 limit: 5,
                 cost: { 
                     stone: 12,
                     lumber: 8
                 },
                 effect: function (town, building) {
-                    town['citizen']['max'] += 2;
+                    town['citizen']['max'] += 1;
                 }
             },
             {
                 name: 'House',
                 require: { minerals: 2, tech: 3 },
-                description: 'A modern house, with all the conveniences, houses 2 citizens',
+                description: 'A modern house, with all the conveniences, houses one citizen',
                 cost: { 
                     cement: 6,
                     lumber: 8,
@@ -263,7 +286,31 @@ function defineBuildings() {
                     iron: 3
                 },
                 effect: function (town, building) {
-                    town['citizen']['max'] += 2;
+                    town['citizen']['max'] += 1;
+                }
+            }
+        ]
+    };
+    
+    building['medium_house'] = {
+        type: 'storage',
+        inflation: { 
+            scale: 'linear',
+            ammount: 0.5
+        },
+        rank: [
+            {
+                name: 'Apartment Building',
+                require: { housing: 2, minerals: 4, tech: 3 },
+                description: 'An apartment building, houses 5 citizens',
+                cost: { 
+                    cement: 30,
+                    lumber: 50,
+                    copper: 20,
+                    steel: 50
+                },
+                effect: function (town, building) {
+                    town['citizen']['max'] += 5;
                 }
             }
         ]
@@ -279,14 +326,14 @@ function defineBuildings() {
             {
                 name: 'Storage Shed',
                 require: { minerals: 2, warehouse: 1 },
-                description: 'A simple shed to store resources, increaases city storage limit by 25',
+                description: 'A simple shed to store resources, increaases city storage limit by 20.',
                 cost: { 
                     stone: 4,
                     lumber: 8,
                     iron: 2
                 },
                 effect: function (town, building) {
-                    town['storage_cap'] += 25;
+                    town['storage_cap'] += 20;
                 }
             }
         ]

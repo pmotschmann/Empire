@@ -59,6 +59,18 @@ function defineTech() {
         }
     ];
     
+    research['survay'] = [
+        {
+            name: 'Prospecting',
+            require: { economics: 1, knowledge: 10 },
+            description: 'Learn how to survay land for potential mine locations',
+            cost: { 
+                lumber: 10,
+                stone: 10
+            }
+        }
+    ];
+    
     research['housing'] = [
         {
             name: 'Basic Housing',
@@ -71,13 +83,27 @@ function defineTech() {
             effect: function () {
                 $('#city_info .citizen').show();
             }
+        },
+        {
+            name: 'Efficient Housing',
+            require: { minerals: 4, tech: 3, knowledge: 20 },
+            description: 'Learn how to build apartment buildings for citizens',
+            cost: { 
+                steel: 50,
+                cement: 50,
+                copper: 50,
+                lumber: 50
+            },
+            effect: function () {
+                $('#city_info .citizen').show();
+            }
         }
     ];
     
     research['warehouse'] = [
         {
             name: 'Storage Shed',
-            require: { tech: 2, knowledge: 5 },
+            require: { minerals: 2, tech: 2, knowledge: 5 },
             description: 'Learn how to build a simple shed to store materials',
             cost: { 
                 lumber: 5,
