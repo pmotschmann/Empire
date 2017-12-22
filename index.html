@@ -23,6 +23,9 @@
     <div id="top" class="top d-flex"></div>
     <ul id="menu" class="nav nav-tabs" role="tablist">
         <li class="nav-item">
+            <a class="nav-link" href="#main_menu" data-toggle="tab" role="tab">Menu</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link active" href="#city" data-toggle="tab" role="tab">City</a>
         </li>
         <li id="research_tab" class="nav-item">
@@ -30,6 +33,12 @@
         </li>
     </ul>
     <div id="game" class="tab-content">
+        <div id="main_menu" class="menu tab-pane fade" role="tabpanel">
+            <div class="resetOption">
+                <button id="reset">Reset Game</button>
+                <span>Warning, this can not be undone</span>
+            </div>
+        </div>
         <div id="city" class="city tab-pane fade show active" role="tabpanel">
             <div id="city_info" class="d-flex info_bar"></div>
             <div id="storage_pane" class="storage_bar collapse fade show active"></div>

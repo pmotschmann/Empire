@@ -92,9 +92,10 @@ function drawCityStorage(id,res) {
                 return false;
             }
             var width = 1;
-            var refreshId = setInterval(function() {
+            intervals[res] = setInterval(function() {
                 if (width >= 100) {
-                    clearInterval(refreshId);
+                    clearInterval(intervals[res]);
+                    delete intervals[res];
                     var yield = global['resource'][res]['yield'];
                     var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
                     if (yield + storage_sum > city[0].storage_cap) {
@@ -186,9 +187,6 @@ function loadInfoBar(id) {
     vm.$watch('max', function (newValue, oldValue) {
         $('#citizens' + id).html(city[id]['citizen']['amount'] + ' / ' + city[id]['citizen']['max']);
     });
-    
-    // for testing reasons
-    //city[id]['citizen']['max'] = 5;
 }
 
 // Loads all core city elements
@@ -231,7 +229,7 @@ function loadFactory(id,factory) {
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
         var add = $('<span id="' + factory + id + 'AddWorker" class="add">&raquo;</span>');
-        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor'] + '</span>');
+        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor'] + '</span>');
         
         workers.append(remove);
         workers.append(count);
@@ -247,17 +245,17 @@ function loadFactory(id,factory) {
             if (Number(city[id][factory]['workers']) > 0) {
                 city[id][factory]['workers']--;
                 city[id]['citizen']['idle']++;
-                count.html(city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor']);
+                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor']);
             }
         });
         
         $('#' + factory + id + 'AddWorker').on('click',function(e){
             e.preventDefault();
             
-            if (Number(city[id]['citizen']['idle']) > 0) {
+            if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['workers'] < building[factory]['rank'][rank]['labor_cap']) {
                 city[id][factory]['workers']++;
                 city[id]['citizen']['idle']--;
-                count.html(city[id][factory]['workers'] + ' ' + building[factory]['rank'][rank]['labor']);
+                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor']);
             }
         });
     }
@@ -309,7 +307,6 @@ function loadFactory(id,factory) {
 
 // Adds storage type building to city
 function loadStorage(id,storage) {
-    
     // Find newest plans
     var rank = -1;
     for (var i=0; i < building[storage]['rank'].length; i++) {
@@ -321,9 +318,19 @@ function loadStorage(id,storage) {
         }
     }
     
+    // Get current number of constructed
+    var owned = 0;
+    if ( city[id][storage] ) {
+        owned = city[id][storage]['owned'];
+    }
+    var title = building[storage]['rank'][rank]['description'];
+    if (building[storage]['rank'][rank]['limit']) {
+        title = title + ' (Limit ' + building[storage]['rank'][rank]['limit'] +')';
+    }
+    
     // Blueprint available
-    if (rank > -1) {
-        var structure = $('<div id="' + storage + id + '" class="city blueprint"></div>');
+    if (rank > -1 && building[storage]['rank'][rank]['limit'] < owned) {
+        var structure = $('<div id="' + storage + id + '" class="city blueprint" title="' + title + '"></div>');
         var header = $('<div class="header row"><div class="col build">Construct ' + building[storage]['rank'][rank]['name'] + '</div></div>');
         structure.append(header);
         
@@ -370,11 +377,11 @@ function loadStorage(id,storage) {
     
     // Player has at least one of this building
     if (city[id][storage]) {
-        var structure = $('<div id="' + storage + id + 'bp" class="city storage"></div>');
+        var structure = $('<div id="' + storage + id + 'bp" class="city storage" title="' + title + '"></div>');
         var header = $('<div class="header row"><div class="col build">' + building[storage]['rank'][rank]['name'] + '</div></div>');
         structure.append(header);
         
-        var owned = $('<div class="col">Constructed: ' + city[id][storage]['owned'] + '</div>');
+        var owned = $('<div class="col">Constructed: ' + owned + '</div>');
         structure.append(owned);
         
         $('#structures' + id).append(structure);
@@ -385,6 +392,48 @@ function loadStorage(id,storage) {
 function loadUnique(id,unique) {
     if (city[id][unique]) {
         // Player has this building
+        var rank = city[id][unique]['rank'];
+        
+        var structure = $('<div id="' + unique + id + '" class="city unique"></div>');
+        var header = $('<div class="header row"><div class="col">' + building[unique]['rank'][rank]['name'] +'</div></div>');
+        
+        if (building[unique]['rank'][rank]['staff']) {
+            var workers = $('<div class="col"></div>');
+            var remove = $('<span id="' + unique + id + 'RemoveWorker" class="remove">&laquo;</span>');
+            var add = $('<span id="' + unique + id + 'AddWorker" class="add">&raquo;</span>');
+            var count = $('<span id="' + unique + id + 'Workers" class="workers">' + city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor'] + '</span>');
+            
+            workers.append(remove);
+            workers.append(count);
+            workers.append(add);
+            structure.append(header);
+            structure.append(workers);
+            
+            $('#structures' + id).append(structure);
+            
+            $('#' + unique + id + 'RemoveWorker').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id][unique]['workers']) > 0) {
+                    city[id][unique]['workers']--;
+                    city[id]['citizen']['idle']++;
+                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor']);
+                }
+            });
+            
+            $('#' + unique + id + 'AddWorker').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id]['citizen']['idle']) > 0 && city[id][unique]['workers'] < building[unique]['rank'][rank]['labor_cap']) {
+                    city[id][unique]['workers']++;
+                    city[id]['citizen']['idle']--;
+                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor']);
+                }
+            });
+        }
+        else {
+            $('#structures' + id).append(structure);
+        }
     }
     else {
         // Player does not have this building
@@ -408,7 +457,7 @@ function registerMine(id,mine) {
     var workers = $('<div class="col"></div>');
     var remove = $('<span id="' + mine['id'] + 'RemoveWorker" class="remove">&laquo;</span>');
     var add = $('<span id="' + mine['id'] + 'AddWorker" class="add">&raquo;</span>');
-    var count = $('<span id="' + mine['id'] + 'Workers" class="workers">' + mine['workers'] + ' Miners</span>');
+    var count = $('<span id="' + mine['id'] + 'Workers" class="workers">' + mine['workers'] + '/' + building['mine']['rank'][mine['rank']]['labor_cap'] + ' Miners</span>');
     
     workers.append(remove);
     workers.append(count);
@@ -430,7 +479,7 @@ function registerMine(id,mine) {
     $('#' + mine['id'] + 'AddWorker').on('click',function(e){
         e.preventDefault();
         
-        if (Number(city[id]['citizen']['idle']) > 0) {
+        if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['workers'] < building['mine']['rank'][mine['rank']]['labor_cap']) {
             mine['workers']++;
             city[id]['citizen']['idle']--;
         }
@@ -441,7 +490,7 @@ function registerMine(id,mine) {
     });
     
     unwatch[mine['id'] + 'workers'] = vm_w.$watch('workers', function (newValue, oldValue) {
-        count.html(newValue + ' Miners');
+        count.html(newValue + '/' + building['mine']['rank'][mine['rank']]['labor_cap'] + ' Miners');
     });
     
     var vm_r = new Vue({

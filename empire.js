@@ -1,18 +1,14 @@
+var main_loop;
 $(function() {
+    settings();
+    
     var global_data = save.getItem('global') || false;
     if (global_data) {
         // Load preexiting game data
         global = JSON.parse(global_data);
     }
     else {
-        defineResources();
-        
-        global['money'] = 0;
-        global['knowledge'] = 0;
-        global['next_id'] = 0;
-        global['research_lab'] = false;
-        global['trading_post'] = false;
-        global['tech'] = 0;
+        newGame();
     }
     
     if (!global['research_lab']) {
@@ -247,6 +243,68 @@ function inflation(id,struct,cost) {
     }
     return cost;
 }
+
+function newGame() {
+    defineResources();
+    global['money'] = 0;
+    global['knowledge'] = 0;
+    global['next_id'] = 0;
+    global['research_lab'] = false;
+    global['trading_post'] = false;
+    global['tech'] = 0;
+}
+
+function settings() {
+    $('#reset').on('click',function(e){
+        e.preventDefault();
+        
+        Object.keys(city).forEach(function (id) { 
+            Object.keys(unwatch[id]).forEach(function (watcher) {
+                unwatch[id][watcher]();
+                delete unwatch[id][watcher]
+            });
+            delete unwatch[id];
+            vue['storage' + id].$destroy();
+            delete vue['storage' + id];
+        });
+        
+        Object.keys(unwatch).forEach(function (watch) {
+            unwatch[watch]();
+            delete unwatch[watch];
+        });
+        
+        Object.keys(intervals).forEach(function (interval) {
+            clearInterval(intervals[interval]);
+            delete intervals[interval];
+        });
+        
+        city = [{
+            storage: {},
+            unique: {},
+            factory: {},
+            mine: []
+        }];
+        global = {
+            resource: {}
+        };
+        $('#city_info').empty();
+        $('#storage_pane').empty();
+        $('#structures_pane').empty();
+        $('#blueprints_pane').empty();
+        $('#mines_pane').empty();
+        save.clear();
+        newGame();
+        $('#research_tab').hide();
+        $('#city_info').hide();
+        $('#city_menu').hide();
+        $('#sub_city').hide();
+        loadTech();
+        loadCity();
+        $('#city_info .money').hide();
+        $('#city_info .citizen').hide();
+        
+    });
+} 
 
 function nameCase(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

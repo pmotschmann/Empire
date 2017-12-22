@@ -8,6 +8,7 @@ function defineBuildings() {
                 name: 'Mine',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
+                labor_cap: 10,
                 cost: { 
                     lumber: 50,
                     iron: 25
@@ -49,6 +50,9 @@ function defineBuildings() {
                 name: 'Trading Post',
                 require: { economics: 1 },
                 description: 'Allows spare resources to be sold for money',
+                staff: true,
+                labor: 'Trademaster',
+                labor_cap: 1,
                 cost: { 
                     lumber: 20,
                     stone: 20
@@ -67,6 +71,7 @@ function defineBuildings() {
                 require: { minerals: 2, farming: 1 },
                 description: 'The farm increases your food supply, which makes gaining new citizens easier',
                 labor: 'Farmers',
+                labor_cap: 5,
                 cost: { 
                     copper: 25,
                     iron: 25,
@@ -87,6 +92,7 @@ function defineBuildings() {
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Construct a Lumber Mill',
                 labor: 'Mill Workers',
+                labor_cap: 5,
                 cost: { 
                     copper: 10,
                     iron: 25,
@@ -96,6 +102,9 @@ function defineBuildings() {
         ],
         produce: function (town, building) {
             var workers = town[building].workers;
+            if (workers === 0) {
+                return;
+            }
             var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
@@ -114,6 +123,7 @@ function defineBuildings() {
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Construct a Rock Quarry',
                 labor: 'Quarry Workers',
+                labor_cap: 5,
                 cost: { 
                     iron: 50,
                     lumber: 50
@@ -122,11 +132,54 @@ function defineBuildings() {
         ],
         produce: function (town, building) {
             var workers = town[building].workers;
+            if (workers === 0) {
+                return;
+            }
             var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
             }
             town['storage']['stone'] += workers;
+        }
+    };
+    
+    // Allows player to asign citizens as quarry workers, who automatically harvest lumber
+    building['cement_plant'] = {
+        type: 'factory',
+        limit: 1,
+        rank: [
+            {
+                name: 'Cement Plant',
+                require: { minerals: 2, knowledge: 5 },
+                description: 'Construct a Rock Quarry',
+                labor: 'Plant Workers',
+                labor_cap: 5,
+                cost: { 
+                    iron: 50,
+                    lumber: 50
+                }
+            }
+        ],
+        produce: function (town, building) {
+            var workers = town[building].workers;
+            if (workers === 0) {
+                return;
+            }
+            var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
+            if (workers > town.storage_cap - sum) {
+                workers = town.storage_cap - sum;
+            }
+            if (town['storage']['stone'] < workers) {
+                workers = town['storage']['stone'];
+            }
+            if (town['storage']['cement']) {
+                town['storage']['stone'] -= workers;
+                town['storage']['cement'] += workers;
+            }
+            else {
+                town['storage']['stone'] -= workers;
+                town['storage']['cement'] = workers;
+            }
         }
     };
     
@@ -140,6 +193,7 @@ function defineBuildings() {
                 require: { minerals: 4, mining: 3 },
                 description: 'Construct a Steel Mill',
                 labor: 'Mill Workers',
+                labor_cap: 5,
                 cost: { 
                     coal: 25,
                     iron: 50,
@@ -149,6 +203,9 @@ function defineBuildings() {
         ],
         produce: function (town, building) {
             var workers = town[building].workers;
+            if (workers === 0) {
+                return;
+            }
             var sum = Object.values(town.storage).reduce((a, b) => a + b);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
@@ -185,7 +242,8 @@ function defineBuildings() {
             {
                 name: 'Stone Hut',
                 require: { housing: 1 },
-                description: 'Construct a simple hut made out of stone and wood',
+                description: 'A simple hut made out of stone and wood, houses 2 citizens.',
+                limit: 5,
                 cost: { 
                     stone: 12,
                     lumber: 8
@@ -197,9 +255,9 @@ function defineBuildings() {
             {
                 name: 'House',
                 require: { minerals: 2, tech: 3 },
-                description: 'Construct a modern house, with all the conveniences',
+                description: 'A modern house, with all the conveniences, houses 2 citizens',
                 cost: { 
-                    stone: 6,
+                    cement: 6,
                     lumber: 8,
                     copper: 2,
                     iron: 3
@@ -221,7 +279,7 @@ function defineBuildings() {
             {
                 name: 'Storage Shed',
                 require: { minerals: 2, warehouse: 1 },
-                description: 'Construct a simple shed to store resources',
+                description: 'A simple shed to store resources, increaases city storage limit by 25',
                 cost: { 
                     stone: 4,
                     lumber: 8,

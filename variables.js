@@ -1,6 +1,7 @@
 var save = window.localStorage;
 var unwatch = {};
 var vue = {};
+var intervals = {};
 var resources = {};
 var building = {};
 var research = {};
