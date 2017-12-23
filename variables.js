@@ -92,3 +92,13 @@ var biomes = {
         }
     }
 };
+
+var jobs = {
+    miner: { title: 'Miners', tax: 1, skilled: false },
+    trader: { title: 'Trademaster', tax: 3, skilled: false },
+    farmer: { title: 'Farmers', tax: 1, skilled: false },
+    miller: { title: 'Mill Workers', tax: 1, skilled: false },
+    quarry: { title: 'Quarry Workers', tax: 1, skilled: false },
+    factory: { title: 'Plant Workers', tax: 1, skilled: false },
+    foreman: { title: 'Foreman', tax: 2, skilled: false }
+};

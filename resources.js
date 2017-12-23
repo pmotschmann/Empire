@@ -10,6 +10,7 @@ function defineResources() {
     loadResource('gold',0,0,10);
     loadResource('titanium',0,0,5);
     loadResource('oil',0,0,10);
+    loadResource('cement',0,0,1);
 }
 
 // Load resource function

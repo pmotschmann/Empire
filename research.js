@@ -59,6 +59,20 @@ function defineTech() {
         }
     ];
     
+    research['overseer'] = [ 
+        {
+            name: 'Foreman',
+            require: { knowledge: 10 },
+            description: 'Learn how to oversee a factory with a foreman who boosts productivity.',
+            cost: { 
+                money: 1000
+            },
+            effect: function () {
+                $('#city_info .money').show();
+            }
+        }
+    ];
+    
     research['survay'] = [
         {
             name: 'Prospecting',

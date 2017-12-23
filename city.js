@@ -24,7 +24,7 @@ function loadCity() {
         
         city[0]['biome'] = 'grassland';
         city[0]['tax_rate'] = 1;
-        city[0]['tax_day'] = 60;
+        city[0]['timer'] = 60;
         city[0]['storage_cap'] = 100;
         city[0]['storage'] = { lumber: 0, stone: 0 };
         city[0]['citizen'] = {
@@ -230,15 +230,51 @@ function loadFactory(id,factory) {
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
         var add = $('<span id="' + factory + id + 'AddWorker" class="add">&raquo;</span>');
-        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor'] + '</span>');
+        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']]['title'] + '</span>');
+        
+        structure.append(header);
+        
+        var count_foreman;
+        if (global['overseer']) {
+            var foreman = $('<div class="col"></div>');
+            var remove_foreman = $('<span id="' + factory + id + 'RemoveForeman" class="remove">&laquo;</span>');
+            var add_foreman = $('<span id="' + factory + id + 'AddForeman" class="add">&raquo;</span>');
+            count_foreman = $('<span id="' + factory + id + 'Foreman" class="workers">' + city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title'] + '</span>');
+            
+            foreman.append(remove_foreman);
+            foreman.append(count_foreman);
+            foreman.append(add_foreman);
+            structure.append(foreman);
+        }
         
         workers.append(remove);
         workers.append(count);
         workers.append(add);
-        structure.append(header);
         structure.append(workers);
         
         $('#structures' + id).append(structure);
+        
+        if (global['overseer']) {
+            $('#' + factory + id + 'RemoveForeman').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id][factory]['foreman']) > 0) {
+                    city[id][factory]['foreman']--;
+                    city[id]['citizen']['idle']++;
+                    count_foreman.html(city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title']);
+                }
+            });
+            
+            $('#' + factory + id + 'AddForeman').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['foreman'] < 1) {
+                    city[id][factory]['foreman']++;
+                    city[id]['citizen']['idle']--;
+                    count_foreman.html(city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title']);
+                }
+            });
+        }
         
         $('#' + factory + id + 'RemoveWorker').on('click',function(e){
             e.preventDefault();
@@ -246,7 +282,7 @@ function loadFactory(id,factory) {
             if (Number(city[id][factory]['workers']) > 0) {
                 city[id][factory]['workers']--;
                 city[id]['citizen']['idle']++;
-                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor']);
+                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']]['title']);
             }
         });
         
@@ -256,7 +292,7 @@ function loadFactory(id,factory) {
             if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['workers'] < building[factory]['rank'][rank]['labor_cap']) {
                 city[id][factory]['workers']++;
                 city[id]['citizen']['idle']--;
-                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + building[factory]['rank'][rank]['labor']);
+                count.html(city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']]['title']);
             }
         });
     }
@@ -269,11 +305,17 @@ function loadFactory(id,factory) {
             structure.append(header);
             
             Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) { 
-                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                var price = $('<span class="cost col">' + building[factory]['rank'][0]['cost'][cost] + '</span>');
                 var row = $('<div class="row"></div>');
-                row.append(res);
-                row.append(price);
+                if (cost === 'money') {
+                    var price = $('<span class="cost col">$' + inflation(id,factory,building[factory]['rank'][0]['cost'][cost]) + '</span>');
+                    row.append(price);
+                }
+                else {
+                    var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                    var price = $('<span class="cost col">' + inflation(id,factory,building[factory]['rank'][0]['cost'][cost]) + '</span>');
+                    row.append(res);
+                    row.append(price);
+                }
                 structure.append(row);
             });
             
@@ -282,20 +324,12 @@ function loadFactory(id,factory) {
             structure.on('click',function(e){
                 e.preventDefault();
                 
-                var paid = true;
-                Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
-                    if (city[id]['storage'][cost] < building[factory]['rank'][0]['cost'][cost]) {
-                        paid = false;
-                        return;
-                    }
-                });
+                var paid = payBuildingCosts(id,factory,0);
                 if (paid) {
-                    Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) {
-                        city[id]['storage'][cost] -= building[factory]['rank'][0]['cost'][cost];
-                    });
                     city[id][factory] = {
                         rank: 0,
-                        workers: 0
+                        workers: 0,
+                        foreman: 0
                     };
                     if (building[factory]['rank'][0].effect) {
                         building[factory]['rank'][0].effect(city[id],factory);
@@ -346,11 +380,17 @@ function loadStorage(id,storage) {
         structure.append(header);
         
         Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) { 
-            var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-            var price = $('<span class="cost col">' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
             var row = $('<div class="row"></div>');
-            row.append(res);
-            row.append(price);
+            if (cost === 'money') {
+                var price = $('<span class="cost col">$' + inflation(id,storage,building[storage]['rank'][0]['cost'][cost]) + '</span>');
+                row.append(price);
+            }
+            else {
+                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                var price = $('<span class="cost col">' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
+                row.append(res);
+                row.append(price);
+            }
             structure.append(row);
         });
         
@@ -359,17 +399,8 @@ function loadStorage(id,storage) {
         structure.on('click',function(e){
             e.preventDefault();
             
-            var paid = true;
-            Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
-                if (city[id]['storage'][cost] < inflation(id,storage,building[storage]['rank'][0]['cost'][cost])) {
-                    paid = false;
-                    return;
-                }
-            });
+            var paid = payBuildingCosts(id,storage,rank);
             if (paid) {
-                Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) {
-                    city[id]['storage'][cost] -= inflation(id,storage,building[storage]['rank'][0]['cost'][cost]);
-                });
                 var owned = 0;
                 if (city[id][storage]) {
                     owned = city[id][storage]['owned'];
@@ -414,7 +445,7 @@ function loadUnique(id,unique) {
             var workers = $('<div class="col"></div>');
             var remove = $('<span id="' + unique + id + 'RemoveWorker" class="remove">&laquo;</span>');
             var add = $('<span id="' + unique + id + 'AddWorker" class="add">&raquo;</span>');
-            var count = $('<span id="' + unique + id + 'Workers" class="workers">' + city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor'] + '</span>');
+            var count = $('<span id="' + unique + id + 'Workers" class="workers">' + city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + jobs[building[unique]['rank'][rank]['labor']]['title'] + '</span>');
             
             workers.append(remove);
             workers.append(count);
@@ -429,7 +460,7 @@ function loadUnique(id,unique) {
                 if (Number(city[id][unique]['workers']) > 0) {
                     city[id][unique]['workers']--;
                     city[id]['citizen']['idle']++;
-                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor']);
+                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + jobs[building[unique]['rank'][rank]['labor']]['title']);
                 }
             });
             
@@ -439,7 +470,7 @@ function loadUnique(id,unique) {
                 if (Number(city[id]['citizen']['idle']) > 0 && city[id][unique]['workers'] < building[unique]['rank'][rank]['labor_cap']) {
                     city[id][unique]['workers']++;
                     city[id]['citizen']['idle']--;
-                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + building[unique]['rank'][rank]['labor']);
+                    count.html(city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + jobs[building[unique]['rank'][rank]['labor']]['title']);
                 }
             });
         }
@@ -451,17 +482,22 @@ function loadUnique(id,unique) {
         // Player does not have this building
         if (checkRequirements(building[unique]['rank'][0].require)) {
             var title = building[unique]['rank'][0]['description'];
-            
             var structure = $('<div id="' + unique + id + '" class="city blueprint" title="' + title + '"></div>');
             var header = $('<div class="header row"><div class="col">Construct ' + building[unique]['rank'][0]['name'] +'</div></div>');
             structure.append(header);
             
             Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) { 
-                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                var price = $('<span class="cost col">' + building[unique]['rank'][0]['cost'][cost] + '</span>');
                 var row = $('<div class="row"></div>');
-                row.append(res);
-                row.append(price);
+                if (cost === 'money') {
+                    var price = $('<span class="cost col">$' + inflation(id,unique,building[unique]['rank'][0]['cost'][cost]) + '</span>');
+                    row.append(price);
+                }
+                else {
+                    var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                    var price = $('<span class="cost col">' + inflation(id,unique,building[unique]['rank'][0]['cost'][cost]) + '</span>');
+                    row.append(res);
+                    row.append(price);
+                }
                 structure.append(row);
             });
                 
@@ -470,17 +506,8 @@ function loadUnique(id,unique) {
             structure.on('click',function(e){
                 e.preventDefault();
                 
-                var paid = true;
-                Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) {
-                    if (city[id]['storage'][cost] < building[unique]['rank'][0]['cost'][cost]) {
-                        paid = false;
-                        return;
-                    }
-                });
+                var paid = payBuildingCosts(id,unique,0);
                 if (paid) {
-                    Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) {
-                        city[id]['storage'][cost] -= building[unique]['rank'][0]['cost'][cost];
-                    });
                     if (building[unique]['rank'][0]['staff']) {
                         city[id][unique] = {
                             rank: 0,
@@ -573,4 +600,31 @@ function registerMine(id,mine) {
         
         container.append(row);
     });
+}
+
+function payBuildingCosts(id,build,rank) {
+    var paid = true;
+    Object.keys(building[build]['rank'][rank]['cost']).forEach(function (cost) {
+        if (cost === 'money') {
+            if (global['money'] < inflation(id,build,building[build]['rank'][0]['cost'][cost])) {
+                paid = false;
+                return;
+            }
+        }
+        else if (city[id]['storage'][cost] < inflation(id,build,building[build]['rank'][rank]['cost'][cost])) {
+            paid = false;
+            return;
+        }
+    });
+    if (paid) {
+        Object.keys(building[build]['rank'][0]['cost']).forEach(function (cost) {
+            if (cost === 'money') {
+                global['money'] -= Number(inflation(id,build,building[build]['rank'][rank]['cost'][cost]));
+            }
+            else {
+                city[id]['storage'][cost] -= Number(inflation(id,build,building[build]['rank'][rank]['cost'][cost]));
+            }
+        });
+    }
+    return paid;
 }

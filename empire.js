@@ -47,13 +47,21 @@ $(function() {
     // Main game loop
     setInterval(function() {
         for (var id=0; id < city.length; id++) {
+            if (isNaN(city[id]['timer']) || city[id]['timer'] === 0) {
+                city[id]['timer'] = 60;
+            }
+            city[id]['timer'] -= 1;
+            
+            
             var employed = 0;
+            var revenue = 0;
             // Resource mining
             // Uses weird reverse loop so depleted mines can be pruned
             for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
                 var mine = city[id]['mine'][key];
                 var remain = building['mine'].produce(city[id],mine);
                 employed += mine['workers'];
+                revenue += jobs[building['mine']['rank'][mine['rank']]['labor']]['tax'] * mine['workers'];
                 
                 // Mine is depleted
                 if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
@@ -76,12 +84,23 @@ $(function() {
                     return;
                 }
                 else if (city[id][bld] && building[bld].produce) {
-                    building[bld].produce(city[id],bld);
+                    if (global['overseer'] && city[id][bld]['foreman'] && city[id][bld]['foreman'] === 1) {
+                        employed++;
+                        revenue += jobs['foreman']['tax'];
+                        if (city[id].timer % 2 === 0) {
+                            building[bld].produce(city[id],bld);
+                        }
+                    }
+                    else if (city[id].timer % 3 === 0) {
+                        building[bld].produce(city[id],bld);
+                    }
                     employed += city[id][bld]['workers'];
+                    revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
                 }
                 else if (city[id][bld] && building[bld]['rank'][city[id][bld]['rank']].staff) {
                     // needed for employment headcount
                     employed += city[id][bld]['workers'];
+                    revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
                 }
             });
             
@@ -102,10 +121,8 @@ $(function() {
             }
             
             // Collect taxes
-            city[id]['tax_day'] -= 1;
-            if (city[id]['tax_day'] === 0) {
-                global['money'] += employed * city[id]['tax_rate'];
-                city[id]['tax_day'] = 60;
+            if (city[id]['timer'] === 0) {
+                global['money'] += revenue * city[id]['tax_rate'];
             }
             
             // Correct labor pool
@@ -159,10 +176,16 @@ function showTech(techKey,techLevel) {
     tech.append(name);
     tech.append(desc);
     Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) { 
-        var res = $('<span class="resource">' + nameCase(cost) + '</span>');
-        var price = $('<span class="cost">' + research[techKey][techLevel]['cost'][cost] + '</span>');
-        tech.append(res);
-        tech.append(price);
+        if (cost === 'money') {
+            var price = $('<span class="cost">$' + research[techKey][techLevel]['cost'][cost] + '</span>');
+            tech.append(price);
+        }
+        else {
+            var res = $('<span class="resource">' + nameCase(cost) + '</span>');
+            var price = $('<span class="cost">' + research[techKey][techLevel]['cost'][cost] + '</span>');
+            tech.append(res);
+            tech.append(price);
+        }
     });
     var name = $('<div class="footer"></div>');
     tech.append(name);
@@ -173,14 +196,25 @@ function showTech(techKey,techLevel) {
         
         var paid = true;
         Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-            if (city[0]['storage'][cost] < research[techKey][techLevel]['cost'][cost]) {
+            if (cost === 'money') {
+                if (global['money'] < research[techKey][techLevel]['cost'][cost]) {
+                    paid = false;
+                    return;
+                }
+            }
+            else if (!city[0]['storage'][cost] || city[0]['storage'][cost] < research[techKey][techLevel]['cost'][cost]) {
                 paid = false;
                 return;
             }
         });
         if (paid) {
             Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) {
-                city[0]['storage'][cost] -= research[techKey][techLevel]['cost'][cost];
+                if (cost === 'money') {
+                    global['money'] -= research[techKey][techLevel]['cost'][cost];
+                }
+                else {
+                    city[0]['storage'][cost] -= research[techKey][techLevel]['cost'][cost];
+                }
             });
             if (global[techKey]) {
                 global[techKey]++;

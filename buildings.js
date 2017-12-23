@@ -8,6 +8,7 @@ function defineBuildings() {
                 name: 'Mine',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
+                labor: 'miner',
                 labor_cap: 10,
                 cost: { 
                     lumber: 50,
@@ -51,7 +52,7 @@ function defineBuildings() {
                 require: { economics: 1 },
                 description: 'Allows spare resources to be sold for money',
                 staff: true,
-                labor: 'Trademaster',
+                labor: 'trader',
                 labor_cap: 1,
                 cost: { 
                     lumber: 20,
@@ -70,9 +71,10 @@ function defineBuildings() {
                 name: 'Farm',
                 require: { minerals: 2, farming: 1 },
                 description: 'The farm increases your food supply, which makes gaining new citizens easier. Assign farmers to boost citizen gain rate.',
-                labor: 'Farmers',
+                labor: 'farmer',
                 labor_cap: 5,
                 cost: { 
+                    money: 500,
                     copper: 25,
                     iron: 25,
                     lumber: 100,
@@ -91,7 +93,7 @@ function defineBuildings() {
                 name: 'Lumber Mill',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Lumber Mill will automatically harvest lumber.',
-                labor: 'Mill Workers',
+                labor: 'miller',
                 labor_cap: 5,
                 cost: { 
                     copper: 10,
@@ -127,7 +129,7 @@ function defineBuildings() {
                 name: 'Rock Quarry',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Rock Quarry will automatically mine stone.',
-                labor: 'Quarry Workers',
+                labor: 'quarry',
                 labor_cap: 5,
                 cost: { 
                     iron: 50,
@@ -162,9 +164,10 @@ function defineBuildings() {
                 name: 'Cement Plant',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'The cemenet plant consumes stone and produces cement.',
-                labor: 'Plant Workers',
+                labor: 'factory',
                 labor_cap: 5,
                 cost: { 
+                    money: 100,
                     iron: 50,
                     lumber: 50
                 }
@@ -202,9 +205,10 @@ function defineBuildings() {
                 name: 'Steel Mill',
                 require: { minerals: 4, mining: 3 },
                 description: 'The Steel Mill consumes iron and coal to make steel.',
-                labor: 'Mill Workers',
+                labor: 'miller',
                 labor_cap: 5,
                 cost: { 
+                    money: 100,
                     coal: 25,
                     iron: 50,
                     lumber: 100
@@ -247,6 +251,7 @@ function defineBuildings() {
                 require: { minerals: 2, farming: 2 },
                 description: 'The greenhouse increases the effectiveness of your farmers.',
                 cost: { 
+                    money: 5000,
                     coal: 250,
                     iron: 250,
                     lumber: 1000
@@ -280,6 +285,7 @@ function defineBuildings() {
                 require: { minerals: 2, tech: 3 },
                 description: 'A modern house, with all the conveniences, houses one citizen',
                 cost: { 
+                    money: 50,
                     cement: 6,
                     lumber: 8,
                     copper: 2,
@@ -304,6 +310,7 @@ function defineBuildings() {
                 require: { housing: 2, minerals: 4, tech: 3 },
                 description: 'An apartment building, houses 5 citizens',
                 cost: { 
+                    money: 1000,
                     cement: 30,
                     lumber: 50,
                     copper: 20,
@@ -327,9 +334,25 @@ function defineBuildings() {
                 name: 'Storage Shed',
                 require: { minerals: 2, warehouse: 1 },
                 description: 'A simple shed to store resources, increaases city storage limit by 20.',
+                limit: 5,
                 cost: { 
                     stone: 4,
                     lumber: 8,
+                    iron: 2
+                },
+                effect: function (town, building) {
+                    town['storage_cap'] += 20;
+                }
+            },
+            {
+                name: 'Storage Shed',
+                require: { minerals: 2, warehouse: 1, tech: 3 },
+                description: 'A sturdy shed to store resources, increaases city storage limit by 20.',
+                cost: { 
+                    money: 75,
+                    cement: 4,
+                    lumber: 8,
+                    copper: 2,
                     iron: 2
                 },
                 effect: function (town, building) {
