@@ -110,6 +110,7 @@ div.city {
     }
     
     div.mine,
+    div.prospect,
     div.factory,
     div.storage,
     div.unique {
@@ -131,8 +132,30 @@ div.city {
         }
     }
     
-    div.mine {
-        width: 18rem;
+    div.prospect {
+        background: url("images/survey.jpg");
+        filter: invert(100%);
+        cursor: pointer;
+        
+        &.offer {
+            cursor: default;
+        }
+        
+        > div {
+            text-shadow: 1px 1px #fff;
+            color: #000;
+            font-weight: bold;
+            
+            button.prospect {
+                filter: invert(100%);
+                width: 5.5rem;
+                cursor: pointer;
+            }
+        }
+        div.header {
+            filter: inherit;
+            text-shadow: none;
+        }
     }
     
     div.mine .header {

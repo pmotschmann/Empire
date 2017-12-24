@@ -1,4 +1,3 @@
-var main_loop;
 $(function() {
     settings();
     
@@ -20,6 +19,7 @@ $(function() {
         $('#sub_city').hide();
     }
     
+    // Define things
     defineTech();
     defineBuildings();
     
@@ -120,6 +120,37 @@ $(function() {
                 }
             }
             
+            if (city[id]['prospecting']) {
+                city[id]['prospecting']--;
+                var completion = Math.floor((Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) - city[id]['prospecting']) / Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) * 100);
+                $('#prospecting' + id + 'title').html('Prospecting ' + completion + '%');
+                
+                if (city[id]['prospecting'] === 0) {
+                    city[id]['prospecting'] = false;
+                    if (global['next_id'] === 0) {
+                        city[id]['prospecting_offer'] = { 
+                            copper: 1000,
+                            iron: 750,
+                            coal: 250
+                        };
+                    }
+                    else {
+                        var mine = {};
+                        Object.keys(biomes[city[id].biome].minerals).forEach(function (ore) {
+                            if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
+                                mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
+                                // Chance to strike a rich ore vein
+                                if (Math.random() * 100 > 95) {
+                                    mine[ore] *=  Math.ceil(Math.random() * 1000);
+                                }
+                            }
+                        });
+                        city[id]['prospecting_offer'] = mine;
+                    }
+                    loadMines(id);
+                }
+            }
+            
             // Collect taxes
             if (city[id]['timer'] === 0) {
                 global['money'] += revenue * city[id]['tax_rate'];
@@ -176,15 +207,18 @@ function showTech(techKey,techLevel) {
     tech.append(name);
     tech.append(desc);
     Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) { 
+        var row = $('<div class="row"></div>');
         if (cost === 'money') {
-            var price = $('<span class="cost">$' + research[techKey][techLevel]['cost'][cost] + '</span>');
-            tech.append(price);
+            var price = $('<span class="col cost">$' + research[techKey][techLevel]['cost'][cost] + '</span>');
+            row.append(price);
+            tech.append(row);
         }
         else {
             var res = $('<span class="resource">' + nameCase(cost) + '</span>');
             var price = $('<span class="cost">' + research[techKey][techLevel]['cost'][cost] + '</span>');
-            tech.append(res);
-            tech.append(price);
+            row.append(res);
+            row.append(price);
+            tech.append(row);
         }
     });
     var name = $('<div class="footer"></div>');
@@ -279,7 +313,7 @@ function inflation(id,struct,cost) {
         }
         cost += Math.ceil(cost * owned * building[struct].inflation.ammount);
     }
-    return cost;
+    return Math.ceil(cost * biomes[city[id].biome].cost);
 }
 
 function newGame() {

@@ -30,65 +30,72 @@ var biomes = {
         desc: 'Grasslands are temparte climates dominated by large fields of grass, they make favorable farmland and are easy to develop settlements in.',
         cost: 1.0,
         growth: 1.0,
-        resources: {
-            lumber: 1.0,
-            stone: 1.0,
+        lumber: 1.0,
+        stone: 1.0,
+        minerals: {
             copper: 0.75,
-            iron: 0.5,
-            coal: 0.5,
-            oil: 0.1
+            iron: 0.6,
+            coal: 0.5
         }
     },
     desert: {
-        desc: 'Deserts are arid climents that can be hard to settle, they are often excellent sources of stone, oil, and rare metals.',
+        desc: 'Deserts are arid climents that can be hard to settle and lack access to timber, they are however excellent sources of stone, oil, and rare metals.',
         cost: 1.2,
         growth: 0.5,
-        resources: {
-            lumber: 0.1,
-            stone: 2.0,
-            copper: 1.0,
+        stone: 2.0,
+        minerals: {
+            copper: 0.9,
             iron: 1.0,
             coal: 0.5,
-            oil: 0.5
-        }
+            gold: 0.3,
+            aluminium: 0.3,
+            titanium: 0.2
+        },
+        oil: 0.5
     },
     mountain: {
         desc: 'Mountain areas are often rich with mineral resources, but are tough to colonize. Mountain settlements however are generally easy to foriify.',
         cost: 1.2,
         growth: 0.75,
-        resources: {
-            lumber: 0.5,
-            stone: 1.0,
-            copper: 0.75,
-            iron: 1.0,
-            coal: 1.0,
-            oil: 0.05
-        }
+        lumber: 0.5,
+        stone: 1.0,
+        minerals: {
+            copper: 1.0,
+            iron: 1.25,
+            coal: 0.85,
+            gold: 0.2,
+            aluminium: 0.5,
+            titanium: 0.3
+        },
+        oil: 0.05
     },
     forest: {
         desc: 'Forests are rich in lumber but generally are poor sources of other resources.',
         cost: 1.0,
         growth: 1.0,
-        resources: {
-            lumber: 2.5,
-            stone: 0.5,
+        lumber: 2.5,
+        stone: 0.5,
+        minerals: {
             copper: 0.25,
-            iron: 0.25,
+            iron: 0.3,
             coal: 0.25,
-            oil: 0.1
+            aluminium: 0.15,
+            gold: 0.1
         }
     },
     wetland: {
         desc: 'Wetlands are often treacherous terrain that are poorly suited for settlements, the conditions make it hard to extact minerals from the earth and are genrally tough to live in. However wetlands are tough to invade so they make great strongholds.',
         cost: 1.5,
         growth: 0.5,
-        resources: {
-            lumber: 0.8,
-            stone: 0.25,
+        lumber: 0.8,
+        stone: 0.25,
+        minerals: {
             copper: 0.25,
             iron: 0.15,
             coal: 0.15,
-            oil: 0.5
+            gold: 0.1,
+            aluminium: 0.2,
+            titanium: 0.15
         }
     }
 };

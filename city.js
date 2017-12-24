@@ -8,24 +8,13 @@ function loadCity() {
     else {
         // New game, setup starter state
         // Player starts with a starter mine
-        city[0]['mine'] = [
-            /*{
-                id: 'mine0',
-                name: 'Basic Mine',
-                type: 'mine',
-                resources: {
-                    stone: 5000,
-                    copper: 2500,
-                    iron: 1000,
-                },
-                workers: 0
-            }*/
-        ];
+        city[0]['mine'] = [];
         
         city[0]['biome'] = 'grassland';
         city[0]['tax_rate'] = 1;
         city[0]['timer'] = 60;
         city[0]['storage_cap'] = 100;
+        city[0]['prospecting'] = false;
         city[0]['storage'] = { lumber: 0, stone: 0 };
         city[0]['citizen'] = {
             amount: 0,
@@ -195,25 +184,27 @@ function loadCityCore(id) {
     $('#blueprints'+id).empty();
     
     Object.keys(building).forEach(function (key) {
-        switch (building[key]['type']) {
-            case 'mine':
-                // Mines are handled elsewhere, do nothing
-                break;
-            case 'factory':
-                // Load factory type buildings
-                loadFactory(id,key);
-                break;
-            case 'storage':
-                // Load storage type buildings
-                loadStorage(id,key);
-                break;
-            case 'unique':
-                // Load unique type buildings
-                loadUnique(id,key);
-                break;
-            default:
-                // Building type was not recognized, ignore it
-                break;
+        if(building[key]['allow'].all || building[key]['allow'][city[id].biome]) {
+            switch (building[key]['type']) {
+                case 'mine':
+                    // Mines are handled elsewhere, do nothing
+                    break;
+                case 'factory':
+                    // Load factory type buildings
+                    loadFactory(id,key);
+                    break;
+                case 'storage':
+                    // Load storage type buildings
+                    loadStorage(id,key);
+                    break;
+                case 'unique':
+                    // Load unique type buildings
+                    loadUnique(id,key);
+                    break;
+                default:
+                    // Building type was not recognized, ignore it
+                    break;
+            }
         }
     });
 }
@@ -235,7 +226,7 @@ function loadFactory(id,factory) {
         structure.append(header);
         
         var count_foreman;
-        if (global['overseer']) {
+        if (global['overseer'] && building[factory]['rank'][rank]['foreman']) {
             var foreman = $('<div class="col"></div>');
             var remove_foreman = $('<span id="' + factory + id + 'RemoveForeman" class="remove">&laquo;</span>');
             var add_foreman = $('<span id="' + factory + id + 'AddForeman" class="add">&raquo;</span>');
@@ -533,9 +524,134 @@ function loadUnique(id,unique) {
 function loadMines(id) {
     $('#mines' + id).empty();
     
+    // Load existing mines
     Object.keys(city[id]['mine']).forEach(function (key) {
         registerMine(id,city[id]['mine'][key]);
     });
+    // Prospecting action
+    if (global['survey']) {
+        loadProspect(id);
+    }
+}
+
+function loadProspect(id) {
+    if (city[id]['prospecting_offer']) {
+        var mineral = Object.keys(city[id].prospecting_offer).reduce(function(a, b){ return city[id].prospecting_offer[a] > city[id].prospecting_offer[b] ? a : b });
+        var container = $('<div id="prospecting' + id + '" class="city prospect offer"></div>');
+        var header = $('<div class="header row"><div class="col" id="prospecting' + id + 'title">Prospecting Complete</div></div>');
+        container.append(header);
+        var row = $('<div class="row"></div>');
+        
+        console.log(city[id].prospecting_offer);
+        
+        var prefix = '';
+        if (city[id]['prospecting_offer'][mineral] > 50000) {
+            prefix = 'Rich ';
+        }
+        else if (city[id]['prospecting_offer'][mineral] > 5000) {
+            prefix = 'Adundent ';
+        }
+        else if (city[id]['prospecting_offer'][mineral] > 1000) {
+            prefix = '';
+        }
+        else if (city[id]['prospecting_offer'][mineral] > 500) {
+            prefix = 'Poor ';
+        }
+        else {
+            prefix = 'Worthless ';
+        }
+        
+        var type = $('<div class="col">' + prefix + nameCase(mineral) + ' Mine</div>');
+        row.append(type);
+        container.append(row);
+        
+        var cash_row = $('<div class="row"></div>');
+        var cost = inflation(id,'mine',city[id]['mine'].length * 100);
+        var cash_cost = $('<div class="col">$' + cost + '</div>');
+        cash_row.append(cash_cost);
+        container.append(cash_row);
+        
+        var lumber_row = $('<div class="row"></div>');
+        var lumber_cost = inflation(id,'mine',(city[id]['mine'].length + 1) * 25);
+        var lumber_col = $('<div class="col">Lumber</div><div class="col">' + lumber_cost + '</div>');
+        lumber_row.append(lumber_col);
+        container.append(lumber_row);
+        
+        var option_row = $('<div class="row"></div>');
+        var discard_col = $('<div class="col"></div>');
+        var construct_col = $('<div class="col"></div>');
+        var discard = $('<button class="prospect">Abandon</button>');
+        var construct = $('<button class="prospect">Build</button>');
+        discard_col.append(discard);
+        construct_col.append(construct);
+        option_row.append(discard_col);
+        option_row.append(construct_col);
+        container.append(option_row);
+        
+        $('#mines' + id).append(container);
+        
+        discard.on('click',function(e){
+            e.preventDefault();
+            delete city[id].prospecting_offer;
+            loadMines(id);
+        });
+        
+        construct.on('click',function(e){
+            e.preventDefault();
+            
+            console.log('build clicked');
+            
+            if (global['money'] >= cost && city[id]['storage']['lumber'] >= lumber_cost) {
+                global['money'] -= cost;
+                city[id]['storage']['lumber'] -= lumber_cost;
+                
+                console.log('build pay');
+                
+                var mine = {
+                    id: 'mine' + global['next_id'],
+                    name: nameCase(mineral) + ' Mine',
+                    type: 'mine',
+                    resources: city[id].prospecting_offer,
+                    workers: 0,
+                    rank: 0
+                };
+                
+                city[id]['mine'].push(mine);
+                
+                global['next_id']++;
+                delete city[id].prospecting_offer;;
+                loadMines(id);
+            }
+        });
+    }
+    else {
+        var container = $('<div id="prospecting' + id + '" class="city prospect"></div>');
+        var header = $('<div class="header row"><div class="col" id="prospecting' + id + 'title">Prospect Land</div></div>');
+        container.append(header);
+        var price = 0;
+        var row = $('<div class="row"></div>');
+        if (global['next_id'] === 0) {
+            var cost = $('<div class="col">$0</div>');
+            row.append(cost);
+        }
+        else {
+            price = inflation(id,'mine',(city[id]['mine'].length * 100));
+            var cost = $('<div class="col">$' + price + '</div>');
+            row.append(cost);
+        }
+        container.append(row);
+        $('#mines' + id).append(container);
+        
+        container.on('click',function(e){
+            e.preventDefault();
+            
+            if (city[id].prospecting === false && global['money'] >= price) {
+                global['money'] -= price;
+                city[id].prospecting = Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost);
+                $('#prospecting' + id + 'title').html('Prospecting 0%');
+            }
+        });
+    }
 }
 
 // Adds an individual mine to the UI
@@ -551,8 +667,8 @@ function registerMine(id,mine) {
     workers.append(remove);
     workers.append(count);
     workers.append(add);
-    header.append(workers);
     container.append(header);
+    container.append(workers);
     
     $('#mines' + id).append(container);
     
@@ -568,7 +684,7 @@ function registerMine(id,mine) {
     $('#' + mine['id'] + 'AddWorker').on('click',function(e){
         e.preventDefault();
         
-        if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['workers'] < building['mine']['rank'][mine['rank']]['labor_cap']) {
+        if (Number(city[id]['citizen']['idle']) > 0 && mine['workers'] < building['mine']['rank'][mine['rank']]['labor_cap']) {
             mine['workers']++;
             city[id]['citizen']['idle']--;
         }

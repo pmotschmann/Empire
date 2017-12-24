@@ -28,8 +28,9 @@ function defineTech() {
             require: { minerals: 3, knowledge: 20 },
             description: 'Discover electricity and advance into a new era',
             cost: { 
-                copper: 25,
-                coal: 25
+                money: 5000,
+                copper: 100,
+                coal: 100
             }
         },
         {
@@ -37,6 +38,7 @@ function defineTech() {
             require: { mining: 5, timber: 5 },
             description: 'Modern tools powered by electricity',
             cost: { 
+                money: 10000,
                 coal: 500,
                 oil: 500,
                 steel: 500
@@ -56,6 +58,14 @@ function defineTech() {
             effect: function () {
                 $('#city_info .money').show();
             }
+        },
+        {
+            name: 'Production Quotas',
+            require: { overseer: 1, knowledge: 15 },
+            description: 'Learn about how to set production quotas',
+            cost: { 
+                money: 2500
+            }
         }
     ];
     
@@ -66,21 +76,38 @@ function defineTech() {
             description: 'Learn how to oversee a factory with a foreman who boosts productivity.',
             cost: { 
                 money: 1000
-            },
-            effect: function () {
-                $('#city_info .money').show();
+            }
+        },
+        {
+            name: 'Operations Manager',
+            require: { economics: 2, knowledge: 30 },
+            description: 'Learn how to manage a factory with an operations manager to automatically sell excess materials.',
+            cost: { 
+                money: 25000
             }
         }
     ];
     
-    research['survay'] = [
+    research['survey'] = [
         {
             name: 'Prospecting',
             require: { economics: 1, knowledge: 10 },
-            description: 'Learn how to survay land for potential mine locations',
+            description: 'Learn how to survey land for potential mine locations',
             cost: { 
+                money: 100,
                 lumber: 10,
                 stone: 10
+            }
+        }
+    ];
+    
+    research['expedition'] = [
+        {
+            name: 'Exploration',
+            require: { survey: 1, knowledge: 30 },
+            description: 'Learn the logistics of mounting an expedition to find new lands',
+            cost: { 
+                money: 10000
             }
         }
     ];
@@ -103,13 +130,11 @@ function defineTech() {
             require: { minerals: 4, tech: 3, knowledge: 20 },
             description: 'Learn how to build apartment buildings for citizens',
             cost: { 
+                money: 10000,
                 steel: 50,
                 cement: 50,
                 copper: 50,
                 lumber: 50
-            },
-            effect: function () {
-                $('#city_info .citizen').show();
             }
         }
     ];
@@ -123,9 +148,17 @@ function defineTech() {
                 lumber: 5,
                 stone: 5,
                 iron: 5
-            },
-            effect: function () {
-                $('#city_info .citizen').show();
+            }
+        },
+        {
+            name: 'Warehouse',
+            require: { minerals: 4, tech: 3, knowledge: 25 },
+            description: 'Learn how to build a simple shed to store materials',
+            cost: { 
+                money: 25000,
+                cement: 50,
+                lumber: 50,
+                steel: 50
             }
         }
     ];
@@ -253,6 +286,7 @@ function defineTech() {
             name: 'Steel Pickaxe',
             description: 'A pickaxe made from a wooden shaft with a steel head. Increases manual mining speed.',
             cost: { 
+                money: 100,
                 lumber: 100,
                 steel: 25
             },
@@ -267,6 +301,7 @@ function defineTech() {
             name: 'Lightweight Pickaxe',
             description: 'A pickaxe made from an aluminium shaft with a steel head. Increases manual mining speed.',
             cost: { 
+                money: 1000,
                 lumber: 250,
                 aluminium: 100
             },
@@ -275,6 +310,24 @@ function defineTech() {
                 global.resource.copper.rate = 5;
                 global.resource.iron.rate = 4;
                 global.resource.coal.rate = 4;
+            }
+        },
+        {
+            name: 'Jackhammer',
+            require: { tech: 4 },
+            description: 'Jackhammers drastically increases manual mining production.',
+            cost: { 
+                money: 5000,
+                oil: 2500,
+                aluminium: 5000,
+                steel: 25000
+            },
+            effect: function () {
+                global.resource.stone.rate = 7;
+                global.resource.copper.rate = 6;
+                global.resource.iron.rate = 5;
+                global.resource.coal.rate = 5;
+                global.resource.stone.yield = 2;
             }
         }
     ];
@@ -319,6 +372,7 @@ function defineTech() {
             name: 'Steel Axe',
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
+                money: 100,
                 lumber: 100,
                 steel: 25
             },
@@ -330,6 +384,7 @@ function defineTech() {
             name: 'Crosscut Saw',
             description: 'The next evolution in cutting down trees, saws are more efficent then axes. Increases manual wood cutting speed.',
             cost: { 
+                money: 1000,
                 lumber: 250,
                 steel: 100
             },
@@ -341,6 +396,7 @@ function defineTech() {
             name: 'Bow Saw',
             description: 'A better saw with an aluminium frame. Increases manual wood cutting speed.',
             cost: { 
+                money: 2500,
                 aluminium: 2500,
                 steel: 5000
             },
@@ -350,9 +406,10 @@ function defineTech() {
         },
         {
             name: 'Chainsaw',
-            require: { tech: 3 },
+            require: { tech: 4 },
             description: 'A lean mean tree cutting machine, chainsaws are way better then manual saws. Increased manual lumber yield.',
             cost: { 
+                money: 5000,
                 oil: 2500,
                 aluminium: 5000,
                 steel: 25000
