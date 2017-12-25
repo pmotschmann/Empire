@@ -536,93 +536,117 @@ function loadMines(id) {
 
 function loadProspect(id) {
     if (city[id]['prospecting_offer']) {
-        var mineral = Object.keys(city[id].prospecting_offer).reduce(function(a, b){ return city[id].prospecting_offer[a] > city[id].prospecting_offer[b] ? a : b });
         var container = $('<div id="prospecting' + id + '" class="city prospect offer"></div>');
         var header = $('<div class="header row"><div class="col" id="prospecting' + id + 'title">Prospecting Complete</div></div>');
         container.append(header);
-        var row = $('<div class="row"></div>');
         
-        console.log(city[id].prospecting_offer);
-        
-        var prefix = '';
-        if (city[id]['prospecting_offer'][mineral] > 50000) {
-            prefix = 'Rich ';
-        }
-        else if (city[id]['prospecting_offer'][mineral] > 5000) {
-            prefix = 'Adundent ';
-        }
-        else if (city[id]['prospecting_offer'][mineral] > 1000) {
-            prefix = '';
-        }
-        else if (city[id]['prospecting_offer'][mineral] > 500) {
-            prefix = 'Poor ';
+        if (Object.keys(city[id]['prospecting_offer']).length === 0) {
+            
+            var row = $('<div class="row"></div>');
+            var fail = $('<div class="col">Failed to locate usable resources</div>');
+            row.append(fail);
+            container.append(row);
+            
+            var option_row = $('<div class="row"></div>');
+            var discard_col = $('<div class="col"></div>');
+            var discard = $('<button class="prospect">Abandon</button>');
+            
+            discard_col.append(discard);
+            option_row.append(discard_col);
+            container.append(option_row);
+            
+            $('#mines' + id).append(container);
+            
+            discard.on('click',function(e){
+                e.preventDefault();
+                delete city[id].prospecting_offer;
+                loadMines(id);
+            });
         }
         else {
-            prefix = 'Worthless ';
-        }
-        
-        var type = $('<div class="col">' + prefix + nameCase(mineral) + ' Mine</div>');
-        row.append(type);
-        container.append(row);
-        
-        var cash_row = $('<div class="row"></div>');
-        var cost = inflation(id,'mine',city[id]['mine'].length * 100);
-        var cash_cost = $('<div class="col">$' + cost + '</div>');
-        cash_row.append(cash_cost);
-        container.append(cash_row);
-        
-        var lumber_row = $('<div class="row"></div>');
-        var lumber_cost = inflation(id,'mine',(city[id]['mine'].length + 1) * 25);
-        var lumber_col = $('<div class="col">Lumber</div><div class="col">' + lumber_cost + '</div>');
-        lumber_row.append(lumber_col);
-        container.append(lumber_row);
-        
-        var option_row = $('<div class="row"></div>');
-        var discard_col = $('<div class="col"></div>');
-        var construct_col = $('<div class="col"></div>');
-        var discard = $('<button class="prospect">Abandon</button>');
-        var construct = $('<button class="prospect">Build</button>');
-        discard_col.append(discard);
-        construct_col.append(construct);
-        option_row.append(discard_col);
-        option_row.append(construct_col);
-        container.append(option_row);
-        
-        $('#mines' + id).append(container);
-        
-        discard.on('click',function(e){
-            e.preventDefault();
-            delete city[id].prospecting_offer;
-            loadMines(id);
-        });
-        
-        construct.on('click',function(e){
-            e.preventDefault();
+            var mineral = Object.keys(city[id].prospecting_offer).reduce(function(a, b){ return city[id].prospecting_offer[a] > city[id].prospecting_offer[b] ? a : b });
+            var row = $('<div class="row"></div>');
             
-            console.log('build clicked');
-            
-            if (global['money'] >= cost && city[id]['storage']['lumber'] >= lumber_cost) {
-                global['money'] -= cost;
-                city[id]['storage']['lumber'] -= lumber_cost;
-                
-                console.log('build pay');
-                
-                var mine = {
-                    id: 'mine' + global['next_id'],
-                    name: nameCase(mineral) + ' Mine',
-                    type: 'mine',
-                    resources: city[id].prospecting_offer,
-                    workers: 0,
-                    rank: 0
-                };
-                
-                city[id]['mine'].push(mine);
-                
-                global['next_id']++;
-                delete city[id].prospecting_offer;;
-                loadMines(id);
+            var prefix = '';
+            if (city[id]['prospecting_offer'][mineral] > 50000) {
+                prefix = 'Rich ';
             }
-        });
+            else if (city[id]['prospecting_offer'][mineral] > 5000) {
+                prefix = 'Adundent ';
+            }
+            else if (city[id]['prospecting_offer'][mineral] > 1000) {
+                prefix = '';
+            }
+            else if (city[id]['prospecting_offer'][mineral] > 500) {
+                prefix = 'Poor ';
+            }
+            else {
+                prefix = 'Worthless ';
+            }
+            
+            var type = $('<div class="col">' + prefix + nameCase(mineral) + ' Mine</div>');
+            row.append(type);
+            container.append(row);
+            
+            var cash_row = $('<div class="row"></div>');
+            var cost = inflation(id,'mine',city[id]['mine'].length * 100);
+            var cash_cost = $('<div class="col">$' + cost + '</div>');
+            cash_row.append(cash_cost);
+            container.append(cash_row);
+            
+            var lumber_row = $('<div class="row"></div>');
+            var lumber_cost = inflation(id,'mine',(city[id]['mine'].length + 1) * 25);
+            var lumber_col = $('<div class="col">Lumber</div><div class="col">' + lumber_cost + '</div>');
+            lumber_row.append(lumber_col);
+            container.append(lumber_row);
+            
+            var option_row = $('<div class="row"></div>');
+            var discard_col = $('<div class="col"></div>');
+            var construct_col = $('<div class="col"></div>');
+            var discard = $('<button class="prospect">Abandon</button>');
+            var construct = $('<button class="prospect">Build</button>');
+            discard_col.append(discard);
+            construct_col.append(construct);
+            option_row.append(discard_col);
+            option_row.append(construct_col);
+            container.append(option_row);
+            
+            $('#mines' + id).append(container);
+            
+            discard.on('click',function(e){
+                e.preventDefault();
+                delete city[id].prospecting_offer;
+                loadMines(id);
+            });
+            
+            construct.on('click',function(e){
+                e.preventDefault();
+                
+                console.log('build clicked');
+                
+                if (global['money'] >= cost && city[id]['storage']['lumber'] >= lumber_cost) {
+                    global['money'] -= cost;
+                    city[id]['storage']['lumber'] -= lumber_cost;
+                    
+                    console.log('build pay');
+                    
+                    var mine = {
+                        id: 'mine' + global['next_id'],
+                        name: nameCase(mineral) + ' Mine',
+                        type: 'mine',
+                        resources: city[id].prospecting_offer,
+                        workers: 0,
+                        rank: 0
+                    };
+                    
+                    city[id]['mine'].push(mine);
+                    
+                    global['next_id']++;
+                    delete city[id].prospecting_offer;;
+                    loadMines(id);
+                }
+            });
+        }
     }
     else {
         var container = $('<div id="prospecting' + id + '" class="city prospect"></div>');

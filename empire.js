@@ -59,7 +59,9 @@ $(function() {
             // Uses weird reverse loop so depleted mines can be pruned
             for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
                 var mine = city[id]['mine'][key];
-                var remain = building['mine'].produce(city[id],mine);
+                if (city[id].timer % 2 === 0) {
+                    building['mine'].produce(city[id],mine);
+                }
                 employed += mine['workers'];
                 revenue += jobs[building['mine']['rank'][mine['rank']]['labor']]['tax'] * mine['workers'];
                 
