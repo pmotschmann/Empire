@@ -97,10 +97,10 @@ function defineTech() {
                 money: 100,
                 lumber: 10,
                 stone: 10
+            },
+            effect: function () {
+                loadMines(0);
             }
-        },
-        effect: function () {
-            loadMines(0);
         }
     ];
     
