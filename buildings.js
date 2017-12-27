@@ -214,6 +214,24 @@ function defineBuildings() {
         }
     };
     
+    // Adds a one time bonus to farm effectiveness
+    building['blast_furnance'] = {
+        type: 'unique',
+        limit: 1,
+        allow: { all: false }, // doesn't currently do anything, don't make people build it for no reason 
+        rank: [
+            {
+                name: 'Blast Furnace',
+                require: { smelting: 1 },
+                description: 'The Blast Furnance is used to process various ores into metals.',
+                cost: { 
+                    stone: 5,
+                    lumber: 5
+                }
+            }
+        ]
+    };
+    
     // Produces steel, requires workers
     building['steel_mill'] = {
         type: 'factory',
@@ -286,7 +304,7 @@ function defineBuildings() {
         allow: { all: true },
         inflation: { 
             scale: 'linear',
-            ammount: 0.5
+            amount: 0.5
         },
         rank: [
             {
@@ -325,7 +343,7 @@ function defineBuildings() {
         allow: { all: true },
         inflation: { 
             scale: 'linear',
-            ammount: 0.5
+            amount: 0.5
         },
         rank: [
             {
@@ -351,7 +369,7 @@ function defineBuildings() {
         allow: { all: true },
         inflation: { 
             scale: 'linear',
-            ammount: 0.5
+            amount: 0.5
         },
         rank: [
             {
@@ -391,7 +409,7 @@ function defineBuildings() {
         allow: { all: true },
         inflation: { 
             scale: 'linear',
-            ammount: 0.5
+            amount: 0.5
         },
         rank: [
             {

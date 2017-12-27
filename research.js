@@ -188,10 +188,22 @@ function defineTech() {
         }
     ];
     
+    research['smelting'] = [
+        {
+            name: 'Smelting',
+            require: { tech: 1 },
+            description: 'Learn how to build a blast furnace to smelt ore into usable metals.',
+            cost: { 
+                lumber: 2,
+                stone: 2
+            }
+        }
+    ];
+    
     research['minerals'] = [
         {
             name: 'Copper Ore',
-            require: { knowledge: 2 },
+            require: { smelting: 1 },
             description: 'Learn how to extract and smelt copper ore',
             cost: { 
                 lumber: 5,
@@ -261,6 +273,7 @@ function defineTech() {
         },
         {
             name: 'Copper Pickaxe',
+            require: { minerals: 1 },
             description: 'A pickaxe made from a wooden shaft with a copper head. Increases manual mining speed.',
             cost: { 
                 lumber: 5,
@@ -273,6 +286,7 @@ function defineTech() {
         },
         {
             name: 'Iron Pickaxe',
+            require: { minerals: 2 },
             description: 'A pickaxe made from a wooden shaft with an iron head. Increases manual mining speed.',
             cost: { 
                 lumber: 10,
@@ -287,6 +301,7 @@ function defineTech() {
         },
         {
             name: 'Steel Pickaxe',
+            require: { minerals: 4 },
             description: 'A pickaxe made from a wooden shaft with a steel head. Increases manual mining speed.',
             cost: { 
                 money: 100,
@@ -351,6 +366,7 @@ function defineTech() {
         },
         {
             name: 'Copper Axe',
+            require: { minerals: 1 },
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
                 lumber: 5,
@@ -362,6 +378,7 @@ function defineTech() {
         },
         {
             name: 'Iron Axe',
+            require: { minerals: 2 },
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
                 lumber: 10,
@@ -373,6 +390,7 @@ function defineTech() {
         },
         {
             name: 'Steel Axe',
+            require: { minerals: 4 },
             description: 'An axe made from a wooden shaft with a copper head. Increases manual wood cutting speed.',
             cost: { 
                 money: 100,

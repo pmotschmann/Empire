@@ -373,7 +373,7 @@ function loadStorage(id,storage) {
         Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) { 
             var row = $('<div class="row"></div>');
             if (cost === 'money') {
-                var price = $('<span class="cost col">$' + inflation(id,storage,building[storage]['rank'][0]['cost'][cost]) + '</span>');
+                var price = $('<span class="cost col">$' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
                 row.append(price);
             }
             else {
@@ -622,13 +622,9 @@ function loadProspect(id) {
             construct.on('click',function(e){
                 e.preventDefault();
                 
-                console.log('build clicked');
-                
                 if (global['money'] >= cost && city[id]['storage']['lumber'] >= lumber_cost) {
                     global['money'] -= cost;
                     city[id]['storage']['lumber'] -= lumber_cost;
-                    
-                    console.log('build pay');
                     
                     var mine = {
                         id: 'mine' + global['next_id'],
@@ -746,7 +742,7 @@ function payBuildingCosts(id,build,rank) {
     var paid = true;
     Object.keys(building[build]['rank'][rank]['cost']).forEach(function (cost) {
         if (cost === 'money') {
-            if (global['money'] < inflation(id,build,building[build]['rank'][0]['cost'][cost])) {
+            if (global['money'] < inflation(id,build,building[build]['rank'][rank]['cost'][cost])) {
                 paid = false;
                 return;
             }
@@ -757,7 +753,7 @@ function payBuildingCosts(id,build,rank) {
         }
     });
     if (paid) {
-        Object.keys(building[build]['rank'][0]['cost']).forEach(function (cost) {
+        Object.keys(building[build]['rank'][rank]['cost']).forEach(function (cost) {
             if (cost === 'money') {
                 global['money'] -= Number(inflation(id,build,building[build]['rank'][rank]['cost'][cost]));
             }
