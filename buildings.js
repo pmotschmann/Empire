@@ -38,8 +38,10 @@ function defineBuildings() {
                     harvesters = unused;
                 }
                 unused -= harvesters;
-                town['storage'][res] = (town['storage'][res] || 0) + Number(harvesters);
-                mine['resources'][res] -= Number(harvesters);
+                if (Number(harvesters) > 0) {
+                    town['storage'][res] = (town['storage'][res] || 0) + Number(harvesters);
+                    mine['resources'][res] -= Number(harvesters);
+                }
             });
         }
     };

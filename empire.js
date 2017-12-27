@@ -166,7 +166,8 @@ $(function() {
                 if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length && global['resource'][key].manual) {
                     // Do nothing
                 }
-                else if ($('#storage' + id + ' .' + key).length === 0){
+                else if ($('#storage' + id + ' .' + key).length === 0 && (city[id]['storage'][key] > 0 || (global['resource'][key].manual && global['resource'][key].unlocked) ) ) {
+                    console.log('good resource: ' + key);
                     var clone = {};
                     Object.keys(city[id]['storage']).forEach(function (res) {
                         clone[res] = city[id]['storage'][res];
@@ -182,6 +183,7 @@ $(function() {
                     loadCityStorage(id);
                 }
                 else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
+                    console.log('bad resource: ' + key);
                     delete city[id]['storage'][key];
                     unwatch[id]['storage' + key]();
                     delete unwatch[id]['storage' + key];
