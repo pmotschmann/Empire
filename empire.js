@@ -236,8 +236,6 @@ function showTech(techKey,techLevel) {
             tech.append(row);
         }
     });
-    var name = $('<div class="footer"></div>');
-    tech.append(name);
     $('#research div').first().append(tech);
     
     $('#' + techKey + 'Clicker').on('click',function(e){
