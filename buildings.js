@@ -25,6 +25,9 @@ function defineBuildings() {
             var work = mine['workers'];
             var unused = work;
             Object.keys(mine['resources']).forEach(function (res) {
+                if (mine['resources'][res] < 0) {
+                    mine['resources'][res] = 0;
+                }
                 var remain = mine['resources'][res];
                 var ratio = remain / sum;
                 var harvesters = Math.ceil(work * ratio);
@@ -38,7 +41,7 @@ function defineBuildings() {
                 if (harvesters > unused) {
                     harvesters = unused;
                 }
-                if (town.quota[res] && harvesters > town.quota[res] - town['storage'][res]) {
+                if (town.quota[res] && harvesters > (town.quota[res] - town['storage'][res])) {
                     if (mine['manager']) {
                         var excess = harvesters - (town.quota[res] - town['storage'][res]);
                         global.money += excess * global.resource[res].value;

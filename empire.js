@@ -59,6 +59,10 @@ $(function() {
             // Uses weird reverse loop so depleted mines can be pruned
             for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
                 var mine = city[id]['mine'][key];
+                if (global['overseer'] >= 2 && mine['manager'] && mine['manager'] === 1) {
+                    employed++;
+                    revenue += jobs['manager']['tax'];
+                }
                 if (city[id].timer % 2 === 0) {
                     building['mine'].produce(city[id],mine);
                 }
@@ -76,20 +80,24 @@ $(function() {
                     unwatch[mine['id'] + 'workers']();
                     delete unwatch[mine['id'] + 'workers'];
                     city[id]['mine'].splice(key, 1);
+                    
+                    if (global['survey']) {
+                        loadMines(id);
+                    }
                 }
             }
             
             // Triggers production
             Object.keys(building).forEach(function (bld) {
-                if (building[bld]['manager'] && city[id][bld]['manager']) {
-                    employed++;
-                    revenue += jobs['manager']['tax'];
-                }
                 if (building[bld].type === 'mine') {
-                    // don't do anything with mines, handled already
                     return;
                 }
                 else if (city[id][bld] && building[bld].produce) {
+                    if (global['overseer'] >= 2 && city[id][bld]['manager'] && city[id][bld]['manager'] === 1) {
+                        console.log(bld + ' managed');
+                        employed++;
+                        revenue += jobs['manager']['tax'];
+                    }
                     if (global['overseer'] && city[id][bld]['foreman'] && city[id][bld]['foreman'] === 1) {
                         employed++;
                         revenue += jobs['foreman']['tax'];
