@@ -9,6 +9,7 @@ function defineBuildings() {
                 name: 'Mine',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
+                manager: true,
                 labor: 'miner',
                 labor_cap: 10,
                 cost: { 
@@ -37,6 +38,14 @@ function defineBuildings() {
                 if (harvesters > unused) {
                     harvesters = unused;
                 }
+                if (town.quota[res] && harvesters > town.quota[res] - town['storage'][res]) {
+                    if (mine['manager']) {
+                        var excess = harvesters - (town.quota[res] - town['storage'][res]);
+                        global.money += excess * global.resource[res].value;
+                        mine['resources'][res] -= excess;
+                    }
+                    harvesters = town.quota[res] - town['storage'][res];
+                }
                 unused -= harvesters;
                 if (Number(harvesters) > 0) {
                     town['storage'][res] = (town['storage'][res] || 0) + Number(harvesters);
@@ -44,6 +53,29 @@ function defineBuildings() {
                 }
             });
         }
+    };
+    
+    building['city_hall'] = {
+        type: 'unique',
+        limit: 1,
+        allow: { all: true },
+        rank: [
+            {
+                name: 'City Hall',
+                require: { government: 1 },
+                description: 'The center of govenment of any city. Allows advanced management of your city.',
+                staff: true,
+                labor: 'bureaucrat',
+                labor_cap: 3,
+                cost: { 
+                    money: 100,
+                    lumber: 50,
+                    stone: 50,
+                    copper: 10,
+                    iron: 10
+                }
+            }
+        ]
     };
     
     building['trading_post'] = {
@@ -106,6 +138,7 @@ function defineBuildings() {
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Lumber Mill will automatically harvest lumber.',
                 foreman: true,
+                manager: true,
                 labor: 'miller',
                 labor_cap: 5,
                 cost: { 
@@ -124,6 +157,13 @@ function defineBuildings() {
             var harvest = Math.ceil(workers * biomes[town.biome].lumber);
             if (harvest > town.storage_cap - sum) {
                 harvest = town.storage_cap - sum;
+            }
+            if (town.quota['lumber'] && harvest > town.quota['lumber'] - town['storage']['lumber']) {
+                if (town[building]['manager']) {
+                    var excess = harvest - (town.quota['lumber'] - town['storage']['lumber']);
+                    global.money += excess * global.resource.lumber.value;
+                }
+                harvest = town.quota['lumber'] - town['storage']['lumber'];
             }
             if (town['storage']['lumber']) {
                 town['storage']['lumber'] += Number(harvest);
@@ -145,6 +185,7 @@ function defineBuildings() {
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Rock Quarry will automatically mine stone.',
                 foreman: true,
+                manager: true,
                 labor: 'quarry',
                 labor_cap: 5,
                 cost: { 
@@ -161,6 +202,13 @@ function defineBuildings() {
             var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
             if (workers > town.storage_cap - sum) {
                 workers = town.storage_cap - sum;
+            }
+            if (town.quota['stone'] && workers > town.quota['stone'] - town['storage']['stone']) {
+                if (town[building]['manager']) {
+                    var excess = workers - (town.quota['stone'] - town['storage']['stone']);
+                    global.money += excess * global.resource.stone.value;
+                }
+                workers = town.quota['stone'] - town['storage']['stone'];
             }
             if (town['storage']['stone']) {
                 town['storage']['stone'] += Number(workers);
@@ -182,12 +230,16 @@ function defineBuildings() {
                 require: { minerals: 2, knowledge: 5 },
                 description: 'The cemenet plant consumes stone and produces cement.',
                 foreman: true,
+                manager: true,
                 labor: 'factory',
                 labor_cap: 5,
                 cost: { 
                     money: 100,
                     iron: 50,
                     lumber: 50
+                },
+                effect: function (town, building) {
+                    global.resource.cement.unlocked = 1;
                 }
             }
         ],
@@ -202,6 +254,13 @@ function defineBuildings() {
             }
             if (town['storage']['stone'] < workers) {
                 workers = town['storage']['stone'];
+            }
+            if (town.quota['cement'] && workers > town.quota['cement'] - town['storage']['cement']) {
+                if (town[building]['manager']) {
+                    var excess = workers - (town.quota['cement'] - town['storage']['cement']);
+                    global.money += excess * global.resource.cement.value;
+                }
+                workers = town.quota['cement'] - town['storage']['cement'];
             }
             if (town['storage']['cement']) {
                 town['storage']['stone'] -= Number(workers);
@@ -243,6 +302,7 @@ function defineBuildings() {
                 require: { minerals: 4, mining: 3 },
                 description: 'The Steel Mill consumes iron and coal to make steel.',
                 foreman: true,
+                manager: true,
                 labor: 'miller',
                 labor_cap: 5,
                 cost: { 
@@ -267,6 +327,13 @@ function defineBuildings() {
             }
             if ( workers > town['storage']['coal'] ) {
                 workers = town['storage']['coal'];
+            }
+            if (town.quota['steel'] && workers > town.quota['steel'] - town['storage']['steel']) {
+                if (town[building]['manager']) {
+                    var excess = harvest - (town.quota['steel'] - town['storage']['steel']);
+                    global.money += excess * global.resource.steel.value;
+                }
+                workers = town.quota['steel'] - town['storage']['steel'];
             }
             town['storage']['iron'] -= Number(workers) * 2;
             town['storage']['coal'] -= Number(workers);

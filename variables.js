@@ -142,5 +142,17 @@ var jobs = {
         desc: 'The foreman increases the productivity of a factory. Each factory worker is more efficent when a foreman is present.',
         tax: 2,
         skilled: false
+    },
+    manager: { 
+        title: 'Manager',
+        desc: 'The manager will automatically arrange the sale of all excess materials produced by this facility.',
+        tax: 3,
+        skilled: false
+    },
+    bureaucrat: { 
+        title: 'Bureaucrats',
+        desc: 'Bureaucrats process red tape for your citizens. Their job function is unclear but they sure do generate a lot of mysterious revenue.',
+        tax: 5,
+        skilled: false
     }
 };

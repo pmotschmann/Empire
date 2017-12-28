@@ -23,6 +23,13 @@ function loadCity() {
         };
     }
     
+    if (!city[0]['quota']) {
+        city[0]['quota'] = {};
+    }
+    if (!global.resource.cement.unlocked && city[0]['cement_plant']) {
+        global.resource.cement.unlocked = 1;
+    }
+    
     for (var i=0; i < city.length; i++) {
         var storages = $('<div id="storage' + i + '" class="storages d-flex"></div>');
         $('#storage_pane').append(storages);
@@ -213,6 +220,10 @@ function loadCityCore(id) {
 function loadFactory(id,factory) {
     if (city[id][factory]) {
         // Player has this building
+        if (!city[id][factory]['manager']) {
+            city[id][factory]['manager'] = 0;
+        }
+        
         var rank = city[id][factory]['rank'];
         var title = building[factory]['rank'][rank]['description'];
         
@@ -224,6 +235,19 @@ function loadFactory(id,factory) {
         var count = $('<span id="' + factory + id + 'Workers" class="workers" title="' + jobTitle(city[id],building[factory]['rank'][rank]['labor']) + '">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']].title + '</span>');
         
         structure.append(header);
+        
+        var count_manager;
+        if (global['overseer'] >= 2 && building[factory]['rank'][rank]['manager']) {
+            var manager = $('<div class="col"></div>');
+            var remove_manager = $('<span id="' + factory + id + 'RemoveManager" class="remove">&laquo;</span>');
+            var add_manager = $('<span id="' + factory + id + 'AddManager" class="add">&raquo;</span>');
+            count_manager = $('<span id="' + factory + id + 'Manager" class="workers" title="' + jobTitle(city[id],'manager') + '">' + city[id][factory]['manager'] + '/1 ' + jobs['manager']['title'] + '</span>');
+            
+            manager.append(remove_manager);
+            manager.append(count_manager);
+            manager.append(add_manager);
+            structure.append(manager);
+        }
         
         var count_foreman;
         if (global['overseer'] && building[factory]['rank'][rank]['foreman']) {
@@ -245,7 +269,7 @@ function loadFactory(id,factory) {
         
         $('#structures' + id).append(structure);
         
-        if (global['overseer']) {
+        if (global['overseer'] && building[factory]['rank'][rank]['foreman']) {
             $('#' + factory + id + 'RemoveForeman').on('click',function(e){
                 e.preventDefault();
                 
@@ -263,6 +287,28 @@ function loadFactory(id,factory) {
                     city[id][factory]['foreman']++;
                     city[id]['citizen']['idle']--;
                     count_foreman.html(city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title']);
+                }
+            });
+        }
+        
+        if (global['overseer'] >= 2 && building[factory]['rank'][rank]['manager']) {
+            $('#' + factory + id + 'RemoveManager').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id][factory]['manager']) > 0) {
+                    city[id][factory]['manager']--;
+                    city[id]['citizen']['idle']++;
+                    count_manager.html(city[id][factory]['manager'] + '/1 ' + jobs['manager']['title']);
+                }
+            });
+            
+            $('#' + factory + id + 'AddManager').on('click',function(e){
+                e.preventDefault();
+                
+                if (Number(city[id]['citizen']['idle']) > 0 && city[id][factory]['manager'] < 1) {
+                    city[id][factory]['manager']++;
+                    city[id]['citizen']['idle']--;
+                    count_manager.html(city[id][factory]['manager'] + '/1 ' + jobs['manager']['title']);
                 }
             });
         }
@@ -320,7 +366,8 @@ function loadFactory(id,factory) {
                     city[id][factory] = {
                         rank: 0,
                         workers: 0,
-                        foreman: 0
+                        foreman: 0,
+                        manager: 0
                     };
                     if (building[factory]['rank'][0].effect) {
                         building[factory]['rank'][0].effect(city[id],factory);
@@ -467,6 +514,107 @@ function loadUnique(id,unique) {
         }
         else {
             $('#structures' + id).append(structure);
+        }
+        
+        switch (unique) {
+            case 'city_hall': // Extra city call options
+                
+                // Taxes
+                if (global['government'] >= 2) {
+                    var rate_table = {
+                        1: 'Low Taxes',
+                        2: 'Medium Taxes',
+                        3: 'High Taxes',
+                        4: 'Oppressive Taxes'
+                    };
+                    
+                    var taxes = $('<div class="col"></div>');
+                    var lower = $('<span class="remove">&laquo;</span>');
+                    var raise = $('<span class="add">&raquo;</span>');
+                    var current = $('<span class="workers" title="Set current tax rate, higher taxes may cause discontent">' + rate_table[city[id]['tax_rate']] + '</span>');
+                    
+                    taxes.append(lower);
+                    taxes.append(current);
+                    taxes.append(raise);
+                    structure.append(taxes);
+                    
+                    lower.on('click',function(e){
+                        e.preventDefault();
+                        
+                        if (city[id]['tax_rate'] > 0) {
+                            city[id]['tax_rate']--;
+                            current.html(rate_table[city[id]['tax_rate']]);
+                            loadCityCore(id);
+                            loadMines(id);
+                        }
+                    });
+                    
+                    raise.on('click',function(e){
+                        e.preventDefault();
+                        
+                        if (city[id]['tax_rate'] < 3 || (global['government'] >= 3 && city[id]['tax_rate'] < 4)) {
+                            city[id]['tax_rate']++;
+                            current.html(rate_table[city[id]['tax_rate']]);
+                            loadCityCore(id);
+                            loadMines(id);
+                        }
+                    });
+                }
+                
+                // Production Quotas
+                if (global['economics'] >= 3) {
+                    var quota_row = $('<div class="row"></div>');
+                    var quota_col = $('<div class="col"></div>');
+                    var quota = $('<button title="Opens menu to set production quotas">Set Quotas</button>');
+                    quota_row.append(quota_col);
+                    quota_col.append(quota);
+                    structure.append(quota_row);
+                    
+                    quota.on('click',function(e){
+                        e.preventDefault();
+                        
+                        var quota_container = $('#city_hall div').first();
+                        quota_container.empty();
+                        
+                        Object.keys(global['resource']).forEach(function (res) {
+                            if (global['resource'][res].unlocked){
+                                var contain = $('<div class="container"></div>');
+                                var div_row = $('<div class="row"><div class="col">' + nameCase(res) + ' Limit </div></div>');
+                                var current_quota = city[id].storage_cap;
+                                if (city[id]['quota'][res]) {
+                                    current_quota = city[id]['quota'][res];
+                                }
+                                var limit = $('<div class="col">' + current_quota + '</div>');
+                                div_row.append(limit);
+                                contain.append(div_row);
+                                var input = $('<input id="quota' + res + '" type="text" data-slider-id="quota' + res + 'slider" data-provide="slider" data-slider-min="0" data-slider-max="' + city[id].storage_cap + '" data-slider-step="10" data-slider-value="' + current_quota + '">');
+                                contain.append(input);
+                                quota_container.append(contain);
+                                input.slider({
+                                    formatter: function(value) {
+                                        limit.html(value);
+                                        city[id]['quota'][res] = value;
+                                        return 'Current value: ' + value;
+                                    },
+                                    tooltip: 'show'
+                                });
+                            }
+                        });
+                        
+                        $('#city_hall').addClass('show');
+                        $('#city_hall').addClass('active');
+                        
+                        $('#city').removeClass('show');
+                        $('#city').removeClass('active');
+                        
+                        $('#menu li a').removeClass('active');
+                        
+                    });
+                }
+                break;
+            default:
+                // Do nothing
+                break;
         }
     }
     else {
@@ -632,6 +780,7 @@ function loadProspect(id) {
                         type: 'mine',
                         resources: city[id].prospecting_offer,
                         workers: 0,
+                        manager: 0,
                         rank: 0
                     };
                     
@@ -678,19 +827,60 @@ function loadProspect(id) {
 function registerMine(id,mine) {
     var container = $('<div id="' + mine['id'] + '" class="city mine"></div>');
     
+    if (!mine['manager']) {
+        mine['manager'] = 0;
+    }
+    
     var header = $('<div class="header row"><div class="col">' + mine['name'] +'</div></div>');
+    container.append(header);
+    
+    var count_manager;
+    if (global['overseer'] >= 2 && building['mine']['rank'][mine['rank']]['manager']) {
+        var manager = $('<div class="col"></div>');
+        var remove_manager = $('<span id="' + mine['id'] + 'RemoveManager" class="remove">&laquo;</span>');
+        var add_manager = $('<span id="' + mine['id'] + 'AddManager" class="add">&raquo;</span>');
+        count_manager = $('<span id="' + mine['id'] + 'Manager" class="workers" title="' + jobTitle(city[id],'manager') + '">' + mine['manager'] + '/1 ' + jobs['manager']['title'] + '</span>');
+        
+        manager.append(remove_manager);
+        manager.append(count_manager);
+        manager.append(add_manager);
+        container.append(manager);
+    }
+    
     var workers = $('<div class="col"></div>');
     var remove = $('<span id="' + mine['id'] + 'RemoveWorker" class="remove">&laquo;</span>');
     var add = $('<span id="' + mine['id'] + 'AddWorker" class="add">&raquo;</span>');
-    var count = $('<span id="' + mine['id'] + 'Workers" class="workers">' + mine['workers'] + '/' + building['mine']['rank'][mine['rank']]['labor_cap'] + ' Miners</span>');
+    var count = $('<span id="' + mine['id'] + 'Workers" class="workers" title="' + jobTitle(city[id],'miner') + '">' + mine['workers'] + '/' + building['mine']['rank'][mine['rank']]['labor_cap'] + ' Miners</span>');
     
     workers.append(remove);
     workers.append(count);
     workers.append(add);
-    container.append(header);
+    
     container.append(workers);
     
     $('#mines' + id).append(container);
+    
+    if (global['overseer'] >= 2 && building['mine']['rank'][mine['rank']]['manager']) {
+        $('#' + mine['id'] + 'RemoveManager').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(mine['manager']) > 0) {
+                mine['manager']--;
+                city[id]['citizen']['idle']++;
+                count_manager.html(mine['manager'] + '/1 ' + jobs['manager']['title']);
+            }
+        });
+        
+        $('#' + mine['id'] + 'AddManager').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(city[id]['citizen']['idle']) > 0 && mine['manager'] < 1) {
+                mine['manager']++;
+                city[id]['citizen']['idle']--;
+                count_manager.html(mine['manager'] + '/1 ' + jobs['manager']['title']);
+            }
+        });
+    }
     
     $('#' + mine['id'] + 'RemoveWorker').on('click',function(e){
         e.preventDefault();
@@ -785,7 +975,7 @@ function payBuildingCosts(id,build,rank) {
 function jobTitle(town,title) {
     var desc = jobs[title].desc;
     if (global['economics'] >= 2) {
-        desc = desc + '\n\nGenerates $' + (town['tax_rate'] * jobs[title].tax) + '/min in tax revenue.';
+        desc = desc + '\n\nGenerates $' + (town['tax_rate'] * jobs[title].tax) + '/min in tax revenue per employee.';
     }
     return desc;
 }

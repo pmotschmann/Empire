@@ -69,10 +69,40 @@ function defineTech() {
         },
         {
             name: 'Production Quotas',
-            require: { overseer: 1, knowledge: 15 },
-            description: 'Learn about how to set production quotas',
+            require: { government: 1, overseer: 1, knowledge: 15 },
+            description: 'Learn about how to set production quotas set by city hall',
             cost: { 
                 money: 2500
+            }
+        }
+    ];
+    
+    research['government'] = [
+        {
+            name: 'City Hall',
+            require: { economics: 1, knowledge: 10 },
+            description: 'Learn how to form a functioning government with a city hall',
+            cost: {
+                money: 75,
+                lumber: 10,
+                stone: 20,
+                iron: 5
+            }
+        },
+        {
+            name: 'Tax Rates',
+            require: { economics: 2, knowledge: 20 },
+            description: 'Gain ability to set the tax rate in city hall',
+            cost: {
+                money: 500
+            }
+        },
+        {
+            name: 'Oppressive Taxes',
+            require: { knowledge: 25 },
+            description: "Unlocks oppressive taxes, you may not want to use this but it's always nice to have the option of taxing your citizens to death",
+            cost: { 
+                money: 1000
             }
         }
     ];
@@ -88,7 +118,7 @@ function defineTech() {
         },
         {
             name: 'Operations Manager',
-            require: { economics: 2, knowledge: 30 },
+            require: { economics: 2, knowledge: 28 },
             description: 'Learn how to manage a factory with an operations manager to automatically sell excess materials.',
             cost: { 
                 money: 25000

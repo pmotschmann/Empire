@@ -81,6 +81,10 @@ $(function() {
             
             // Triggers production
             Object.keys(building).forEach(function (bld) {
+                if (building[bld]['manager'] && city[id][bld]['manager']) {
+                    employed++;
+                    revenue += jobs['manager']['tax'];
+                }
                 if (building[bld].type === 'mine') {
                     // don't do anything with mines, handled already
                     return;
