@@ -142,6 +142,16 @@ function drawCityStorage(id,res) {
     
     unwatch[id]['storage' + res] = vue['storage' + id].$watch('store.'+res, function (newValue, oldValue) {
         amount.html(newValue);
+        
+        $('#blueprints' + id).find('[data-' + res +']').each(function(e){
+            var res_cost = $(this).attr('data-' + res);
+            if (res_cost > newValue) {
+                $(this).addClass('unaffordable');
+            }
+            else {
+                 $(this).removeClass('unaffordable');
+            }
+        });
     });
 }
 
@@ -343,13 +353,22 @@ function loadFactory(id,factory) {
             
             Object.keys(building[factory]['rank'][0]['cost']).forEach(function (cost) { 
                 var row = $('<div class="row"></div>');
+                var afford = '';
                 if (cost === 'money') {
-                    var price = $('<span class="cost col">$' + inflation(id,factory,building[factory]['rank'][0]['cost'][cost]) + '</span>');
+                    var t_cost = inflation(id,factory,building[factory]['rank'][0]['cost'][cost]);
+                    if (t_cost > global.money) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
                     row.append(price);
                 }
                 else {
                     var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                    var price = $('<span class="cost col">' + inflation(id,factory,building[factory]['rank'][0]['cost'][cost]) + '</span>');
+                    var t_cost = inflation(id,factory,building[factory]['rank'][0]['cost'][cost]);
+                    if (t_cost > city[id]['storage'][cost]) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
                     row.append(res);
                     row.append(price);
                 }
@@ -419,13 +438,22 @@ function loadStorage(id,storage) {
         
         Object.keys(building[storage]['rank'][rank]['cost']).forEach(function (cost) { 
             var row = $('<div class="row"></div>');
+            var afford = '';
             if (cost === 'money') {
-                var price = $('<span class="cost col">$' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
+                var t_cost = inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]);
+                if (t_cost > global.money) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
                 row.append(price);
             }
             else {
                 var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                var price = $('<span class="cost col">' + inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]) + '</span>');
+                var t_cost = inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]);
+                if (t_cost > city[id]['storage'][cost]) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
                 row.append(res);
                 row.append(price);
             }
@@ -541,7 +569,7 @@ function loadUnique(id,unique) {
                     lower.on('click',function(e){
                         e.preventDefault();
                         
-                        if (city[id]['tax_rate'] > 0) {
+                        if (city[id]['tax_rate'] > 1) {
                             city[id]['tax_rate']--;
                             current.html(rate_table[city[id]['tax_rate']]);
                             loadCityCore(id);
@@ -627,13 +655,22 @@ function loadUnique(id,unique) {
             
             Object.keys(building[unique]['rank'][0]['cost']).forEach(function (cost) { 
                 var row = $('<div class="row"></div>');
+                var afford = '';
                 if (cost === 'money') {
-                    var price = $('<span class="cost col">$' + inflation(id,unique,building[unique]['rank'][0]['cost'][cost]) + '</span>');
+                    var t_cost = inflation(id,unique,building[unique]['rank'][0]['cost'][cost]);
+                    if (t_cost > global.money) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
                     row.append(price);
                 }
                 else {
                     var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                    var price = $('<span class="cost col">' + inflation(id,unique,building[unique]['rank'][0]['cost'][cost]) + '</span>');
+                    var t_cost = inflation(id,unique,building[unique]['rank'][0]['cost'][cost]);
+                    if (t_cost > city[id]['storage'][cost]) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
                     row.append(res);
                     row.append(price);
                 }
