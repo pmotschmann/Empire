@@ -94,7 +94,6 @@ $(function() {
                 }
                 else if (city[id][bld] && building[bld].produce) {
                     if (global['overseer'] >= 2 && city[id][bld]['manager'] && city[id][bld]['manager'] === 1) {
-                        console.log(bld + ' managed');
                         employed++;
                         revenue += jobs['manager']['tax'];
                     }

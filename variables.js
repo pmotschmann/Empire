@@ -33,9 +33,9 @@ var biomes = {
         lumber: 1.0,
         stone: 1.0,
         minerals: {
-            copper: 0.75,
-            iron: 0.6,
-            coal: 0.5
+            copper: 0.65,
+            iron: 0.7,
+            coal: 0.4
         }
     },
     desert: {

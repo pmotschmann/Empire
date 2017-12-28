@@ -192,8 +192,8 @@ function defineBuildings() {
                 labor: 'quarry',
                 labor_cap: 5,
                 cost: { 
-                    iron: 50,
-                    lumber: 50
+                    iron: 30,
+                    lumber: 40
                 }
             }
         ],
