@@ -221,7 +221,7 @@ function loadFactory(id,factory) {
         var workers = $('<div class="col"></div>');
         var remove = $('<span id="' + factory + id + 'RemoveWorker" class="remove">&laquo;</span>');
         var add = $('<span id="' + factory + id + 'AddWorker" class="add">&raquo;</span>');
-        var count = $('<span id="' + factory + id + 'Workers" class="workers">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']]['title'] + '</span>');
+        var count = $('<span id="' + factory + id + 'Workers" class="workers" title="' + jobTitle(city[id],building[factory]['rank'][rank]['labor']) + '">' + city[id][factory]['workers'] + '/' + building[factory]['rank'][rank]['labor_cap'] + ' ' + jobs[building[factory]['rank'][rank]['labor']].title + '</span>');
         
         structure.append(header);
         
@@ -230,7 +230,7 @@ function loadFactory(id,factory) {
             var foreman = $('<div class="col"></div>');
             var remove_foreman = $('<span id="' + factory + id + 'RemoveForeman" class="remove">&laquo;</span>');
             var add_foreman = $('<span id="' + factory + id + 'AddForeman" class="add">&raquo;</span>');
-            count_foreman = $('<span id="' + factory + id + 'Foreman" class="workers">' + city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title'] + '</span>');
+            count_foreman = $('<span id="' + factory + id + 'Foreman" class="workers" title="' + jobTitle(city[id],'foreman') + '">' + city[id][factory]['foreman'] + '/1 ' + jobs['foreman']['title'] + '</span>');
             
             foreman.append(remove_foreman);
             foreman.append(count_foreman);
@@ -436,7 +436,7 @@ function loadUnique(id,unique) {
             var workers = $('<div class="col"></div>');
             var remove = $('<span id="' + unique + id + 'RemoveWorker" class="remove">&laquo;</span>');
             var add = $('<span id="' + unique + id + 'AddWorker" class="add">&raquo;</span>');
-            var count = $('<span id="' + unique + id + 'Workers" class="workers">' + city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + jobs[building[unique]['rank'][rank]['labor']]['title'] + '</span>');
+            var count = $('<span id="' + unique + id + 'Workers" class="workers" title="' + jobTitle(city[id],building[unique]['rank'][rank]['labor']) + '">' + city[id][unique]['workers'] + '/' + building[unique]['rank'][rank]['labor_cap'] + ' ' + jobs[building[unique]['rank'][rank]['labor']]['title'] + '</span>');
             
             workers.append(remove);
             workers.append(count);
@@ -736,6 +736,23 @@ function registerMine(id,mine) {
         
         container.append(row);
     });
+    
+    var option_row = $('<div class="row"></div>');
+    var discard_col = $('<div class="col"></div>');
+    var discard = $('<button title="Remove this mine from your city register">Close Mine</button>');
+    option_row.append(discard_col);
+    discard_col.append(discard);
+    container.append(option_row);
+    
+    discard.on('click',function(e){
+        e.preventDefault();
+        
+        Object.keys(mine['resources']).forEach(function (mineral) {
+            mine['resources'][mineral] = 0;
+        });
+        
+        container.css('display','none');
+    });
 }
 
 function payBuildingCosts(id,build,rank) {
@@ -763,4 +780,12 @@ function payBuildingCosts(id,build,rank) {
         });
     }
     return paid;
+}
+
+function jobTitle(town,title) {
+    var desc = jobs[title].desc;
+    if (global['economics'] >= 2) {
+        desc = desc + '\n\nGenerates $' + (town['tax_rate'] * jobs[title].tax) + '/min in tax revenue.';
+    }
+    return desc;
 }

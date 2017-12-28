@@ -154,7 +154,7 @@ $(function() {
             }
             
             // Collect taxes
-            if (city[id]['timer'] === 0) {
+            if (city[id]['timer'] === 0 && global['economics'] >= 2) {
                 global['money'] += revenue * city[id]['tax_rate'];
             }
             

@@ -60,6 +60,14 @@ function defineTech() {
             }
         },
         {
+            name: 'Taxation',
+            require: { knowledge: 8 },
+            description: 'Develop a tax code, this makes all citizens with jobs automatically generate money each minutes',
+            cost: { 
+                money: 50
+            }
+        },
+        {
             name: 'Production Quotas',
             require: { overseer: 1, knowledge: 15 },
             description: 'Learn about how to set production quotas',

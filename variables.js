@@ -101,11 +101,46 @@ var biomes = {
 };
 
 var jobs = {
-    miner: { title: 'Miners', tax: 1, skilled: false },
-    trader: { title: 'Trademaster', tax: 3, skilled: false },
-    farmer: { title: 'Farmers', tax: 1, skilled: false },
-    miller: { title: 'Mill Workers', tax: 1, skilled: false },
-    quarry: { title: 'Quarry Workers', tax: 1, skilled: false },
-    factory: { title: 'Plant Workers', tax: 1, skilled: false },
-    foreman: { title: 'Foreman', tax: 2, skilled: false }
+    miner: { 
+        title: 'Miners',
+        desc: 'Miners are workers who extract ore from the ground.',
+        tax: 1,
+        skilled: false
+    },
+    trader: { 
+        title: 'Trademaster',
+        desc: 'The trademaster allows resources to be sold for profit.',
+        tax: 3,
+        skilled: false
+    },
+    farmer: { 
+        title: 'Farmers',
+        desc: 'Farmers increase the rate as which new citizens fill empty housing.',
+        tax: 1,
+        skilled: false
+    },
+    miller: { 
+        title: 'Mill Workers',
+        desc: 'Mill workers are a type of factory worker. They produce resources and sometimes consume other resources depending on the type of building.',
+        tax: 1,
+        skilled: false
+    },
+    quarry: { 
+        title: 'Quarry Workers',
+        desc: 'Quarry workers mine stone from rock quarries.',
+        tax: 1,
+        skilled: false
+    },
+    factory: { 
+        title: 'Plant Workers',
+        desc: 'Plant workers are a type of factory worker. They produce resources and sometimes consume other resources depending on the type of building.',
+        tax: 1,
+        skilled: false
+    },
+    foreman: { 
+        title: 'Foreman',
+        desc: 'The foreman increases the productivity of a factory. Each factory worker is more efficent when a foreman is present.',
+        tax: 2,
+        skilled: false
+    }
 };
