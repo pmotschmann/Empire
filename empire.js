@@ -183,8 +183,10 @@ $(function() {
                 }
                 else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
                     delete city[id]['storage'][key];
-                    unwatch[id]['storage' + key]();
-                    delete unwatch[id]['storage' + key];
+                    if (unwatch[id]['storage' + key]) {
+                        unwatch[id]['storage' + key]();
+                        delete unwatch[id]['storage' + key];
+                    }
                     $('#storage' + id + ' .' + key).remove();
                 }
             });
