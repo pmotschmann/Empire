@@ -155,10 +155,10 @@ function defineTech() {
         },
         {
             name: 'Warehouse',
-            require: { minerals: 4, tech: 3, knowledge: 25 },
-            description: 'Learn how to build a simple shed to store materials',
+            require: { minerals: 4, tech: 3, knowledge: 24 },
+            description: 'Learn how to build a large storage building.',
             cost: { 
-                money: 25000,
+                money: 20000,
                 cement: 50,
                 lumber: 50,
                 steel: 50
