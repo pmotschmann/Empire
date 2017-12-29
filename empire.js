@@ -23,11 +23,11 @@ $(function() {
     defineTech();
     defineBuildings();
     
-    // Set current research
-    loadTech();
-    
     // Load city progression
     loadCity();
+    
+    // Set current research
+    loadTech();
     
     if (!global['economics']) {
         $('#city_info .money').hide();
@@ -223,14 +223,22 @@ function showTech(techKey,techLevel) {
     tech.append(desc);
     Object.keys(research[techKey][techLevel]['cost']).forEach(function (cost) { 
         var row = $('<div class="row"></div>');
+        var afford = '';
+        var t_cost = research[techKey][techLevel]['cost'][cost];
         if (cost === 'money') {
-            var price = $('<span class="col cost">$' + research[techKey][techLevel]['cost'][cost] + '</span>');
+            if (t_cost > global.money) {
+                afford = ' unaffordable';
+            }
+            var price = $('<span class="col cost' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
             row.append(price);
             tech.append(row);
         }
         else {
+            if (t_cost > city[0].storage[cost]) {
+                afford = ' unaffordable';
+            }
             var res = $('<span class="resource">' + nameCase(cost) + '</span>');
-            var price = $('<span class="cost">' + research[techKey][techLevel]['cost'][cost] + '</span>');
+            var price = $('<span class="cost' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
             row.append(res);
             row.append(price);
             tech.append(row);
@@ -383,8 +391,8 @@ function settings() {
         $('#city_info').hide();
         $('#city_menu').hide();
         $('#sub_city').hide();
-        loadTech();
         loadCity();
+        loadTech();
         $('#city_info .money').hide();
         $('#city_info .citizen').hide();
         

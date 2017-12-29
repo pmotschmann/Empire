@@ -149,9 +149,20 @@ function drawCityStorage(id,res) {
                 $(this).addClass('unaffordable');
             }
             else {
-                 $(this).removeClass('unaffordable');
+                $(this).removeClass('unaffordable');
             }
         });
+        if (id === 0) {
+            $('#research').find('[data-' + res +']').each(function(e){
+                var res_cost = $(this).attr('data-' + res);
+                if (res_cost > newValue) {
+                    $(this).addClass('unaffordable');
+                }
+                else {
+                    $(this).removeClass('unaffordable');
+                }
+            });
+        }
     });
 }
 
@@ -177,6 +188,26 @@ function loadInfoBar(id) {
     });
     vm_cash.$watch('money', function (newValue, oldValue) {
         money.html('$' + newValue);
+        $('#blueprints' + id).find('[data-money]').each(function(e){
+            var res_cost = $(this).attr('data-money');
+            if (res_cost > newValue) {
+                $(this).addClass('unaffordable');
+            }
+            else {
+                $(this).removeClass('unaffordable');
+            }
+        });
+        if (id === 0) {
+            $('#research').find('[data-money]').each(function(e){
+                var res_cost = $(this).attr('data-money');
+                if (res_cost > newValue) {
+                    $(this).addClass('unaffordable');
+                }
+                else {
+                    $(this).removeClass('unaffordable');
+                }
+            });
+        }
     });
     
     var vm = new Vue({
