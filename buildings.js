@@ -69,7 +69,7 @@ function defineBuildings() {
                 description: 'The center of govenment of any city. Allows advanced management of your city.',
                 staff: true,
                 labor: 'bureaucrat',
-                labor_cap: 3,
+                labor_cap: function(){ return global['government'] >= 4 ? 5 : 3; }(),
                 cost: { 
                     money: 100,
                     lumber: 50,

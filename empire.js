@@ -168,6 +168,9 @@ $(function() {
             if (city[id]['timer'] === 0 && global['economics'] >= 2) {
                 global['money'] += revenue * city[id]['tax_rate'];
             }
+            else if (city[id]['timer'] === 30 && global['economics'] >= 4) {
+                global['money'] += revenue * city[id]['tax_rate'];
+            }
             
             // Correct labor pool
             city[id].citizen.idle = city[id].citizen.amount - employed;

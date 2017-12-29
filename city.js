@@ -1042,7 +1042,10 @@ function payBuildingCosts(id,build,rank) {
 
 function jobTitle(town,title) {
     var desc = jobs[title].desc;
-    if (global['economics'] >= 2) {
+    if (global['economics'] >= 4) {
+        desc = desc + '\n\nGenerates $' + (town['tax_rate'] * jobs[title].tax * 2) + '/min in tax revenue per employee.';
+    }
+    else if (global['economics'] >= 2) {
         desc = desc + '\n\nGenerates $' + (town['tax_rate'] * jobs[title].tax) + '/min in tax revenue per employee.';
     }
     return desc;
