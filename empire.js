@@ -153,8 +153,18 @@ $(function() {
                             if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
                                 mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
                                 // Chance to strike a rich ore vein
-                                if (Math.random() * 100 > 95) {
-                                    mine[ore] *=  Math.ceil(Math.random() * 1000);
+                                var roll = Math.random() * 100;
+                                if (roll > 99) {
+                                    // Super Rich
+                                    mine[ore] *=  Math.ceil(Math.random() * 250);
+                                }
+                                else if (roll > 95) {
+                                    // Rich
+                                    mine[ore] *=  Math.ceil(Math.random() * 100);
+                                }
+                                else if (roll > 90) {
+                                    // Decent
+                                    mine[ore] *=  Math.ceil(Math.random() * 10);
                                 }
                             }
                         });
