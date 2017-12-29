@@ -348,6 +348,30 @@ function newGame() {
 }
 
 function settings() {
+    $('#export').on('click',function(e){
+        e.preventDefault();
+        
+        var data = JSON.stringify({
+            g: global,
+            c: city
+        });
+        
+        $('#saveString').val(LZString.compressToBase64(data));
+    });
+    
+    $('#import').on('click',function(e){
+        e.preventDefault();
+        
+        var game_state = JSON.parse(LZString.decompressFromBase64($('#saveString').val()));
+        global = game_state['g'];
+        city = game_state['c'];
+        
+        save.setItem('global',JSON.stringify(global));
+        save.setItem('city',JSON.stringify(city));
+        
+        window.location.reload();
+    });
+    
     $('#reset').on('click',function(e){
         e.preventDefault();
         
@@ -395,7 +419,6 @@ function settings() {
         loadTech();
         $('#city_info .money').hide();
         $('#city_info .citizen').hide();
-        
     });
 } 
 
