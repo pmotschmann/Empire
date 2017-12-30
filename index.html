@@ -4,16 +4,47 @@
     <title>Empire</title>
     <meta http-equiv="Content-type" content="text/html;charset=utf-8">
     <link rel="icon" href="empire.ico" type="images/x-icon">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css" crossorigin="anonymous">
+    <script src="lib/fallback.min.js"></script>
+    <script>
+        fallback.load({
+            'Bootstrap-css': [
+                'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css',
+                'lib/bootstrap.min.css'
+            ],
+            'Bootstrap-slider-css': [
+                'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css',
+                'lib/bootstrap-slider.min.css'
+            ],
+            'jQuery': [
+                'https://code.jquery.com/jquery-3.2.1.slim.min.js',
+                'lib/jquery-3.2.1.slim.min.js'
+            ],
+            'Popper': [
+                'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js',
+                'lib/popper.min.js'
+            ],
+            'Bootstrap-js': [
+                'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js',
+                'lib/bootstrap.min.js'
+            ],
+            'Bootstrap-slider-js': [
+                'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js',
+                'lib/bootstrap-slider.min.js'
+            ],
+            'Vue': [
+                'https://cdn.jsdelivr.net/npm/vue',
+                'lib/vue.js'
+            ]
+        }, {
+            shim: {
+                'Bootstrap-js': ['jQuery'],
+                'Bootstrap-slider-js': ['jQuery','Bootstrap-js']
+            }
+        });
+    </script>
     <link rel="stylesheet/less" type="text/css" href="empire.less"/>
     <script src="lib/less.min.js"></script>
     <script src="lib/lz-string.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="variables.js"></script>
     <script src="resources.js"></script>
     <script src="research.js"></script>
