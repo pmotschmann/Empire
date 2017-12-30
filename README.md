@@ -7,7 +7,7 @@ Empire Incremental combines elements of a clicker with an idler and has lots of 
 ## Roadmap
 1. __Smelting__
 
-    Mined ore will require smelting to converted the raw ore into useful ignots.
+    Mined ore will require smelting to convert the raw ore into useful ignots.
     
 2. __Manufactured Goods__
 
@@ -63,4 +63,4 @@ Empire Incremental combines elements of a clicker with an idler and has lots of 
 
 15. __Education__
 
-    All jobs are currently unskilled labor, but eventually there will be high tech jobs which required educated workers, which in turn means there needs to be an educatino system.
+    All jobs are currently unskilled labor, but eventually there will be high tech jobs which required educated workers, which in turn means there needs to be an education system.
