@@ -44,13 +44,11 @@ function loadCity() {
     }
 }
 
-function tileInfo(town,x,y,z) {
+function tileInfo(town, x, y, z) {
     if (town.map[x][y][z][0]) {
         switch (town.map[x][y][z][0].type) {
             case 'debris':
-                $('#modalTitle').html(nameCase(town.biome));
-                $('#modalContent').empty();
-                loadBlueprints(town, x, y, z);
+                unoccupiedSpace(town, x, y, z);
                 break;
             case 'mine':
                  // place holder
@@ -66,11 +64,31 @@ function tileInfo(town,x,y,z) {
         }
     }
     else {
-        $('#modalTitle').html(nameCase(town.biome));
-        $('#modalContent').empty();
-        loadBlueprints(town, x, y, z);
+        unoccupiedSpace(town, x, y, z);
     }
     $('#modal').modal();
+}
+
+function unoccupiedSpace(town, x, y, z) {
+    $('#modalTitle').html(nameCase(town.biome));
+    $('#modalContent').empty();
+    
+    if (isDeveloped(town.map, x+1, y-1, z) || isDeveloped(town.map, x-1, y+1, z) || isDeveloped(town.map, x+1, y, z-1) || isDeveloped(town.map, x-1, y, z+1) || isDeveloped(town.map, x, y+1, z-1) || isDeveloped(town.map, x, y-1, z+1)) {
+        loadBlueprints(town, x, y, z);
+    }
+    else {
+        var wilds = $('<div>Wild ' + town.biome + ' too far from your settlement to develop.</div>');
+        $('#modalContent').append(wilds);
+    }
+}
+
+function isDeveloped(map, x, y, z) {
+    if (map[x] && map[x][y] && map[x][y][z]) {
+        if (map[x][y][z].length > 0 && map[x][y][z][0].type !== 'debris') {
+            return true;
+        }
+    }
+    return false;
 }
 
 function loadBuildingOptions(town, x, y, z, type, rank) {
@@ -282,35 +300,165 @@ function loadUniqueBuilding(town, x, y, z, type, rank) {
 }
 
 function loadFactoryBuilding(town, x, y, z, type, rank) {
-
+    if (!town[type]['manager']) {
+        town[type]['manager'] = 0;
+    }
+    
+    var rank = town[type]['rank'];
+    var title = building[type]['rank'][rank]['description'];
+    
+    var structure = $('<div id="' + type + '" class="city factory" title="' + title + '"></div>');
+    var header = $('<div class="header row"><div class="col">' + building[type]['rank'][rank]['name'] +'</div></div>');
+    var workers = $('<div class="col"></div>');
+    var remove = $('<span id="' + type + 'RemoveWorker" class="remove">&laquo;</span>');
+    var add = $('<span id="' + type + 'AddWorker" class="add">&raquo;</span>');
+    var count = $('<span id="' + type + 'Workers" class="workers" title="' + jobTitle(town,building[type]['rank'][rank]['labor']) + '">' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']].title + '</span>');
+    
+    structure.append(header);
+    
+    var count_manager;
+    if (global['overseer'] >= 2 && building[type]['rank'][rank]['manager']) {
+        var manager = $('<div class="col"></div>');
+        var remove_manager = $('<span id="' + type + 'RemoveManager" class="remove">&laquo;</span>');
+        var add_manager = $('<span id="' + type + 'AddManager" class="add">&raquo;</span>');
+        count_manager = $('<span id="' + type + 'Manager" class="workers" title="' + jobTitle(town,'manager') + '">' + town[type]['manager'] + '/1 ' + jobs['manager']['title'] + '</span>');
+        
+        manager.append(remove_manager);
+        manager.append(count_manager);
+        manager.append(add_manager);
+        structure.append(manager);
+    }
+    
+    var count_foreman;
+    if (global['overseer'] && building[type]['rank'][rank]['foreman']) {
+        var foreman = $('<div class="col"></div>');
+        var remove_foreman = $('<span id="' + type + 'RemoveForeman" class="remove">&laquo;</span>');
+        var add_foreman = $('<span id="' + type + 'AddForeman" class="add">&raquo;</span>');
+        count_foreman = $('<span id="' + type + 'Foreman" class="workers" title="' + jobTitle(town,'foreman') + '">' + town[type]['foreman'] + '/1 ' + jobs['foreman']['title'] + '</span>');
+        
+        foreman.append(remove_foreman);
+        foreman.append(count_foreman);
+        foreman.append(add_foreman);
+        structure.append(foreman);
+    }
+    
+    workers.append(remove);
+    workers.append(count);
+    workers.append(add);
+    structure.append(workers);
+    
+    $('#modalContent').append(structure);
+    
+    if (global['overseer'] && building[type]['rank'][rank]['foreman']) {
+        $('#' + type + 'RemoveForeman').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town[type]['foreman']) > 0) {
+                town[type]['foreman']--;
+                town['citizen']['idle']++;
+                count_foreman.html(town[type]['foreman'] + '/1 ' + jobs['foreman']['title']);
+            }
+        });
+        
+        $('#' + type + 'AddForeman').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town['citizen']['idle']) > 0 && town[type]['foreman'] < 1) {
+                town[type]['foreman']++;
+                town['citizen']['idle']--;
+                count_foreman.html(town[type]['foreman'] + '/1 ' + jobs['foreman']['title']);
+            }
+        });
+    }
+    
+    if (global['overseer'] >= 2 && building[type]['rank'][rank]['manager']) {
+        $('#' + type + 'RemoveManager').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town[type]['manager']) > 0) {
+                town[type]['manager']--;
+                town['citizen']['idle']++;
+                count_manager.html(town[type]['manager'] + '/1 ' + jobs['manager']['title']);
+            }
+        });
+        
+        $('#' + type + 'AddManager').on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town['citizen']['idle']) > 0 && town[type]['manager'] < 1) {
+                town[type]['manager']++;
+                town['citizen']['idle']--;
+                count_manager.html(town[type]['manager'] + '/1 ' + jobs['manager']['title']);
+            }
+        });
+    }
+    
+    $('#' + type + 'RemoveWorker').on('click',function(e){
+        e.preventDefault();
+        
+        if (Number(town[type]['workers']) > 0) {
+            town[type]['workers']--;
+            town['citizen']['idle']++;
+            count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+        }
+    });
+    
+    $('#' + type + 'AddWorker').on('click',function(e){
+        e.preventDefault();
+        
+        if (Number(town['citizen']['idle']) > 0 && town[type]['workers'] < building[type]['rank'][rank]['labor_cap']) {
+            town[type]['workers']++;
+            town['citizen']['idle']--;
+            count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+        }
+    });
 }
 
 function loadStorageBuilding(town, x, y, z, type, rank) {
-
+    var container = $('<div class="d-flex city"></div>');
+    $('#modalContent').append(container);
+    if ((building[type].rank[rank]['tile_limit'] && town.map[x][y][z].length < building[type].rank[rank]['tile_limit']) || !building[type].rank[rank]['tile_limit']) {
+        showBlueprint(container, town, type, rank, false, x, y, z, offsets(town, type, rank, town.map[x][y][z].length));
+    }
 }
 
 function loadBlueprints(town, x, y, z) {
-    var container = $('<div class="d-flex city"></div>');
-    $('#modalContent').append(container);
+    var flex = $('<div class="city"></div>');
+    var container = $('<div class="blueprints d-flex"></div>');
+    flex.append(container);
+    $('#modalContent').append(flex);
     
     Object.keys(building).forEach(function (key) {
-        if(building[key]['allow'].all || building[key]['allow'][town.biome]) {
+        if (building[key]['allow'].all || building[key]['allow'][town.biome]) {
             switch (building[key]['type']) {
                 case 'mine':
                     // Load Prospecting Option
                     break;
                 case 'factory':
                     // Load factory type buildings
-                    
+                    if (!town[key]) {
+                        showBlueprint(container, town, key, 0, true, x, y, z, offsets(town, key, rank, 0));
+                    }
                     break;
                 case 'storage':
                     // Load storage type buildings
-                    
+                    var rank = -1;
+                    for (var i=0; i < building[key]['rank'].length; i++) {
+                        if (checkRequirements(building[key]['rank'][i].require)) {
+                            rank = i;
+                        }
+                        else {
+                            break;
+                        }
+                    }
+                    if (rank > -1) {
+                        showBlueprint(container, town, key, rank, true, x, y, z, offsets(town, key, rank, 0));
+                    }
                     break;
                 case 'unique':
                     // Load unique type buildings
                     if (!town[key]) {
-                        showBlueprint(container,town,key,0,x,y,z);
+                        showBlueprint(container, town, key, 0, true, x, y, z, offsets(town, key, rank, 0));
                     }
                     break;
                 default:
@@ -321,62 +469,147 @@ function loadBlueprints(town, x, y, z) {
     });
 }
 
-function showBlueprint(container, town, type, rank, x, y, z) {
+function offsets(town, type, rank, current) {
+    switch (type) {
+        case 'small_house':
+        case 'shed':
+            switch (current) {
+                case 0:
+                    return { x:-20, y:-5 };
+                    break;
+                case 1:
+                    return { x:-5, y:10 };
+                    break;
+                case 2:
+                    return { x:15, y:0 };
+                    break;
+                case 3:
+                    return { x:0, y:-15 };
+                    break;
+                case 4:
+                    return { x:-35, y:-20 };
+                    break;
+                case 5:
+                    return { x:-15, y:-30 };
+                    break;
+                case 6:
+                    return { x:10, y:25 };
+                    break;
+                case 7:
+                    return { x:30, y:15 };
+                    break;
+                case 8:
+                    return { x:-22, y:20 };
+                    break;
+                case 9:
+                    return { x:-37, y:5 };
+                    break;
+                case 10:
+                    return { x:20, y:-25 };
+                    break;
+                case 11:
+                    return { x:35, y:-10 };
+                    break;
+            }
+            break;
+        default:
+            return { x:0, y:0 };
+            break;
+    }
+}
+
+function showBlueprint(container, town, type, rank, clear, x, y, z, offsets) {
     // Building Available
     if (building[type]['rank'][rank] && checkRequirements(building[type]['rank'][rank].require)) {
-        var title = building[type]['rank'][rank]['description'];
-        var blueprint = $('<div class="city blueprint" title="' + title + '"></div>');
-        var header = $('<div class="header row"><div class="col">Construct ' + building[type]['rank'][rank]['name'] +'</div></div>');
-        blueprint.append(header);
         
-        Object.keys(building[type]['rank'][rank]['cost']).forEach(function (cost) { 
-            var row = $('<div class="row"></div>');
-            var afford = '';
-            if (cost === 'money') {
-                var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
-                if (t_cost > global.money) {
-                    afford = ' unaffordable';
-                }
-                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
-                row.append(price);
+        // Limit detection
+        var buildable = true;
+        if (building[type]['rank'][rank]['limit']) {
+            var owned = 0;
+            if ( town[type] ) {
+                owned = town[type]['owned'];
             }
-            else {
-                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
-                if (t_cost > town['storage'][cost]) {
-                    afford = ' unaffordable';
-                }
-                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
-                row.append(res);
-                row.append(price);
+            if (building[type]['rank'][rank]['limit'] <= owned) {
+                buildable = false;
             }
-            blueprint.append(row);
-        });
+        }
         
-        container.append(blueprint);
-        
-        blueprint.on('click',function(e){
-            e.preventDefault();
+        if (buildable) {
+            var title = building[type]['rank'][rank]['description'];
+            var blueprint = $('<div class="city blueprint" title="' + title + '"></div>');
+            var header = $('<div class="header row"><div class="col">Construct ' + building[type]['rank'][rank]['name'] +'</div></div>');
+            blueprint.append(header);
             
-            var paid = payBuildingCosts(town,type,rank);
-            if (paid) {
-                town.map[x][y][z] = [{  
-                    type: type,
-                    svg: building[type].rank[rank].svg,
-                    x: 0,
-                    y: 0
-                }];
-                town[type] = { rank: 0 };
-                if (building[type]['rank'][rank]['staff'] && !town[type]['workers']) {
-                    town[type]['workers'] = 0;
+            Object.keys(building[type]['rank'][rank]['cost']).forEach(function (cost) { 
+                var row = $('<div class="row"></div>');
+                var afford = '';
+                if (cost === 'money') {
+                    var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
+                    if (t_cost > global.money) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
+                    row.append(price);
                 }
-                if (building[type]['rank'][rank].effect) {
-                    building[type]['rank'][rank].effect(town,type);
+                else {
+                    var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                    var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
+                    if (t_cost > town['storage'][cost]) {
+                        afford = ' unaffordable';
+                    }
+                    var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
+                    row.append(res);
+                    row.append(price);
                 }
-                loadCityMap(town.id);
-                tileInfo(town, x, y, z);
-            }
-        });
+                blueprint.append(row);
+            });
+            
+            container.append(blueprint);
+            
+            blueprint.on('click',function(e){
+                e.preventDefault();
+                
+                var paid = payBuildingCosts(town,type,rank);
+                if (paid) {
+                    var struct = {  
+                        type: type,
+                        svg: building[type].rank[rank].svg,
+                        x: offsets.x,
+                        y: offsets.y
+                    };
+                    if (clear) {
+                        town.map[x][y][z] = [struct];
+                    }
+                    else {
+                        town.map[x][y][z].push(struct);
+                    }
+                    if (town[type]) {
+                        town[type].rank = rank;
+                        town[type].owned++;
+                    }
+                    else {
+                        town[type] = { 
+                            rank: rank,
+                            owned: 1
+                        };
+                    }
+                    if ((building[type]['rank'][rank]['staff'] || building[type].type === 'factory') && !town[type]['workers']) {
+                        town[type]['workers'] = 0;
+                    }
+                    if (building[type]['rank'][rank]['foreman'] && !town[type]['foreman']) {
+                        town[type]['foreman'] = 0;
+                    }
+                    if (building[type]['rank'][rank]['manager'] && !town[type]['manager']) {
+                        town[type]['manager'] = 0;
+                    }
+                    if (building[type]['rank'][rank].effect) {
+                        building[type]['rank'][rank].effect(town,type);
+                    }
+                    loadCityMap(town.id);
+                    tileInfo(town, x, y, z);
+                }
+            });
+        }
     }
 }
 

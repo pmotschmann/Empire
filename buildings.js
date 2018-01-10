@@ -400,8 +400,9 @@ function defineBuildings() {
                 name: 'Hut',
                 svg: 'hut',
                 require: { housing: 1 },
-                description: 'A simple hut made out of wood and, stone, houses one citizen.',
-                limit: 10,
+                description: 'A simple hut made out of wood and stone, houses one citizen.',
+                limit: 12,
+                tile_limit: 12,
                 cost: { 
                     stone: 8,
                     lumber: 12
@@ -415,6 +416,7 @@ function defineBuildings() {
                 svg: 'house',
                 require: { minerals: 2, tech: 3 },
                 description: 'A modern house, with all the conveniences, houses one citizen',
+                tile_limit: 12,
                 cost: { 
                     money: 50,
                     cement: 6,
@@ -469,7 +471,8 @@ function defineBuildings() {
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1 },
                 description: 'A simple shed to store resources, increaases city storage limit by 20.',
-                limit: 10,
+                limit: 12,
+                tile_limit: 12,
                 cost: { 
                     stone: 6,
                     lumber: 6,
@@ -484,6 +487,7 @@ function defineBuildings() {
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1, tech: 3 },
                 description: 'A sturdy shed to store resources, increaases city storage limit by 20.',
+                tile_limit: 12,
                 cost: { 
                     money: 75,
                     cement: 4,
