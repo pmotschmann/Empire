@@ -4,47 +4,22 @@
     <title>Empire</title>
     <meta http-equiv="Content-type" content="text/html;charset=utf-8">
     <link rel="icon" href="empire.ico" type="images/x-icon">
-    <script src="lib/fallback.min.js"></script>
-    <script>
-        fallback.load({
-            'Bootstrap-css': [
-                'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css',
-                'lib/bootstrap.min.css'
-            ],
-            'Bootstrap-slider-css': [
-                'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css',
-                'lib/bootstrap-slider.min.css'
-            ],
-            'jQuery': [
-                'https://code.jquery.com/jquery-3.2.1.slim.min.js',
-                'lib/jquery-3.2.1.slim.min.js'
-            ],
-            'Popper': [
-                'https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js',
-                'lib/popper.min.js'
-            ],
-            'Bootstrap-js': [
-                'https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js',
-                'lib/bootstrap.min.js'
-            ],
-            'Bootstrap-slider-js': [
-                'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js',
-                'lib/bootstrap-slider.min.js'
-            ],
-            'Vue': [
-                'https://cdn.jsdelivr.net/npm/vue',
-                'lib/vue.js'
-            ]
-        }, {
-            shim: {
-                'Bootstrap-js': ['jQuery']
-            }
-        });
-    </script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css" crossorigin="anonymous">
     <link rel="stylesheet/less" type="text/css" href="empire.less"/>
     <script src="lib/less.min.js"></script>
     <script src="lib/lz-string.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.3/svg.min.js"></script>
+    <script src="lib/less.min.js"></script>
+    <script src="lib/lz-string.min.js"></script>
     <script src="variables.js"></script>
+    <script src="svg.js"></script>
+    <script src="doodads.js"></script>
     <script src="resources.js"></script>
     <script src="research.js"></script>
     <script src="buildings.js"></script>
@@ -87,14 +62,12 @@
             <div class="d-flex">
                 <p id="city_menu" class="side">
                     <a class="btn btn-primary" data-toggle="collapse" href="#storage_pane">Storage</a>
-                    <a class="btn btn-primary" data-toggle="collapse" href="#structures_pane">City Center</a>
-                    <a class="btn btn-primary" data-toggle="collapse" href="#mines_pane">Mines</a>
-                    <a class="btn btn-primary" data-toggle="collapse" href="#blueprints_pane">Blueprints</a>
+                    <a class="btn btn-primary" data-toggle="collapse" href="#map_pane">City Map</a>
+                    <a class="btn btn-primary collapsed" data-toggle="collapse" href="#ledger_pane">Ledger</a>
                 </p>
                 <div id="sub_city">
-                    <div id="structures_pane" class="collapse fade show active"></div>
-                    <div id="mines_pane" class="collapse fade show active"></div>
-                    <div id="blueprints_pane" class="collapse fade show active"></div>
+                    <div id="map_pane" class="collapse fade show active"></div>
+                    <div id="ledger_pane" class="collapse fade"></div>
                 </div>
             </div>
         </div>
@@ -105,6 +78,22 @@
             <div class="d-flex">test</div>
         </div>
     </div>
+</div>
+<div id="info-box" class="info-box"></div>
+<div id="modal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog h-100 d-flex flex-column justify-content-center my-0" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle"></h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modalContent">
+        <div stlye="width: 40rem;"></div>
+      </div>
+    </div>
+  </div>
 </div>
 </body>
 </html>

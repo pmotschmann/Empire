@@ -1,240 +1,242 @@
-// fallback js
-fallback.ready(function() {
-
-    $(function() {
-        
-        settings();
-        
-        var global_data = save.getItem('global') || false;
-        if (global_data) {
-            // Load preexiting game data
-            global = JSON.parse(global_data);
-        }
-        else {
-            newGame();
-        }
-        
-        if (!global['research_lab']) {
-            $('#research_tab').hide();
-        }
-        if (Number(global['tech']) < 2) {
-            $('#city_info').hide();
-            $('#city_menu').hide();
-            $('#sub_city').hide();
-        }
-        
-        // Define things
-        defineTech();
-        defineBuildings();
-        
-        // Load city progression
-        loadCity();
-        
-        // Set current research
-        loadTech();
-        
-        if (!global['economics']) {
-            $('#city_info .money').hide();
-        }
-        if (!global['housing']) {
-            $('#city_info .citizen').hide();
-        }
-        
-        $(document).on('click', function (e) {
-            $('[data-toggle="popover"],[data-original-title]').each(function () {
-                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {                
-                    (($(this).popover('hide').data('bs.popover')||{}).inState||{}).click = false  // fix for BS 3.3.6
-                }
-            });
+// Main game init
+$(function() {
+    settings();
+    
+    var global_data = save.getItem('global') || false;
+    if (global_data) {
+        // Load preexiting game data
+        global = JSON.parse(global_data);
+    }
+    else {
+        newGame();
+    }
+    
+    if (!global['research_lab']) {
+        $('#research_tab').hide();
+    }
+    if (Number(global['tech']) < 2) {
+        $('#city_info').hide();
+        $('#city_menu').hide();
+        $('#sub_city').hide();
+    }
+    
+    if (global['debug']) {
+        $('#debug').addClass('btn-primary');
+        $('#debug').removeClass('btn-secondary');
+    }
+    
+    // Define things
+    defineTech();
+    defineBuildings();
+    
+    // Load city progression
+    loadCity();
+    // Set current research
+    loadTech();
+    
+    if (!global['economics']) {
+        $('#city_info .money').hide();
+    }
+    if (!global['housing']) {
+        $('#city_info .citizen').hide();
+    }
+    
+    $(document).on('click', function (e) {
+        $('[data-toggle="popover"],[data-original-title]').each(function () {
+            if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {                
+                (($(this).popover('hide').data('bs.popover')||{}).inState||{}).click = false;  // fix for BS 3.3.6
+            }
         });
-        
-        // Main game loop
-        setInterval(function() {
-            for (var id=0; id < city.length; id++) {
-                if (isNaN(city[id]['timer']) || city[id]['timer'] === 0) {
-                    city[id]['timer'] = 60;
+    });
+    
+    mainLoop();
+});
+
+// Main game loop
+function mainLoop() {
+    intervals['main'] = setInterval(function() {
+        for (var id=0; id < city.length; id++) {
+            if (isNaN(city[id]['timer']) || city[id]['timer'] === 0) {
+                city[id]['timer'] = 60;
+            }
+            city[id]['timer'] -= 1;
+            
+            
+            var employed = 0;
+            var revenue = 0;
+            // Resource mining
+            // Uses weird reverse loop so depleted mines can be pruned
+            for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
+                var mine = city[id]['mine'][key];
+                if (global['overseer'] >= 2 && mine['manager'] && mine['manager'] === 1) {
+                    employed++;
+                    revenue += jobs['manager']['tax'];
                 }
-                city[id]['timer'] -= 1;
+                if (city[id].timer % 2 === 0) {
+                    building['mine'].produce(city[id],mine);
+                }
+                employed += mine['workers'];
+                revenue += jobs[building['mine']['rank'][mine['rank']]['labor']]['tax'] * mine['workers'];
                 
-                
-                var employed = 0;
-                var revenue = 0;
-                // Resource mining
-                // Uses weird reverse loop so depleted mines can be pruned
-                for (var key=city[id]['mine'].length - 1; key >= 0; key--) {
-                    var mine = city[id]['mine'][key];
-                    if (global['overseer'] >= 2 && mine['manager'] && mine['manager'] === 1) {
-                        employed++;
-                        revenue += jobs['manager']['tax'];
-                    }
-                    if (city[id].timer % 2 === 0) {
-                        building['mine'].produce(city[id],mine);
-                    }
-                    employed += mine['workers'];
-                    revenue += jobs[building['mine']['rank'][mine['rank']]['labor']]['tax'] * mine['workers'];
+                // Mine is depleted
+                if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
+                    city[id]['citizen']['idle'] += mine['workers'];
+                    $('#' + mine['id']).remove();
+                    Object.keys(mine['resources']).forEach(function (res) {
+                        unwatch[mine['id'] + res]();
+                        delete unwatch[mine['id'] + res];
+                    });
+                    unwatch[mine['id'] + 'workers']();
+                    delete unwatch[mine['id'] + 'workers'];
+                    city[id]['mine'].splice(key, 1);
                     
-                    // Mine is depleted
-                    if (Object.values(mine['resources']).reduce((a, b) => a + b) === 0) {
-                        city[id]['citizen']['idle'] += mine['workers'];
-                        $('#' + mine['id']).remove();
-                        Object.keys(mine['resources']).forEach(function (res) {
-                            unwatch[mine['id'] + res]();
-                            delete unwatch[mine['id'] + res];
-                        });
-                        unwatch[mine['id'] + 'workers']();
-                        delete unwatch[mine['id'] + 'workers'];
-                        city[id]['mine'].splice(key, 1);
-                        
-                        if (global['survey']) {
-                            loadMines(id);
-                        }
-                    }
-                }
-                
-                // Triggers production
-                Object.keys(building).forEach(function (bld) {
-                    if (building[bld].type === 'mine') {
-                        return;
-                    }
-                    else if (city[id][bld] && building[bld].produce) {
-                        if (global['overseer'] >= 2 && city[id][bld]['manager'] && city[id][bld]['manager'] === 1) {
-                            employed++;
-                            revenue += jobs['manager']['tax'];
-                        }
-                        if (global['overseer'] && city[id][bld]['foreman'] && city[id][bld]['foreman'] === 1) {
-                            employed++;
-                            revenue += jobs['foreman']['tax'];
-                            if (city[id].timer % 2 === 0) {
-                                building[bld].produce(city[id],bld);
-                            }
-                        }
-                        else if (city[id].timer % 3 === 0) {
-                            building[bld].produce(city[id],bld);
-                        }
-                        employed += city[id][bld]['workers'];
-                        revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
-                    }
-                    else if (city[id][bld] && building[bld]['rank'][city[id][bld]['rank']].staff) {
-                        // needed for employment headcount
-                        employed += city[id][bld]['workers'];
-                        revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
-                    }
-                });
-                
-                // Updates remaining storage total
-                var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
-                $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
-                
-                // Calculates citizen growth
-                if (global['housing'] && city[id].citizen.max > city[id].citizen.amount) {
-                    var num = (city[id].citizen.amount * 25 * city[id]['tax_rate']) / biomes[city[id].biome].growth;
-                    var farmers = 1;
-                    if (city[id].farm) {
-                        farmers += city[id].farm.workers;
-                    }
-                    if (Math.random() * num < farmers) {
-                        city[id].citizen.amount++;
-                    }
-                }
-                
-                if (city[id]['prospecting']) {
-                    city[id]['prospecting']--;
-                    var completion = Math.floor((Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) - city[id]['prospecting']) / Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) * 100);
-                    $('#prospecting' + id + 'title').html('Prospecting ' + completion + '%');
-                    
-                    if (city[id]['prospecting'] === 0) {
-                        city[id]['prospecting'] = false;
-                        if (global['next_id'] === 0) {
-                            city[id]['prospecting_offer'] = { 
-                                copper: 1000,
-                                iron: 750,
-                                coal: 250
-                            };
-                        }
-                        else {
-                            var mine = {};
-                            Object.keys(biomes[city[id].biome].minerals).forEach(function (ore) {
-                                if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
-                                    mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
-                                    // Chance to strike a rich ore vein
-                                    var roll = Math.random() * 100;
-                                    if (roll > 99) {
-                                        // Super Rich
-                                        mine[ore] *=  Math.ceil(Math.random() * 250);
-                                    }
-                                    else if (roll > 95) {
-                                        // Rich
-                                        mine[ore] *=  Math.ceil(Math.random() * 100);
-                                    }
-                                    else if (roll > 90) {
-                                        // Decent
-                                        mine[ore] *=  Math.ceil(Math.random() * 10);
-                                    }
-                                }
-                            });
-                            city[id]['prospecting_offer'] = mine;
-                        }
+                    if (global['survey']) {
                         loadMines(id);
                     }
                 }
-                
-                // Collect taxes
-                if (city[id]['timer'] === 0 && global['economics'] >= 2) {
-                    global['money'] += revenue * city[id]['tax_rate'];
+            }
+            
+            // Triggers production
+            Object.keys(building).forEach(function (bld) {
+                if (building[bld].type === 'mine') {
+                    return;
                 }
-                else if (city[id]['timer'] === 30 && global['economics'] >= 4) {
-                    global['money'] += revenue * city[id]['tax_rate'];
-                }
-                
-                // Correct labor pool
-                city[id].citizen.idle = city[id].citizen.amount - employed;
-                
-                // Ensure storage is displayed accurately
-                Object.keys(city[id]['storage']).forEach(function (key) { 
-                    if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length && global['resource'][key].manual) {
-                        // Do nothing
+                else if (city[id][bld] && building[bld].produce) {
+                    if (global['overseer'] >= 2 && city[id][bld]['manager'] && city[id][bld]['manager'] === 1) {
+                        employed++;
+                        revenue += jobs['manager']['tax'];
                     }
-                    else if ($('#storage' + id + ' .' + key).length === 0 && (city[id]['storage'][key] > 0 || (global['resource'][key].manual && global['resource'][key].unlocked) ) ) {
-                        var clone = {};
-                        Object.keys(city[id]['storage']).forEach(function (res) {
-                            clone[res] = city[id]['storage'][res];
-                        });
-                        city[id]['storage'] = clone;
-                        Object.keys(unwatch[id]).forEach(function (watcher) {
-                            unwatch[id][watcher]();
-                            delete unwatch[id][watcher]
-                        });
-                        vue['storage' + id].$destroy();
-                        delete vue['storage' + id];
-                        $('#storage' + id).empty();
-                        loadCityStorage(id);
-                    }
-                    else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
-                        delete city[id]['storage'][key];
-                        if (unwatch[id]['storage' + key]) {
-                            unwatch[id]['storage' + key]();
-                            delete unwatch[id]['storage' + key];
+                    if (global['overseer'] && city[id][bld]['foreman'] && city[id][bld]['foreman'] === 1) {
+                        employed++;
+                        revenue += jobs['foreman']['tax'];
+                        if (city[id].timer % 2 === 0) {
+                            building[bld].produce(city[id],bld);
                         }
-                        $('#storage' + id + ' .' + key).remove();
                     }
-                });
+                    else if (city[id].timer % 3 === 0) {
+                        building[bld].produce(city[id],bld);
+                    }
+                    employed += city[id][bld]['workers'];
+                    revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
+                }
+                else if (city[id][bld] && building[bld]['rank'][city[id][bld]['rank']].staff) {
+                    // needed for employment headcount
+                    employed += city[id][bld]['workers'];
+                    revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
+                }
+            });
+            
+            // Updates remaining storage total
+            var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
+            $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
+            
+            // Calculates citizen growth
+            if (global['housing'] && city[id].citizen.max > city[id].citizen.amount) {
+                var num = (city[id].citizen.amount * 25 * city[id]['tax_rate']) / biomes[city[id].biome].growth;
+                var farmers = 1;
+                if (city[id].farm) {
+                    farmers += city[id].farm.workers;
+                }
+                if (Math.random() * num < farmers) {
+                    city[id].citizen.amount++;
+                }
             }
             
-            // Check for opening features
-            if (!global['research_lab'] && city[0]['storage'].lumber >= 2 && city[0]['storage'].stone >= 2) {
-                global['research_lab'] = true;
-                $('#research_tab').show();
+            // Prospecting logic
+            if (city[id]['prospecting']) {
+                city[id]['prospecting']--;
+                var completion = Math.floor((Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) - city[id]['prospecting']) / Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) * 100);
+                $('#prospecting' + id + 'title').html('Prospecting ' + completion + '%');
+                
+                if (city[id]['prospecting'] === 0) {
+                    city[id]['prospecting'] = false;
+                    if (global['next_id'] === 0) {
+                        city[id]['prospecting_offer'] = { 
+                            copper: 1000,
+                            iron: 750,
+                            coal: 250
+                        };
+                    }
+                    else {
+                        var mine = {};
+                        Object.keys(biomes[city[id].biome].minerals).forEach(function (ore) {
+                            if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
+                                mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
+                                // Chance to strike a rich ore vein
+                                var roll = Math.random() * 100;
+                                if (roll > 99) {
+                                    // Super Rich
+                                    mine[ore] *=  Math.ceil(Math.random() * 250);
+                                }
+                                else if (roll > 95) {
+                                    // Rich
+                                    mine[ore] *=  Math.ceil(Math.random() * 100);
+                                }
+                                else if (roll > 90) {
+                                    // Above Average
+                                    mine[ore] *=  Math.ceil(Math.random() * 10);
+                                }
+                            }
+                        });
+                        city[id]['prospecting_offer'] = mine;
+                    }
+                    loadMines(id);
+                }
             }
             
-            // Save game state
-            save.setItem('global',JSON.stringify(global));
-            save.setItem('city',JSON.stringify(city));
-        }, 1000);
+            // Collect taxes
+            if (city[id]['timer'] === 0 && global['economics'] >= 2) {
+                global['money'] += revenue * city[id]['tax_rate'];
+            }
+            else if (city[id]['timer'] === 30 && global['economics'] >= 4) {
+                global['money'] += revenue * city[id]['tax_rate'];
+            }
+            
+            // Correct labor pool
+            city[id].citizen.idle = city[id].citizen.amount - employed;
+            
+            // Ensure storage is displayed accurately
+            Object.keys(city[id]['storage']).forEach(function (key) { 
+                if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length && global['resource'][key].manual) {
+                    // Do nothing
+                }
+                else if ($('#storage' + id + ' .' + key).length === 0 && (city[id]['storage'][key] > 0 || (global['resource'][key].manual && global['resource'][key].unlocked) ) ) {
+                    var clone = {};
+                    Object.keys(city[id]['storage']).forEach(function (res) {
+                        clone[res] = city[id]['storage'][res];
+                    });
+                    city[id]['storage'] = clone;
+                    Object.keys(unwatch[id]).forEach(function (watcher) {
+                        unwatch[id][watcher]();
+                        delete unwatch[id][watcher]
+                    });
+                    vue['storage' + id].$destroy();
+                    delete vue['storage' + id];
+                    $('#storage' + id).empty();
+                    loadCityStorage(id);
+                }
+                else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
+                    delete city[id]['storage'][key];
+                    if (unwatch[id]['storage' + key]) {
+                        unwatch[id]['storage' + key]();
+                        delete unwatch[id]['storage' + key];
+                    }
+                    $('#storage' + id + ' .' + key).remove();
+                }
+            });
+        }
         
+        // Check for opening features
+        if (!global['research_lab'] && city[0]['storage'].lumber >= 2 && city[0]['storage'].stone >= 2) {
+            global['research_lab'] = true;
+            $('#research_tab').show();
+        }
         
-    });
-
-});
+        // Save game state
+        save.setItem('global',JSON.stringify(global));
+        save.setItem('city',JSON.stringify(city));
+    }, 1000);
+}
 
 function showTech(techKey,techLevel) {
     var tech = $('<div id="' + techKey + 'Clicker" class="tech" title="Research ' + nameCase(research[techKey][techLevel]['name']) +'"></div>');
@@ -342,12 +344,12 @@ function checkRequirements(requirements) {
     return available;
 }
 
-function inflation(id,struct,cost) {
+function inflation(town,struct,cost) {
     if (building[struct].inflation) {
         var owned = 0;
-        if (city[id][struct]) {
-            if (city[id][struct]['owned']) {
-                owned = city[id][struct]['owned'];
+        if (town[struct]) {
+            if (town[struct]['owned']) {
+                owned = town[struct]['owned'];
             }
             else {
                 owned = 1;
@@ -355,7 +357,7 @@ function inflation(id,struct,cost) {
         }
         cost += Math.ceil(cost * owned * building[struct].inflation.amount);
     }
-    return Math.ceil(cost * biomes[city[id].biome].cost);
+    return Math.ceil(cost * biomes[town.biome].cost);
 }
 
 function newGame() {
@@ -416,32 +418,40 @@ function settings() {
             delete intervals[interval];
         });
         
-        city = [{
-            storage: {},
-            unique: {},
-            factory: {},
-            mine: []
-        }];
-        global = {
-            resource: {}
-        };
-        $('#city_info').empty();
-        $('#storage_pane').empty();
-        $('#structures_pane').empty();
-        $('#blueprints_pane').empty();
-        $('#mines_pane').empty();
         save.clear();
-        newGame();
-        $('#research_tab').hide();
-        $('#city_info').hide();
-        $('#city_menu').hide();
-        $('#sub_city').hide();
-        loadCity();
-        loadTech();
-        $('#city_info .money').hide();
-        $('#city_info .citizen').hide();
+        window.location.reload();
+    });
+    
+    $('#debug').on('click',function(e){
+        e.preventDefault();
+        
+        if (global['debug']) {
+            $('#debug').removeClass('btn-primary');
+            $('#debug').addClass('btn-secondary');
+            global['debug'] = 0;
+        }
+        else {
+            $('#debug').addClass('btn-primary');
+            $('#debug').removeClass('btn-secondary');
+            global['debug'] = 1;
+        }
     });
 } 
+
+Math.rand = function(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+}
+
+Math.seed = 2;
+Math.seededRandom = function(min, max) {
+    max = max || 1;
+    min = min || 0;
+ 
+    Math.seed = (Math.seed * 9301 + 49297) % 233280;
+    var rnd = Math.seed / 233280;
+ 
+    return min + rnd * (max - min);
+}
 
 function nameCase(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

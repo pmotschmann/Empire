@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   height="20"
+   width="20"
+   version="1.1"
+   viewBox="0 0 20 20"
+   id="svg548">
+  <defs
+     id="defs550">
+    <linearGradient
+       id="linearGradient817">
+      <stop
+         offset="0"
+         style="stop-color:#333333"
+         id="stop818" />
+      <stop
+         offset="1"
+         style="stop-color:#ffffff"
+         id="stop819" />
+    </linearGradient>
+    <linearGradient
+       x1="353.64001"
+       y1="209.99001"
+       gradientTransform="matrix(0.043272,0,0,0.04096357,-2.1193053,-0.47206149)"
+       x2="299.31"
+       gradientUnits="userSpaceOnUse"
+       xlink:href="#linearGradient817"
+       y2="-29.450001"
+       id="linearGradient820" />
+    <linearGradient
+       x1="162.41"
+       y1="162.10001"
+       gradientTransform="matrix(0.04939778,0,0,0.03588402,-2.1193053,-0.47206149)"
+       x2="363.04001"
+       gradientUnits="userSpaceOnUse"
+       xlink:href="#linearGradient817"
+       y2="-107.04"
+       id="linearGradient821" />
+    <linearGradient
+       y2="1.0703"
+       x1="0.074878"
+       y1="0.28907001"
+       x2="0.92500001"
+       id="linearGradient822">
+      <stop
+         offset="0"
+         style="stop-color:#ffffff"
+         id="stop824" />
+      <stop
+         offset="1"
+         style="stop-color:#00ffff"
+         id="stop825" />
+    </linearGradient>
+    <linearGradient
+       x1="79.563004"
+       x2="469.5"
+       gradientTransform="matrix(0.0288539,0,0,0.06143042,0.9856862,0.63310499)"
+       y1="97.929001"
+       gradientUnits="userSpaceOnUse"
+       y2="325.87"
+       id="linearGradient827">
+      <stop
+         offset="0"
+         style="stop-color:#ffffff"
+         id="stop829" />
+      <stop
+         offset="1"
+         style="stop-color:#975e52"
+         id="stop830" />
+    </linearGradient>
+  </defs>
+  <path
+     id="path807"
+     style="fill:url(#linearGradient827);fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="m 11.142692,19.789324 0.05263,-8.315062 5.999475,-5.1574437 0.05263,8.3676887 z" />
+  <path
+     id="path803"
+     style="fill:url(#linearGradient820);fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="m 7.1430423,5.7379216 c 0,0 5.3679517,6.2099834 5.4732057,6.2099834 0.105254,0 5.841594,-5.05219 5.841594,-5.05219 L 12.721502,1.1593747 7.0377883,5.7905485" />
+  <path
+     id="path804"
+     style="fill:url(#linearGradient821);fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="m 7.0904153,5.7905485 c 0,0.052627 -5.7363403,3.4733804 -5.7363403,3.4733804 L 6.8799074,4.843263 12.668875,1.1593747 Z" />
+  <path
+     id="path805"
+     style="fill:#000000;fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="M 1.354075,9.2639289 7.0904153,5.7905485 12.616248,12.000532 12.089978,12.421547 6.8272804,6.5273262 1.6172099,9.7901986 Z" />
+  <path
+     id="path806"
+     style="fill:#824a3d;fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="m 2.3013606,9.3691828 c 0.052627,0 0.052627,7.7361652 0,7.7361652 l 8.8939584,2.683976 V 11.421635 L 6.8272804,6.5799532 Z" />
+  <path
+     id="path808"
+     style="fill:#ee5e46;fill-rule:evenodd;stroke:#000000;stroke-width:0.4210158;stroke-linejoin:round"
+     d="m 4.3034714,17.614266 0.052627,-5.578459 4.5785468,1.157793 v 5.788967 z" />
+  <metadata
+     id="metadata29">
+    <rdf:RDF>
+      <cc:Work>
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://creativecommons.org/publicdomain/zero/1.0/" />
+        <dc:publisher>
+          <cc:Agent
+             rdf:about="http://openclipart.org/">
+            <dc:title>Openclipart</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:title></dc:title>
+      </cc:Work>
+      <cc:License
+         rdf:about="http://creativecommons.org/publicdomain/zero/1.0/">
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Reproduction" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#Distribution" />
+        <cc:permits
+           rdf:resource="http://creativecommons.org/ns#DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+  <metadata
+     id="metadata31">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:title>Clipart by Nicu Buculei - nosmoke</dc:title>
+        <dc:rights>
+          <cc:Agent>
+            <dc:title>Nicu Buculei</dc:title>
+          </cc:Agent>
+        </dc:rights>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <cc:license
+           rdf:resource="http://web.resource.org/cc/PublicDomain" />
+      </cc:Work>
+      <cc:License
+         rdf:about="http://web.resource.org/cc/PublicDomain">
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Reproduction" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/Distribution" />
+        <cc:permits
+           rdf:resource="http://web.resource.org/cc/DerivativeWorks" />
+      </cc:License>
+    </rdf:RDF>
+  </metadata>
+</svg>
