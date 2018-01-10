@@ -25,6 +25,23 @@ SVG.extend(SVG.Container, {
     }
 })
 
+function createGradient(svg,id,stops){
+    var svgNS = svg.namespaceURI;
+    var grad  = document.createElementNS(svgNS,'linearGradient');
+    grad.setAttribute('id',id);
+    for (var i=0;i<stops.length;i++){
+        var attrs = stops[i];
+        var stop = document.createElementNS(svgNS,'stop');
+        for (var attr in attrs){
+            if (attrs.hasOwnProperty(attr)) stop.setAttribute(attr,attrs[attr]);
+        }
+        grad.appendChild(stop);
+    }
+    
+    var defs = svg.querySelector('defs') || svg.insertBefore( document.createElementNS(svgNS,'defs'), svg.firstChild );
+    return defs.appendChild(grad);
+}
+
 function generateMap(biome, size) {
     var rings = size - 1;
     var terrain = {};
@@ -131,23 +148,6 @@ function hexGrid(town, svg) {
     }
 }
 
-function createGradient(svg,id,stops){
-    var svgNS = svg.namespaceURI;
-    var grad  = document.createElementNS(svgNS,'linearGradient');
-    grad.setAttribute('id',id);
-    for (var i=0;i<stops.length;i++){
-        var attrs = stops[i];
-        var stop = document.createElementNS(svgNS,'stop');
-        for (var attr in attrs){
-            if (attrs.hasOwnProperty(attr)) stop.setAttribute(attr,attrs[attr]);
-        }
-        grad.appendChild(stop);
-    }
-    
-    var defs = svg.querySelector('defs') || svg.insertBefore( document.createElementNS(svgNS,'defs'), svg.firstChild );
-    return defs.appendChild(grad);
-}
-
 function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
     for (var i=0; i<town.map[mx][my][mz].length; i++) {
         var obj = town.map[mx][my][mz][i];
@@ -167,6 +167,7 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
             case 'cityhall': 
                 entity['i'] = 'cityhall';
                 entity['s'] = 2;
+                break;
             case 'mine': 
                 entity['i'] = 'mine';
                 entity['s'] = 2;
@@ -177,19 +178,21 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
                 break;
             case 'tradepost': 
                 entity['i'] = 'tradepost';
-                entity['s'] = 1.5;
+                entity['s'] = 1.75;
                 break;
             case 'hut': 
                 entity['i'] = 'hut';
+                entity['s'] = 0.75;
                 break;
             case 'shed': 
                 entity['i'] = 'shed';
+                entity['s'] = 0.75;
                 break;
             case 'house': 
-                entity['i'] = 'hut';
+                entity['i'] = 'house';
                 break;
             case 'warehouse': 
-                entity['i'] = 'shed';
+                entity['i'] = 'warehouse';
                 break;
             case 'tree0': // Tree type 0 
                 entity['i'] = 'tree0';
