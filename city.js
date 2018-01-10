@@ -8,24 +8,28 @@ function loadCity() {
     else {
         // New game, setup starter state
         // Player starts with a starter mine
+        city[0]['id'] = 0;
         city[0]['mine'] = [];
-        
         city[0]['biome'] = 'grassland';
         city[0]['tax_rate'] = 1;
         city[0]['timer'] = 60;
         city[0]['storage_cap'] = 100;
         city[0]['prospecting'] = false;
         city[0]['storage'] = { lumber: 0, stone: 0 };
+        city[0]['map'] = generateMap('grassland',10);
+        city[0]['size'] = 2;
+        city[0]['scale'] = 50;
+        city[0]['quota'] = {};
         city[0]['citizen'] = {
             amount: 0,
             idle: 0,
             max: 0
         };
+        city[0]['city_hall'] = {
+            rank: 0
+        };
     }
     
-    if (!city[0]['quota']) {
-        city[0]['quota'] = {};
-    }
     if (!global.resource.cement.unlocked && city[0]['cement_plant']) {
         global.resource.cement.unlocked = 1;
     }
@@ -33,17 +37,355 @@ function loadCity() {
     for (var i=0; i < city.length; i++) {
         var storages = $('<div id="storage' + i + '" class="storages d-flex"></div>');
         $('#storage_pane').append(storages);
-        var structures = $('<div id="structures' + i + '" class="structures d-flex"></div>');
-        $('#structures_pane').append(structures);
-        var blueprints = $('<div id="blueprints' + i + '" class="blueprints d-flex"></div>');
-        $('#blueprints_pane').append(blueprints);
-        var mines = $('<div id="mines' + i + '" class="mines d-flex"></div>');
-        $('#mines_pane').append(mines);
+        
         loadCityStorage(i);
-        loadCityCore(i);
-        loadMines(i);
         loadInfoBar(i);
+        loadCityMap(i);
     }
+}
+
+function tileInfo(town,x,y,z) {
+    if (town.map[x][y][z][0]) {
+        switch (town.map[x][y][z][0].type) {
+            case 'debris':
+                $('#modalTitle').html(nameCase(town.biome));
+                $('#modalContent').empty();
+                loadBlueprints(town, x, y, z);
+                break;
+            case 'mine':
+                 // place holder
+                $('#modalTitle').html(nameCase(town.biome));
+                $('#modalContent').empty();
+                break;
+            default:
+                var rank = town[town.map[x][y][z][0].type].rank;
+                $('#modalTitle').html(building[town.map[x][y][z][0].type].rank[rank].name);
+                $('#modalContent').empty();
+                loadBuildingOptions(town, x, y, z, town.map[x][y][z][0].type, rank);
+                break;
+        }
+    }
+    else {
+        $('#modalTitle').html(nameCase(town.biome));
+        $('#modalContent').empty();
+        loadBlueprints(town, x, y, z);
+    }
+    $('#modal').modal();
+}
+
+function loadBuildingOptions(town, x, y, z, type, rank) {
+    $('#modalContent').html(building[type].rank[rank].description);
+    switch(building[type].type) {
+        case 'unique':
+            loadUniqueBuilding(town, x, y, z, type, rank);
+            break;
+        case 'factory':
+            loadFactoryBuilding(town, x, y, z, type, rank);
+            break;
+        case 'storage':
+            loadStorageBuilding(town, x, y, z, type, rank);
+            break;
+        default:
+            break;
+    }
+}
+
+function loadUniqueBuilding(town, x, y, z, type, rank) {
+    
+    var title = building[type]['rank'][rank]['description'];
+    var structure = $('<div class="city unique" title="' + title + '"></div>');
+    
+    if (building[type]['rank'][rank]['staff']) {
+        var workers = $('<div class="col"></div>');
+        var remove = $('<span class="remove">&laquo;</span>');
+        var add = $('<span class="add">&raquo;</span>');
+        var count = $('<span class="workers" title="' + jobTitle(town,building[type]['rank'][rank]['labor']) + '">' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title'] + '</span>');
+        
+        workers.append(remove);
+        workers.append(count);
+        workers.append(add);
+        structure.append(workers);
+        
+        $('#modalContent').append(structure);
+        
+        remove.on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town[type]['workers']) > 0) {
+                town[type]['workers']--;
+                town['citizen']['idle']++;
+                count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+            }
+        });
+        
+        add.on('click',function(e){
+            e.preventDefault();
+            
+            if (Number(town['citizen']['idle']) > 0 && town[type]['workers'] < building[type]['rank'][rank]['labor_cap']) {
+                town[type]['workers']++;
+                town['citizen']['idle']--;
+                count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+            }
+        });
+    }
+    else {
+        $('#modalContent').append(structure);
+    }
+    
+    switch (type) {
+        case 'city_hall': // Extra city hall options
+            // Taxes
+            if (global['government'] >= 2 && town['city_hall'].rank >= 1) {
+                var rate_table = {
+                    1: 'Low Taxes',
+                    2: 'Medium Taxes',
+                    3: 'High Taxes',
+                    4: 'Oppressive Taxes'
+                };
+                
+                var taxes = $('<div class="col"></div>');
+                var lower = $('<span class="remove">&laquo;</span>');
+                var raise = $('<span class="add">&raquo;</span>');
+                var current = $('<span class="workers" title="Set current tax rate, higher taxes may cause discontent">' + rate_table[town['tax_rate']] + '</span>');
+                
+                taxes.append(lower);
+                taxes.append(current);
+                taxes.append(raise);
+                structure.append(taxes);
+                
+                lower.on('click',function(e){
+                    e.preventDefault();
+                    
+                    if (town['tax_rate'] > 1) {
+                        town['tax_rate']--;
+                        current.html(rate_table[town['tax_rate']]);
+                    }
+                });
+                
+                raise.on('click',function(e){
+                    e.preventDefault();
+                    
+                    if (town['tax_rate'] < 3 || (global['government'] >= 3 && town['tax_rate'] < 4)) {
+                        town['tax_rate']++;
+                        current.html(rate_table[town['tax_rate']]);
+                    }
+                });
+            }
+            
+            // Production Quotas
+            if (global['economics'] >= 3 && town['city_hall'].rank >= 1) {
+                var quota_row = $('<div class="row"></div>');
+                var quota_col = $('<div class="col"></div>');
+                var quota = $('<button title="Opens menu to set production quotas">Set Quotas</button>');
+                quota_row.append(quota_col);
+                quota_col.append(quota);
+                structure.append(quota_row);
+                
+                quota.on('click',function(e){
+                    e.preventDefault();
+                    
+                    var quota_container = $('#city_hall div').first();
+                    quota_container.empty();
+                    
+                    Object.keys(global['resource']).forEach(function (res) {
+                        if (global['resource'][res].unlocked){
+                            var contain = $('<div class="container"></div>');
+                            var div_row = $('<div class="row"><div class="col">' + nameCase(res) + ' Limit </div></div>');
+                            var current_quota = town.storage_cap;
+                            if (town['quota'][res]) {
+                                current_quota = town['quota'][res];
+                            }
+                            var limit = $('<div class="col">' + current_quota + '</div>');
+                            div_row.append(limit);
+                            contain.append(div_row);
+                            var input = $('<input id="quota' + res + '" type="text" data-slider-id="quota' + res + 'slider" data-provide="slider" data-slider-min="0" data-slider-max="' + town.storage_cap + '" data-slider-step="10" data-slider-value="' + current_quota + '">');
+                            contain.append(input);
+                            quota_container.append(contain);
+                            input.slider({
+                                formatter: function(value) {
+                                    limit.html(value);
+                                    town['quota'][res] = value;
+                                    return 'Current value: ' + value;
+                                },
+                                tooltip: 'show'
+                            });
+                        }
+                    });
+                    
+                    $('#city_hall').addClass('show');
+                    $('#city_hall').addClass('active');
+                    
+                    $('#city').removeClass('show');
+                    $('#city').removeClass('active');
+                    
+                    $('#menu li a').removeClass('active');
+                    
+                });
+            }
+            break;
+        default:
+            // Do nothing
+            break;
+    }
+    
+    // Upgrade Available
+    if (building[type]['rank'][rank + 1] && checkRequirements(building[type]['rank'][rank + 1].require)) {
+        var title = building[type]['rank'][rank + 1]['description'];
+        var blueprint = $('<div class="city blueprint" title="' + title + '"></div>');
+        var header = $('<div class="header row"><div class="col">Upgrade to ' + building[type]['rank'][rank + 1]['name'] +'</div></div>');
+        blueprint.append(header);
+        
+        Object.keys(building[type]['rank'][rank + 1]['cost']).forEach(function (cost) { 
+            var row = $('<div class="row"></div>');
+            var afford = '';
+            if (cost === 'money') {
+                var t_cost = inflation(town,type,building[type]['rank'][rank + 1]['cost'][cost]);
+                if (t_cost > global.money) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
+                row.append(price);
+            }
+            else {
+                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                var t_cost = inflation(town,type,building[type]['rank'][rank + 1]['cost'][cost]);
+                if (t_cost > town['storage'][cost]) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
+                row.append(res);
+                row.append(price);
+            }
+            blueprint.append(row);
+        });
+        
+        structure.append(blueprint);
+        
+        blueprint.on('click',function(e){
+            e.preventDefault();
+            
+            var paid = payBuildingCosts(town,type,rank + 1);
+            if (paid) {
+                town[type].rank++;
+                town.map[x][y][z][0].svg = building[type]['rank'][rank + 1].svg;
+                if (building[type]['rank'][rank + 1]['staff'] && !town[type]['workers']) {
+                    town[type]['workers'] = 0;
+                }
+                if (building[type]['rank'][rank + 1].effect) {
+                    building[type]['rank'][rank + 1].effect(town,type);
+                }
+                loadCityMap(town.id);
+                tileInfo(town, x, y, z);
+            }
+        });
+    }
+}
+
+function loadFactoryBuilding(town, x, y, z, type, rank) {
+
+}
+
+function loadStorageBuilding(town, x, y, z, type, rank) {
+
+}
+
+function loadBlueprints(town, x, y, z) {
+    var container = $('<div class="d-flex city"></div>');
+    $('#modalContent').append(container);
+    
+    Object.keys(building).forEach(function (key) {
+        if(building[key]['allow'].all || building[key]['allow'][town.biome]) {
+            switch (building[key]['type']) {
+                case 'mine':
+                    // Load Prospecting Option
+                    break;
+                case 'factory':
+                    // Load factory type buildings
+                    
+                    break;
+                case 'storage':
+                    // Load storage type buildings
+                    
+                    break;
+                case 'unique':
+                    // Load unique type buildings
+                    if (!town[key]) {
+                        showBlueprint(container,town,key,0,x,y,z);
+                    }
+                    break;
+                default:
+                    // Building type was not recognized, ignore it
+                    break;
+            }
+        }
+    });
+}
+
+function showBlueprint(container, town, type, rank, x, y, z) {
+    // Building Available
+    if (building[type]['rank'][rank] && checkRequirements(building[type]['rank'][rank].require)) {
+        var title = building[type]['rank'][rank]['description'];
+        var blueprint = $('<div class="city blueprint" title="' + title + '"></div>');
+        var header = $('<div class="header row"><div class="col">Construct ' + building[type]['rank'][rank]['name'] +'</div></div>');
+        blueprint.append(header);
+        
+        Object.keys(building[type]['rank'][rank]['cost']).forEach(function (cost) { 
+            var row = $('<div class="row"></div>');
+            var afford = '';
+            if (cost === 'money') {
+                var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
+                if (t_cost > global.money) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">$' + t_cost + '</span>');
+                row.append(price);
+            }
+            else {
+                var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
+                var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
+                if (t_cost > town['storage'][cost]) {
+                    afford = ' unaffordable';
+                }
+                var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
+                row.append(res);
+                row.append(price);
+            }
+            blueprint.append(row);
+        });
+        
+        container.append(blueprint);
+        
+        blueprint.on('click',function(e){
+            e.preventDefault();
+            
+            var paid = payBuildingCosts(town,type,rank);
+            if (paid) {
+                town.map[x][y][z] = [{  
+                    type: type,
+                    svg: building[type].rank[rank].svg,
+                    x: 0,
+                    y: 0
+                }];
+                town[type] = { rank: 0 };
+                if (building[type]['rank'][rank]['staff'] && !town[type]['workers']) {
+                    town[type]['workers'] = 0;
+                }
+                if (building[type]['rank'][rank].effect) {
+                    building[type]['rank'][rank].effect(town,type);
+                }
+                loadCityMap(town.id);
+                tileInfo(town, x, y, z);
+            }
+        });
+    }
+}
+
+function loadCityMap(id) {
+    $('#map_pane').empty();
+    var map = $('<div id="city_map' + id + '" class="map d-flex"></div>');
+    $('#map_pane').append(map);
+    var svg = SVG('city_map' + id);
+    hexGrid(city[id],svg);
 }
 
 function loadCityStorage(id) {
@@ -386,7 +728,7 @@ function loadFactory(id,factory) {
                 var row = $('<div class="row"></div>');
                 var afford = '';
                 if (cost === 'money') {
-                    var t_cost = inflation(id,factory,building[factory]['rank'][0]['cost'][cost]);
+                    var t_cost = inflation(city[id],factory,building[factory]['rank'][0]['cost'][cost]);
                     if (t_cost > global.money) {
                         afford = ' unaffordable';
                     }
@@ -395,7 +737,7 @@ function loadFactory(id,factory) {
                 }
                 else {
                     var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                    var t_cost = inflation(id,factory,building[factory]['rank'][0]['cost'][cost]);
+                    var t_cost = inflation(city[id],factory,building[factory]['rank'][0]['cost'][cost]);
                     if (t_cost > city[id]['storage'][cost]) {
                         afford = ' unaffordable';
                     }
@@ -471,7 +813,7 @@ function loadStorage(id,storage) {
             var row = $('<div class="row"></div>');
             var afford = '';
             if (cost === 'money') {
-                var t_cost = inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]);
+                var t_cost = inflation(city[id],storage,building[storage]['rank'][rank]['cost'][cost]);
                 if (t_cost > global.money) {
                     afford = ' unaffordable';
                 }
@@ -480,7 +822,7 @@ function loadStorage(id,storage) {
             }
             else {
                 var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                var t_cost = inflation(id,storage,building[storage]['rank'][rank]['cost'][cost]);
+                var t_cost = inflation(city[id],storage,building[storage]['rank'][rank]['cost'][cost]);
                 if (t_cost > city[id]['storage'][cost]) {
                     afford = ' unaffordable';
                 }
@@ -576,7 +918,7 @@ function loadUnique(id,unique) {
         }
         
         switch (unique) {
-            case 'city_hall': // Extra city call options
+            case 'city_hall': // Extra city hall options
                 
                 // Taxes
                 if (global['government'] >= 2) {
@@ -688,7 +1030,7 @@ function loadUnique(id,unique) {
                 var row = $('<div class="row"></div>');
                 var afford = '';
                 if (cost === 'money') {
-                    var t_cost = inflation(id,unique,building[unique]['rank'][0]['cost'][cost]);
+                    var t_cost = inflation(city[id],unique,building[unique]['rank'][0]['cost'][cost]);
                     if (t_cost > global.money) {
                         afford = ' unaffordable';
                     }
@@ -697,7 +1039,7 @@ function loadUnique(id,unique) {
                 }
                 else {
                     var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
-                    var t_cost = inflation(id,unique,building[unique]['rank'][0]['cost'][cost]);
+                    var t_cost = inflation(city[id],unique,building[unique]['rank'][0]['cost'][cost]);
                     if (t_cost > city[id]['storage'][cost]) {
                         afford = ' unaffordable';
                     }
@@ -805,13 +1147,13 @@ function loadProspect(id) {
             container.append(row);
             
             var cash_row = $('<div class="row"></div>');
-            var cost = inflation(id,'mine',city[id]['mine'].length * 100);
+            var cost = inflation(city[id],'mine',city[id]['mine'].length * 100);
             var cash_cost = $('<div class="col">$' + cost + '</div>');
             cash_row.append(cash_cost);
             container.append(cash_row);
             
             var lumber_row = $('<div class="row"></div>');
-            var lumber_cost = inflation(id,'mine',(city[id]['mine'].length + 1) * 25);
+            var lumber_cost = inflation(city[id],'mine',(city[id]['mine'].length + 1) * 25);
             var lumber_col = $('<div class="col">Lumber</div><div class="col">' + lumber_cost + '</div>');
             lumber_row.append(lumber_col);
             container.append(lumber_row);
@@ -872,7 +1214,7 @@ function loadProspect(id) {
             row.append(cost);
         }
         else {
-            price = inflation(id,'mine',(city[id]['mine'].length * 100));
+            price = inflation(city[id],'mine',(city[id]['mine'].length * 100));
             var cost = $('<div class="col">$' + price + '</div>');
             row.append(cost);
         }
@@ -1013,16 +1355,16 @@ function registerMine(id,mine) {
     });
 }
 
-function payBuildingCosts(id,build,rank) {
+function payBuildingCosts(town,build,rank) {
     var paid = true;
     Object.keys(building[build]['rank'][rank]['cost']).forEach(function (cost) {
         if (cost === 'money') {
-            if (global['money'] < inflation(id,build,building[build]['rank'][rank]['cost'][cost])) {
+            if (global['money'] < inflation(town,build,building[build]['rank'][rank]['cost'][cost])) {
                 paid = false;
                 return;
             }
         }
-        else if (city[id]['storage'][cost] < inflation(id,build,building[build]['rank'][rank]['cost'][cost])) {
+        else if (town['storage'][cost] < inflation(town,build,building[build]['rank'][rank]['cost'][cost])) {
             paid = false;
             return;
         }
@@ -1030,10 +1372,10 @@ function payBuildingCosts(id,build,rank) {
     if (paid) {
         Object.keys(building[build]['rank'][rank]['cost']).forEach(function (cost) {
             if (cost === 'money') {
-                global['money'] -= Number(inflation(id,build,building[build]['rank'][rank]['cost'][cost]));
+                global['money'] -= Number(inflation(town,build,building[build]['rank'][rank]['cost'][cost]));
             }
             else {
-                city[id]['storage'][cost] -= Number(inflation(id,build,building[build]['rank'][rank]['cost'][cost]));
+                town['storage'][cost] -= Number(inflation(town,build,building[build]['rank'][rank]['cost'][cost]));
             }
         });
     }

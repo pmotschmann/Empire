@@ -2,6 +2,30 @@ div.main {
     padding-top: 2rem;
 }
 
+.info-box {
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 1;
+    background-color: #ffffff;
+    border: 2px solid #300ABF;
+    border-radius: 5px;
+    padding: 5px;
+    font-family: arial;
+}
+
+.action-box {
+    width: 25rem;
+    height: 18rem;
+}
+
+.modal {
+    button {
+        cursor: pointer;
+    }
+}
+
 div.menu {
     padding-top: 1rem;
     
@@ -13,6 +37,12 @@ div.menu {
     textarea {
         width: 30rem;
         height: 10rem;
+    }
+}
+
+svg {
+    path {
+        cursor: pointer;
     }
 }
 
@@ -260,4 +290,63 @@ div.research {
 
 .slider-selection {
     background: #bababa;
+}
+
+.svg-img {
+    cursor: pointer;
+    background-size: 100% 100%;
+    width: 100%;
+    height: 100%;
+    
+    &.campfire {
+        background-image: url(svg/campfire.svg);
+    }
+    &.mine {
+        background-image: url(svg/mine.svg);
+    }
+    &.cityhall {
+        background-image: url(svg/cityhall.svg);
+    }
+    &.farm {
+        background-image: url(svg/farm.svg);
+    }
+    &.tradepost {
+        background-image: url(svg/tradepost.svg);
+    }
+    &.hut {
+        background-image: url(svg/hut.svg);
+    }
+    &.house {
+        background-image: url(svg/house.svg);
+    }
+    &.shed {
+        background-image: url(svg/shed.svg);
+    }
+    &.warehouse {
+        background-image: url(svg/warehouse.svg);
+    }
+    &.tree1 {
+        background-image: url(svg/tree1.svg);
+    }
+    &.tree2 {
+        background-image: url(svg/tree2.svg);
+    }
+    &.tree3 {
+        background-image: url(svg/tree3.svg);
+    }
+    &.tree4 {
+        background-image: url(svg/tree4.svg);
+    }
+    &.rock0 {
+        background-image: url(svg/rock.svg);
+    }
+    &.rock1 {
+        background-image: url(svg/rock1.svg);
+    }
+    &.rock2 {
+        background-image: url(svg/rock2.svg);
+    }
+    &.rock3 {
+        background-image: url(svg/rock3.svg);
+    }
 }

@@ -36,7 +36,8 @@ var biomes = {
             copper: 0.65,
             iron: 0.7,
             coal: 0.4
-        }
+        },
+        tile_color: '#59ae69'
     },
     desert: {
         desc: 'Deserts are arid climents that can be hard to settle and lack access to timber, they are however excellent sources of stone, oil, and rare metals.',
@@ -51,7 +52,8 @@ var biomes = {
             aluminium: 0.3,
             titanium: 0.2
         },
-        oil: 0.5
+        oil: 0.5,
+        tile_color: '#59ae69'
     },
     mountain: {
         desc: 'Mountain areas are often rich with mineral resources, but are tough to colonize. Mountain settlements however are generally easy to foriify.',
@@ -67,7 +69,8 @@ var biomes = {
             aluminium: 0.5,
             titanium: 0.3
         },
-        oil: 0.05
+        oil: 0.05,
+        tile_color: '#59ae69'
     },
     forest: {
         desc: 'Forests are rich in lumber but generally are poor sources of other resources.',
@@ -81,7 +84,8 @@ var biomes = {
             coal: 0.25,
             aluminium: 0.15,
             gold: 0.1
-        }
+        },
+        tile_color: '#59ae69'
     },
     wetland: {
         desc: 'Wetlands are often treacherous terrain that are poorly suited for settlements, the conditions make it hard to extact minerals from the earth and are genrally tough to live in. However wetlands are tough to invade so they make great strongholds.',
@@ -96,7 +100,8 @@ var biomes = {
             gold: 0.1,
             aluminium: 0.2,
             titanium: 0.15
-        }
+        },
+        tile_color: '#59ae69'
     }
 };
 

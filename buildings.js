@@ -7,6 +7,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Mine',
+                svg: 'mine',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
                 manager: true,
@@ -64,7 +65,17 @@ function defineBuildings() {
         allow: { all: true },
         rank: [
             {
+                name: 'Encampment',
+                svg: 'campfire',
+                description: 'A simple camp to use as your opperating base.',
+                cost: { 
+                    lumber: 1,
+                    stone: 1
+                }
+            },
+            {
                 name: 'City Hall',
+                svg: 'cityhall',
                 require: { government: 1 },
                 description: 'The center of govenment of any city. Allows advanced management of your city.',
                 staff: true,
@@ -88,6 +99,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Trading Post',
+                svg: 'tradepost',
                 require: { economics: 1 },
                 description: 'Allows spare resources to be sold for money',
                 staff: true,
@@ -109,6 +121,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Farm',
+                svg: 'farm',
                 require: { minerals: 2, farming: 1 },
                 description: 'The farm increases your food supply, which makes gaining new citizens easier. Assign farmers to boost citizen gain rate.',
                 staff: true,
@@ -138,6 +151,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Lumber Mill',
+                svg: 'lumbermill',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Lumber Mill will automatically harvest lumber.',
                 foreman: true,
@@ -185,6 +199,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Rock Quarry',
+                svg: 'rockquarry',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'Workers assgined to the Rock Quarry will automatically mine stone.',
                 foreman: true,
@@ -230,6 +245,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Cement Plant',
+                svg: 'cementfactory',
                 require: { minerals: 2, knowledge: 5 },
                 description: 'The cemenet plant consumes stone and produces cement.',
                 foreman: true,
@@ -284,6 +300,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Blast Furnace',
+                svg: 'furnace',
                 require: { smelting: 1 },
                 description: 'The Blast Furnance is used to process various ores into metals.',
                 cost: { 
@@ -302,6 +319,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Steel Mill',
+                svg: 'steelmill',
                 require: { minerals: 4, mining: 3 },
                 description: 'The Steel Mill consumes iron and coal to make steel.',
                 foreman: true,
@@ -357,6 +375,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Green House',
+                svg: 'greenhouse',
                 require: { minerals: 2, farming: 2 },
                 description: 'The greenhouse increases the effectiveness of your farmers.',
                 cost: { 
@@ -378,13 +397,14 @@ function defineBuildings() {
         },
         rank: [
             {
-                name: 'Stone Hut',
+                name: 'Hut',
+                svg: 'hut',
                 require: { housing: 1 },
-                description: 'A simple hut made out of stone and wood, houses one citizen.',
+                description: 'A simple hut made out of wood and, stone, houses one citizen.',
                 limit: 10,
                 cost: { 
-                    stone: 12,
-                    lumber: 8
+                    stone: 8,
+                    lumber: 12
                 },
                 effect: function (town, building) {
                     town['citizen']['max'] += 1;
@@ -392,6 +412,7 @@ function defineBuildings() {
             },
             {
                 name: 'House',
+                svg: 'house',
                 require: { minerals: 2, tech: 3 },
                 description: 'A modern house, with all the conveniences, houses one citizen',
                 cost: { 
@@ -418,6 +439,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Apartment Building',
+                svg: 'apartments',
                 require: { housing: 2, minerals: 4, tech: 3 },
                 description: 'An apartment building, houses 5 citizens',
                 cost: { 
@@ -444,12 +466,13 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Storage Shed',
+                svg: 'shed',
                 require: { minerals: 2, warehouse: 1 },
                 description: 'A simple shed to store resources, increaases city storage limit by 20.',
                 limit: 10,
                 cost: { 
-                    stone: 4,
-                    lumber: 8,
+                    stone: 6,
+                    lumber: 6,
                     iron: 2
                 },
                 effect: function (town, building) {
@@ -458,6 +481,7 @@ function defineBuildings() {
             },
             {
                 name: 'Storage Shed',
+                svg: 'shed',
                 require: { minerals: 2, warehouse: 1, tech: 3 },
                 description: 'A sturdy shed to store resources, increaases city storage limit by 20.',
                 cost: { 
@@ -484,6 +508,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Warehouse',
+                svg: 'warehouse',
                 require: { minerals: 2, warehouse: 2, tech: 3 },
                 description: 'A large storage building, increaases city storage limit by 100.',
                 cost: { 

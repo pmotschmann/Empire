@@ -85,6 +85,37 @@ function defineTech() {
         }
     ];
     
+    research['cartography'] = [ 
+        {
+            name: 'Basic Cartography',
+            require: { tech: 1, knowledge: 2 },
+            description: 'Learn how draw crude maps which help you navigate further from your camp.',
+            cost: { 
+                lumber: 10,
+                stone: 5
+            },
+            effect: function () {
+                city[0].size = 3;
+                city[0].scale = 40;
+                loadCityMap(0);
+            }
+        },
+        {
+            name: 'Landmarks',
+            require: { knowledge: 10 },
+            description: 'Learn to draw better maps by using landmarks, this increases your zone of influence.',
+            cost: { 
+                money: 100,
+                lumber: 25
+            },
+            effect: function () {
+                city[0].size = 4;
+                city[0].scale = 30;
+                loadCityMap(0);
+            }
+        }
+    ];
+    
     research['government'] = [
         {
             name: 'Oxymoron Hall',
