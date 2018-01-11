@@ -140,9 +140,6 @@ div.city {
     
     div.mines,
     div.structures,
-    div.storages,
-    div.unique,
-    div.factory,
     div.blueprints {
         flex-direction: column;
         flex-flow: row wrap;
@@ -153,10 +150,7 @@ div.city {
     }
     
     div.mine,
-    div.prospect,
-    div.factory,
-    div.storage,
-    div.unique {
+    div.prospect {
         width: 15rem;
         border: solid .0625rem grey;
         margin: 1rem 1rem 0 0;
@@ -315,6 +309,9 @@ div.research {
     }
     &.tradepost {
         background-image: url(svg/tradepost.svg);
+    }
+    &.factory {
+        background-image: url(svg/factory.svg);
     }
     &.hut {
         background-image: url(svg/hut.svg);
