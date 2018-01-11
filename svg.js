@@ -95,18 +95,6 @@ function hexGrid(town, svg) {
     var centerV = rings * scale * 3;
     svg.size(centerH * 2, centerV * 2);
     
-    createGradient(svg.node,'rockGradient',[
-        {offset:'5%', 'stop-color':'#999'},
-        {offset:'50%','stop-color':'#aba'},
-        {offset:'95%','stop-color':'#999'}
-    ]);
-    
-    createGradient(svg.node,'shrubGradient',[
-        {offset:'15%', 'stop-color':'#ae7'},
-        {offset:'50%','stop-color':'#395'},
-        {offset:'85%','stop-color':'#2a4'}
-    ]);
-    
     doodads = [];
     for (var x=((rings - 1) * -1); x <= (rings - 1); x++) {
         for (var y=((rings - 1) * -1); y <= (rings - 1); y++) {
@@ -179,6 +167,22 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
             case 'tradepost': 
                 entity['i'] = 'tradepost';
                 entity['s'] = 1.75;
+                break;
+            case 'lumbermill': 
+                entity['i'] = 'factory'; // placeholder
+                entity['s'] = 1.5;
+                break;
+            case 'rockquarry': 
+                entity['i'] = 'factory'; // placeholder
+                entity['s'] = 1.5;
+                break;
+            case 'cementfactory': 
+                entity['i'] = 'factory'; // placeholder
+                entity['s'] = 1.5;
+                break;
+            case 'steelmill': 
+                entity['i'] = 'factory'; // placeholder
+                entity['s'] = 1.5;
                 break;
             case 'hut': 
                 entity['i'] = 'hut';
