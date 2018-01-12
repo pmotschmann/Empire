@@ -169,20 +169,20 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
                 entity['s'] = 1.75;
                 break;
             case 'lumbermill': 
-                entity['i'] = 'factory'; // placeholder
-                entity['s'] = 1.5;
+                entity['i'] = 'lumbermill';
+                entity['s'] = 2.5;
                 break;
             case 'rockquarry': 
                 entity['i'] = 'factory'; // placeholder
                 entity['s'] = 1.5;
                 break;
             case 'cementfactory': 
-                entity['i'] = 'factory'; // placeholder
-                entity['s'] = 1.5;
+                entity['i'] = 'cementplant';
+                entity['s'] = 2;
                 break;
             case 'steelmill': 
-                entity['i'] = 'factory'; // placeholder
-                entity['s'] = 1.5;
+                entity['i'] = 'steelmill';
+                entity['s'] = 2.5;
                 break;
             case 'hut': 
                 entity['i'] = 'hut';
