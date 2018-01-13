@@ -7,7 +7,7 @@ function defineBuildings() {
         rank: [
             {
                 name: 'Mine',
-                svg: 'mine',
+                svg: 'mine-grey',
                 require: { mining: 1 },
                 description: 'Construct a Mine',
                 manager: true,
@@ -371,7 +371,7 @@ function defineBuildings() {
     building['greenhouse'] = {
         type: 'unique',
         limit: 1,
-        allow: { all: true },
+        allow: { all: false }, // this is going to be reimplimented as an upgrade for the farm
         rank: [
             {
                 name: 'Green House',
@@ -444,6 +444,7 @@ function defineBuildings() {
                 svg: 'apartments',
                 require: { housing: 2, minerals: 4, tech: 3 },
                 description: 'An apartment building, houses 5 citizens',
+                tile_limit: 4,
                 cost: { 
                     money: 1000,
                     cement: 30,
@@ -470,7 +471,7 @@ function defineBuildings() {
                 name: 'Storage Shed',
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1 },
-                description: 'A simple shed to store resources, increaases city storage limit by 20.',
+                description: 'A simple shed to store resources, increases city storage limit by 25.',
                 limit: 12,
                 tile_limit: 12,
                 cost: { 
@@ -479,14 +480,19 @@ function defineBuildings() {
                     iron: 2
                 },
                 effect: function (town, building) {
-                    town['storage_cap'] += 20;
+                    if (global['packing'] >= 1) {
+                        town['storage_cap'] += 25;
+                    }
+                    else {
+                        town['storage_cap'] += 20;
+                    }
                 }
             },
             {
                 name: 'Storage Shed',
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1, tech: 3 },
-                description: 'A sturdy shed to store resources, increaases city storage limit by 20.',
+                description: 'A sturdy shed to store resources, increases city storage limit by 25.',
                 tile_limit: 12,
                 cost: { 
                     money: 75,
@@ -496,7 +502,12 @@ function defineBuildings() {
                     iron: 2
                 },
                 effect: function (town, building) {
-                    town['storage_cap'] += 20;
+                    if (global['packing'] >= 1) {
+                        town['storage_cap'] += 25;
+                    }
+                    else {
+                        town['storage_cap'] += 20;
+                    }
                 }
             }
         ]
@@ -514,7 +525,8 @@ function defineBuildings() {
                 name: 'Warehouse',
                 svg: 'warehouse',
                 require: { minerals: 2, warehouse: 2, tech: 3 },
-                description: 'A large storage building, increaases city storage limit by 100.',
+                description: 'A large storage building, increases city storage limit by 125.',
+                tile_limit: 4,
                 cost: { 
                     money: 500,
                     cement: 40,
@@ -523,7 +535,12 @@ function defineBuildings() {
                     steel: 30
                 },
                 effect: function (town, building) {
-                    town['storage_cap'] += 100;
+                    if (global['packing'] >= 2) {
+                        town['storage_cap'] += 125;
+                    }
+                    else {
+                        town['storage_cap'] += 100;
+                    }
                 }
             }
         ]

@@ -122,7 +122,12 @@ function hexGrid(town, svg) {
         if (town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0] && town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0].type !== 'debris') {
             var type = town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0].type;
             if (type === 'mine') {
-                // Mine title logic goes here
+                for (var j=0; j<town.mine.length; j++) {
+                    if (town.mine[j].id === doodads[i].id) {
+                        obj.attr('title',town.mine[j].name);
+                        break;
+                    } 
+                }
             }
             else if (town[type]) {
                 obj.attr('title',building[type]['rank'][town[type]['rank']]['name']);
@@ -156,13 +161,14 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
                 entity['i'] = 'cityhall';
                 entity['s'] = 2;
                 break;
-            case 'mine': 
-                entity['i'] = 'mine';
+            case 'mine-grey': 
+                entity['i'] = 'mine-grey';
                 entity['s'] = 2;
+                entity['id'] = obj.id;
                 break;
             case 'farm': 
                 entity['i'] = 'farm';
-                entity['s'] = 1.5;
+                entity['s'] = 2.5;
                 break;
             case 'tradepost': 
                 entity['i'] = 'tradepost';
@@ -192,11 +198,16 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
                 entity['i'] = 'shed';
                 entity['s'] = 0.75;
                 break;
+            case 'apartments': 
+                entity['i'] = 'condos';
+                entity['s'] = 1.4;
+                break;
             case 'house': 
                 entity['i'] = 'house';
                 break;
             case 'warehouse': 
                 entity['i'] = 'warehouse';
+                entity['s'] = 1.25;
                 break;
             case 'tree0': // Tree type 0 
                 entity['i'] = 'tree0';

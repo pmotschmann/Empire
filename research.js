@@ -185,9 +185,6 @@ function defineTech() {
                 money: 100,
                 lumber: 10,
                 stone: 10
-            },
-            effect: function () {
-                loadMines(0);
             }
         }
     ];
@@ -250,6 +247,25 @@ function defineTech() {
                 cement: 50,
                 lumber: 50,
                 steel: 50
+            }
+        }
+    ];
+    
+    research['packing'] = [ 
+        {
+            name: 'Efficient Packing',
+            require: { warehouse: 1, knowledge: 12 },
+            description: 'Learn how to get the most out of your storage by arranging things in neat piles instead of haphazardly tossing them in. Increasese storage gain from Sheds by 25%',
+            cost: { 
+                money: 1000
+            }
+        },
+        {
+            name: 'Pallets',
+            require: { warehouse: 2, knowledge: 28 },
+            description: 'Learn how to more efficiently pack a warehouse by stacking things on pallets. Increasese storage gain from Warehouses by 25%',
+            cost: { 
+                money: 40000
             }
         }
     ];
