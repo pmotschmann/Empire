@@ -88,11 +88,12 @@ function mainLoop() {
                     });
                     unwatch[mine['id'] + 'workers']();
                     delete unwatch[mine['id'] + 'workers'];
+                    delete vue[mine['id'] + 'workers'];
+                    delete vue[mine['id']];
+                    city[id].map[mine.x][mine.y][mine.z] = [];
                     city[id]['mine'].splice(key, 1);
                     
-                    if (global['survey']) {
-                        loadMines(id);
-                    }
+                    loadCityMap(id);
                 }
             }
             
@@ -126,7 +127,31 @@ function mainLoop() {
                 }
             });
             
-            // Updates remaining storage total
+            // Updates storage totals
+            var storage_cap = 100;
+            if (city[id]['shed']) {
+                if (global['packing'] >= 1) {
+                    building.shed.rank[0].description = 'A simple shed to store resources, increases city storage limit by 25.';
+                    building.shed.rank[1].description = 'A simple shed to store resources, increases city storage limit by 25.';
+                    storage_cap += (city[id]['shed'].owned * 25);
+                }
+                else {
+                    building.shed.rank[0].description = 'A simple shed to store resources, increases city storage limit by 20.';
+                    building.shed.rank[1].description = 'A simple shed to store resources, increases city storage limit by 20.';
+                    storage_cap += (city[id]['shed'].owned * 20);
+                }
+            }
+            if (city[id]['warehouse']) {
+                if (global['packing'] >= 2) {
+                    building.warehouse.rank[0].description = 'A large storage building, increases city storage limit by 125.';
+                    storage_cap += (city[id]['warehouse'].owned * 125);
+                }
+                else {
+                    building.warehouse.rank[0].description = 'A large storage building, increases city storage limit by 100.';
+                    storage_cap += (city[id]['warehouse'].owned * 100);
+                }
+            }
+            city[id]['storage_cap'] = storage_cap;
             var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
             $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
             
@@ -145,42 +170,34 @@ function mainLoop() {
             // Prospecting logic
             if (city[id]['prospecting']) {
                 city[id]['prospecting']--;
+                var prospect_id = String(city[id].prospect_id.x)+String(city[id].prospect_id.y)+String(city[id].prospect_id.z);
                 var completion = Math.floor((Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) - city[id]['prospecting']) / Math.ceil((city[id].mine.length + 1) * 15 * biomes[city[id].biome].cost) * 100);
-                $('#prospecting' + id + 'title').html('Prospecting ' + completion + '%');
+                $('#prospecting' + prospect_id + 'title').html('Prospecting ' + completion + '%');
                 
                 if (city[id]['prospecting'] === 0) {
                     city[id]['prospecting'] = false;
-                    if (global['next_id'] === 0) {
-                        city[id]['prospecting_offer'] = { 
-                            copper: 1000,
-                            iron: 750,
-                            coal: 250
-                        };
-                    }
-                    else {
-                        var mine = {};
-                        Object.keys(biomes[city[id].biome].minerals).forEach(function (ore) {
-                            if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
-                                mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
-                                // Chance to strike a rich ore vein
-                                var roll = Math.random() * 100;
-                                if (roll > 99) {
-                                    // Super Rich
-                                    mine[ore] *=  Math.ceil(Math.random() * 250);
-                                }
-                                else if (roll > 95) {
-                                    // Rich
-                                    mine[ore] *=  Math.ceil(Math.random() * 100);
-                                }
-                                else if (roll > 90) {
-                                    // Above Average
-                                    mine[ore] *=  Math.ceil(Math.random() * 10);
-                                }
+                    var mine = {};
+                    Object.keys(biomes[city[id].biome].minerals).forEach(function (ore) {
+                        if (Math.random() < biomes[city[id].biome]['minerals'][ore]) {
+                            mine[ore] = Math.ceil(Math.random() * 2000 * biomes[city[id].biome]['minerals'][ore]);
+                            // Chance to strike a rich ore vein
+                            var roll = Math.random() * 100;
+                            if (roll > 99) {
+                                // Super Rich
+                                mine[ore] *=  Math.ceil(Math.random() * 250);
                             }
-                        });
-                        city[id]['prospecting_offer'] = mine;
-                    }
-                    loadMines(id);
+                            else if (roll > 95) {
+                                // Rich
+                                mine[ore] *=  Math.ceil(Math.random() * 100);
+                            }
+                            else if (roll > 90) {
+                                // Above Average
+                                mine[ore] *=  Math.ceil(Math.random() * 10);
+                            }
+                        }
+                    });
+                    city[id]['prospecting_offer'][prospect_id] = mine;
+                    tileInfo(city[id], city[id].prospect_id.x, city[id].prospect_id.y, city[id].prospect_id.z);
                 }
             }
             
@@ -305,9 +322,6 @@ function showTech(techKey,techLevel) {
                 research[techKey][techLevel]['effect']();
             }
             loadTech();
-            for (var i=0; i < city.length; i++) {
-                loadCityCore(i);
-            }
         }
         
         return false;
