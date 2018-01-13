@@ -44,14 +44,19 @@ function defineBuildings() {
                 }
                 if (town.quota[res] && harvesters > (town.quota[res] - town['storage'][res])) {
                     if (mine['manager']) {
+                        if (town['storage'][res] > town.quota[res]) {
+                            var stored_exess = town['storage'][res] - town.quota[res];
+                            town['storage'][res] = town.quota[res];
+                            global.money += stored_exess * global.resource[res].value;
+                        }
                         var excess = harvesters - (town.quota[res] - town['storage'][res]);
                         global.money += excess * global.resource[res].value;
                         mine['resources'][res] -= excess;
                     }
                     harvesters = town.quota[res] - town['storage'][res];
                 }
-                unused -= harvesters;
                 if (Number(harvesters) > 0) {
+                    unused -= harvesters;
                     town['storage'][res] = (town['storage'][res] || 0) + Number(harvesters);
                     mine['resources'][res] -= Number(harvesters);
                 }
