@@ -43,7 +43,7 @@ function defineBuildings() {
                     harvesters = unused;
                 }
                 if (town.quota[res] && harvesters > (town.quota[res] - town['storage'][res])) {
-                    if (mine['manager']) {
+                    if (mine['manager'] && town['trading_post'] && town['trading_post']['workers']) {
                         if (town['storage'][res] > town.quota[res]) {
                             var stored_exess = town['storage'][res] - town.quota[res];
                             town['storage'][res] = town.quota[res];
@@ -181,7 +181,7 @@ function defineBuildings() {
                 harvest = town.storage_cap - sum;
             }
             if (town.quota['lumber'] && harvest > town.quota['lumber'] - town['storage']['lumber']) {
-                if (town[building]['manager']) {
+                if (town[building]['manager'] && town['trading_post'] && town['trading_post']['workers']) {
                     var excess = harvest - (town.quota['lumber'] - town['storage']['lumber']);
                     global.money += excess * global.resource.lumber.value;
                 }
@@ -227,7 +227,7 @@ function defineBuildings() {
                 workers = town.storage_cap - sum;
             }
             if (town.quota['stone'] && workers > town.quota['stone'] - town['storage']['stone']) {
-                if (town[building]['manager']) {
+                if (town[building]['manager'] && town['trading_post'] && town['trading_post']['workers']) {
                     var excess = workers - (town.quota['stone'] - town['storage']['stone']);
                     global.money += excess * global.resource.stone.value;
                 }
@@ -280,7 +280,7 @@ function defineBuildings() {
                 workers = town['storage']['stone'];
             }
             if (town.quota['cement'] && workers > town.quota['cement'] - town['storage']['cement']) {
-                if (town[building]['manager']) {
+                if (town[building]['manager'] && town['trading_post'] && town['trading_post']['workers']) {
                     var excess = workers - (town.quota['cement'] - town['storage']['cement']);
                     global.money += excess * global.resource.cement.value;
                 }
@@ -355,7 +355,7 @@ function defineBuildings() {
                 workers = town['storage']['coal'];
             }
             if (town.quota['steel'] && workers > town.quota['steel'] - town['storage']['steel']) {
-                if (town[building]['manager']) {
+                if (town[building]['manager'] && town['trading_post'] && town['trading_post']['workers']) {
                     var excess = harvest - (town.quota['steel'] - town['storage']['steel']);
                     global.money += excess * global.resource.steel.value;
                 }

@@ -6,7 +6,7 @@ function defineResources() {
     loadResource('iron',1,0,2);
     loadResource('coal',1,0,2);
     loadResource('steel',0,0,5);
-    loadResource('cement',0,0,1);
+    loadResource('cement',0,0,2);
     loadResource('aluminium',0,0,4);
     loadResource('gold',0,0,10);
     loadResource('titanium',0,0,5);
