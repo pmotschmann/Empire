@@ -141,6 +141,72 @@ function hexGrid(town, svg) {
     }
 }
 
+function offsets(town, type, rank, current) {
+    switch (type) {
+        case 'small_house':
+        case 'shed':
+            switch (current) {
+                case 0:
+                    return { x:-20, y:-5 };
+                    break;
+                case 1:
+                    return { x:-5, y:10 };
+                    break;
+                case 2:
+                    return { x:15, y:0 };
+                    break;
+                case 3:
+                    return { x:0, y:-15 };
+                    break;
+                case 4:
+                    return { x:-35, y:-20 };
+                    break;
+                case 5:
+                    return { x:-15, y:-30 };
+                    break;
+                case 6:
+                    return { x:10, y:25 };
+                    break;
+                case 7:
+                    return { x:30, y:15 };
+                    break;
+                case 8:
+                    return { x:-22, y:20 };
+                    break;
+                case 9:
+                    return { x:-37, y:5 };
+                    break;
+                case 10:
+                    return { x:20, y:-25 };
+                    break;
+                case 11:
+                    return { x:35, y:-10 };
+                    break;
+            }
+            break;
+        case 'medium_house':
+        case 'warehouse':
+            switch (current) {
+                case 0:
+                    return { x:-20, y:10 };
+                    break;
+                case 1:
+                    return { x:20, y:-20 };
+                    break;
+                case 2:
+                    return { x:-20, y:-20 };
+                    break;
+                case 3:
+                    return { x:20, y:10 };
+                    break;
+            }
+            break;
+        default:
+            return { x:0, y:0 };
+            break;
+    }
+}
+
 function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
     for (var i=0; i<town.map[mx][my][mz].length; i++) {
         var obj = town.map[mx][my][mz][i];
