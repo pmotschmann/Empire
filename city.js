@@ -622,12 +622,14 @@ function drawCityStorage(id,res) {
         outer.append(inner);
         $('#storage' + id).append(outer);
         
+        var harvesting = false;
         clicker.on('click',function(e){
             e.preventDefault();
-            var bar = $('#' + res + 'ProgressBar');
-            if (parseInt(bar.width()) > 0) {
+            if (harvesting === true) {
                 return false;
             }
+            harvesting = true;
+            var bar = $('#' + res + 'ProgressBar');
             var width = 1;
             intervals[res] = setInterval(function() {
                 if (width >= 100) {
@@ -642,6 +644,7 @@ function drawCityStorage(id,res) {
                     storage_sum += yield;
                     $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
                     bar.width('0');
+                    harvesting = false;
                 } else {
                     width++; 
                     bar.width(width + '%');
