@@ -61,7 +61,6 @@ function mainLoop() {
             }
             city[id]['timer'] -= 1;
             
-            
             var employed = 0;
             var revenue = 0;
             // Resource mining
@@ -210,7 +209,30 @@ function mainLoop() {
             }
             
             // Correct labor pool
-            city[id].citizen.idle = city[id].citizen.amount - employed;
+            if (employed > city[id].citizen.amount) {
+                city[id].citizen.idle = 0;
+                var overstaffed = employed - city[id].citizen.amount;
+                Object.keys(city[id]).forEach(function (obj) {
+                    if (city[id][obj]['workers'] && city[id][obj].workers > 0 && overstaffed > 0) {
+                        overstaffed--;
+                        city[id][obj].workers--;
+                    }
+                    else if (city[id][obj]['foreman'] && city[id][obj].foreman > 0 && overstaffed > 0) {
+                        overstaffed--;
+                        city[id][obj].foreman--;
+                    }
+                    else if (city[id][obj]['manager'] && city[id][obj].manager > 0 && overstaffed > 0) {
+                        overstaffed--;
+                        city[id][obj].manager--;
+                    }
+                    else if (overstaffed === 0) {
+                        return;
+                    }
+                });
+            }
+            else {
+                city[id].citizen.idle = city[id].citizen.amount - employed;
+            }
             
             // Ensure storage is displayed accurately
             Object.keys(city[id]['storage']).forEach(function (key) { 
