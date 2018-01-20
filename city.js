@@ -660,6 +660,9 @@ function loadCityMap(id) {
 }
 
 function loadCityStorage(id) {
+    $('.popover').each(function () {
+        $(this).popover('hide');
+    });
     vue['storage' + id] = new Vue({
         data: { store: city[id]['storage'] }
     });
@@ -739,6 +742,9 @@ function drawCityStorage(id,res) {
                     if (city[id]['storage'][res] > 0) {
                         city[id]['storage'][res]--;
                         global['money'] += global['resource'][res]['value'];
+                        if (city[id]['storage'][res] <= 0) {
+                            $('#pop' + id + res).popover('toggle');
+                        }
                     }
                 });
             }

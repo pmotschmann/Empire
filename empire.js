@@ -49,6 +49,7 @@ $(function() {
         });
     });
     
+    // Start game loop
     mainLoop();
 });
 
