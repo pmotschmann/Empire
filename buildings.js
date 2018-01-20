@@ -273,9 +273,6 @@ function defineBuildings() {
                 return;
             }
             var sum = Number(Object.keys(town['storage']).length ? Object.values(town['storage']).reduce((a, b) => a + b) : 0);
-            if (workers > town.storage_cap - sum) {
-                workers = town.storage_cap - sum;
-            }
             if (town['storage']['stone'] < workers) {
                 workers = town['storage']['stone'];
             }
@@ -345,9 +342,6 @@ function defineBuildings() {
                 return;
             }
             var sum = Object.values(town.storage).reduce((a, b) => a + b);
-            if (workers > town.storage_cap - sum) {
-                workers = town.storage_cap - sum;
-            }
             if ( workers * 2 > town['storage']['iron'] ) {
                 workers = Math.floor(town['storage']['iron'] / 2);
             }
