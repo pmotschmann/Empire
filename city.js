@@ -132,10 +132,22 @@ function loadUniqueBuilding(town, x, y, z, type, rank) {
         var workers = $('<div class="col"></div>');
         var remove = $('<span class="remove">&laquo;</span>');
         var add = $('<span class="add">&raquo;</span>');
-        var count = $('<span class="workers" title="' + jobTitle(town,building[type]['rank'][rank]['labor']) + '">' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title'] + '</span>');
-        
         workers.append(remove);
-        workers.append(count);
+        
+        var count;
+        if (jobs[building[type]['rank'][rank]['labor']].skilled) {
+            var worker = $('<div class="progress labor"></div>');
+            var progress = $('<div id="workers' + String(x)+String(y)+String(z) + 'ProgressBar" class="progress-bar progress-bar-striped bg-success" style="width:0%" role="progress-bar"></div>');
+            count = $('<div id="workers' + String(x)+String(y)+String(z) + '" class="progress-bar-title workers" title="' + jobTitle(town,building[type]['rank'][rank]['labor']) + '">' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title'] + '</div>');
+            worker.append(progress);
+            worker.append(count);
+            workers.append(worker);
+        }
+        else {
+            count = $('<span id="workers' + String(x)+String(y)+String(z) + '" class="workers" title="' + jobTitle(town,building[type]['rank'][rank]['labor']) + '">' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title'] + '</span>');
+            workers.append(count);
+        }
+        
         workers.append(add);
         structure.append(workers);
         
@@ -155,9 +167,22 @@ function loadUniqueBuilding(town, x, y, z, type, rank) {
             e.preventDefault();
             
             if (Number(town['citizen']['idle']) > 0 && town[type]['workers'] < building[type]['rank'][rank]['labor_cap']) {
-                town[type]['workers']++;
-                town['citizen']['idle']--;
-                count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+                if (jobs[building[type]['rank'][rank]['labor']].skilled) {
+                    if (town[type]['training']) { } 
+                    else {
+                        town[type]['training'] = jobs[building[type]['rank'][rank]['labor']].train;
+                        town[type]['t_type'] = 'workers';
+                        town[type]['t_job'] = building[type]['rank'][rank]['labor'];
+                        town[type]['t_id'] = String(x)+String(y)+String(z);
+                        town[type]['t_cap'] = building[type]['rank'][rank]['labor_cap'];
+                        town['citizen']['idle']--;
+                    }
+                }
+                else {
+                    town[type]['workers']++;
+                    town['citizen']['idle']--;
+                    count.html(town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title']);
+                }
             }
         });
     }
@@ -167,6 +192,53 @@ function loadUniqueBuilding(town, x, y, z, type, rank) {
     
     switch (type) {
         case 'city_hall': // Extra city hall options
+            if (global['economics'] >= 5 && town['city_hall'].rank >= 1) {
+                if (!town['city_hall']['accountant']) {
+                    town['city_hall']['accountant'] = 0;
+                }
+                var accountant = $('<div class="col"></div>');
+                var accountant_remove = $('<span class="remove">&laquo;</span>');
+                var accountant_add = $('<span class="add">&raquo;</span>');
+                
+                accountant.append(accountant_remove);
+                
+                var accountant_worker = $('<div class="progress labor"></div>');
+                var accountant_progress = $('<div id="accountant' + String(x)+String(y)+String(z) + 'ProgressBar" class="progress-bar progress-bar-striped bg-success" style="width:0%" role="progress-bar"></div>');
+                var accountant_count = $('<div id="accountant' + String(x)+String(y)+String(z) + '" class="progress-bar-title workers" title="' + jobTitle(town,'accountant') + '">' + town[type]['accountant'] + '/1 ' + jobs['accountant']['title'] + '</div>');
+                accountant_worker.append(accountant_progress);
+                accountant_worker.append(accountant_count);
+                accountant.append(accountant_worker);
+                
+                accountant.append(accountant_add);
+                structure.append(accountant);
+                
+                accountant_remove.on('click',function(e){
+                    e.preventDefault();
+                    
+                    if (Number(town[type]['accountant']) > 0) {
+                        town[type]['accountant'] = 0;
+                        town['citizen']['idle']++;
+                        accountant_count.html(town[type]['accountant'] + '/1 ' + jobs['accountant']['title']);
+                    }
+                });
+                
+                accountant_add.on('click',function(e){
+                    e.preventDefault();
+                    
+                    if (Number(town['citizen']['idle']) > 0 && town[type]['accountant'] < 1) {
+                        if (town[type]['training']) { } 
+                        else {
+                            town[type]['training'] = jobs['accountant'].train;
+                            town[type]['t_type'] = 'accountant';
+                            town[type]['t_job'] = 'accountant';
+                            town[type]['t_id'] = String(x)+String(y)+String(z);
+                            town[type]['t_cap'] = 1;
+                            town['citizen']['idle']--;
+                        }
+                    }
+                });
+            }
+            
             // Taxes
             if (global['government'] >= 2 && town['city_hall'].rank >= 1) {
                 var rate_table = {
@@ -926,9 +998,6 @@ function loadMineOptions(town, mine, x, y, z) {
     if (!mine['manager']) {
         mine['manager'] = 0;
     }
-    
-    var header = $('<div class="header row"><div class="col">' + mine['name'] +'</div></div>');
-    container.append(header);
     
     var count_manager;
     if (global['overseer'] >= 2 && building['mine']['rank'][mine['rank']]['manager']) {

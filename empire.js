@@ -98,6 +98,7 @@ function mainLoop() {
             
             // Triggers production
             Object.keys(building).forEach(function (bld) {
+                // Work
                 if (building[bld].type === 'mine') {
                     return;
                 }
@@ -123,6 +124,31 @@ function mainLoop() {
                     // needed for employment headcount
                     employed += city[id][bld]['workers'];
                     revenue += jobs[building[bld]['rank'][city[id][bld]['rank']]['labor']]['tax'] * city[id][bld]['workers'];
+                }
+                // Training
+                if (city[id][bld] && city[id][bld]['training'] && city[id][bld]['training'] > 0) {
+                    employed++;
+                    var decrement = 1;
+                    if (city[id]['university']) {
+                        decrement += city[id]['university']['workers'];
+                    }
+                    city[id][bld]['training'] -= decrement;
+                    
+                    if (city[id][bld]['training'] <= 0) {
+                        $('#' + city[id][bld]['t_type'] + city[id][bld]['t_id'] + 'ProgressBar').css('width', '0%');
+                        city[id][bld]['training'] = 0;
+                        city[id][bld][city[id][bld]['t_type']]++;
+                        $('#' + city[id][bld]['t_type'] + city[id][bld]['t_id']).html(city[id][bld][city[id][bld]['t_type']] + '/' + city[id][bld]['t_cap'] + ' ' + jobs[city[id][bld]['t_job']].title);
+                        delete city[id][bld]['training'];
+                        delete city[id][bld]['t_type'];
+                        delete city[id][bld]['t_id'];
+                        delete city[id][bld]['t_cap'];
+                        delete city[id][bld]['t_job'];
+                    }
+                    else {
+                        var value = 100 - Math.ceil((city[id][bld]['training'] / jobs[city[id][bld]['t_job']].train) * 100);
+                        $('#' + city[id][bld]['t_type'] + city[id][bld]['t_id'] + 'ProgressBar').css('width', value + '%');
+                    }
                 }
             });
             
@@ -153,6 +179,11 @@ function mainLoop() {
             city[id]['storage_cap'] = storage_cap;
             var storage_sum = Number(Object.keys(city[id]['storage']).length ? Object.values(city[id]['storage']).reduce((a, b) => a + b) : 0);
             $('#cityStorage' + id).html(storage_sum + ' / ' + city[id]['storage_cap']);
+            
+            if (city[id]['city_hall'] && city[id]['city_hall']['accountant'] > 0) {
+                employed++;
+                revenue += jobs['accountant']['tax'];
+            }
             
             // Calculates citizen growth
             if (global['housing'] && city[id].citizen.max > city[id].citizen.amount) {

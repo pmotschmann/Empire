@@ -121,16 +121,84 @@ function hexGrid(town, svg) {
         obj.attr('data-z',doodads[i].mz);
         if (town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0] && town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0].type !== 'debris') {
             var type = town.map[doodads[i].mx][doodads[i].my][doodads[i].mz][0].type;
+            obj.attr('data-type',type);
             if (type === 'mine') {
                 for (var j=0; j<town.mine.length; j++) {
                     if (town.mine[j].id === doodads[i].id) {
-                        obj.attr('title',town.mine[j].name);
+                        obj.attr('data-index',j);
+                        if (global['status_reports']) {
+                            obj.on('mouseover',function(e){
+                                var index = $(this).data('index');
+                                $('#info-box').css('display','block');
+                                $('#info-box').css('top',e.pageY-$('#info-box').height()-30);
+                                $('#info-box').css('left',e.pageX-($('#info-box').width())/2);
+                                $('#info-box').empty();
+                                
+                                var rank = town.mine[index]['rank'];
+                                var report = $('<div></div>');
+                                var title = $('<div>' + town.mine[index].name + '</div>');
+                                report.append(title);
+                                
+                                if (global['overseer'] >= 2 && building['mine']['rank'][rank]['manager']) {
+                                    var manager = $('<div>' + town.mine[index].manager + '/1 ' + jobs['manager']['title'] + '</div>');
+                                    report.append(manager);
+                                }
+                                var workers = $('<div>' + town.mine[index].workers + '/' + building['mine']['rank'][rank]['labor_cap'] + ' ' + jobs[building['mine']['rank'][rank]['labor']]['title'] + '</div>');
+                                report.append(workers);
+                                
+                                $('#info-box').append(report);
+                            });
+                            obj.on('mouseleave',function(e){
+                                $('#info-box').css('display','none');
+                            });
+                        }
+                        else {
+                            obj.attr('title',town.mine[j].name);
+                        }
                         break;
                     } 
                 }
             }
             else if (town[type]) {
-                obj.attr('title',building[type]['rank'][town[type]['rank']]['name']);
+                if (global['status_reports']) {
+                    obj.on('mouseover',function(e){
+                        $('#info-box').css('display','block');
+                        $('#info-box').css('top',e.pageY-$('#info-box').height()-30);
+                        $('#info-box').css('left',e.pageX-($('#info-box').width())/2);
+                        $('#info-box').empty();
+                        
+                        var type = $(this).data('type');
+                        var rank = town[type]['rank'];
+                        var report = $('<div></div>');
+                        var title = $('<div>' + building[type]['rank'][rank]['name'] + '</div>');
+                        report.append(title);
+                        
+                        if (global['overseer'] >= 2 && building[type]['rank'][rank]['manager']) {
+                            var manager = $('<div>' + town[type]['manager'] + '/1 ' + jobs['manager']['title'] + '</div>');
+                            report.append(manager);
+                        }
+                        if (global['overseer'] && building[type]['rank'][rank]['foreman']) {
+                            var foreman = $('<div>' + town[type]['foreman'] + '/1 ' + jobs['foreman']['title'] + '</div>');
+                            report.append(foreman);
+                        }
+                        if (town[type]['workers']) {
+                            var workers = $('<div>' + town[type]['workers'] + '/' + building[type]['rank'][rank]['labor_cap'] + ' ' + jobs[building[type]['rank'][rank]['labor']]['title'] + '</div>');
+                            report.append(workers);
+                        }
+                        if (type === 'city_hall' && global['economics'] >= 5 && town['city_hall'].rank >= 1) {
+                            var accountant = $('<div>' + town[type]['accountant'] + '/1 ' + jobs['accountant']['title'] + '</div>');
+                            report.append(accountant);
+                        }
+                        
+                        $('#info-box').append(report);
+                    });
+                    obj.on('mouseleave',function(e){
+                        $('#info-box').css('display','none');
+                    });
+                }
+                else {
+                    obj.attr('title',building[type]['rank'][town[type]['rank']]['name']);
+                }
             }
         }
         
@@ -255,6 +323,10 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
             case 'steelmill': 
                 entity['i'] = 'steelmill';
                 entity['s'] = 2.5;
+                break;
+            case 'university': 
+                entity['i'] = 'university';
+                entity['s'] = 1.75;
                 break;
             case 'hut': 
                 entity['i'] = 'hut';

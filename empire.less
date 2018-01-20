@@ -27,6 +27,32 @@ div.main {
     .modal-dialog {
         max-width: 34rem;
     }
+    .workers {
+        width: 10rem;
+    }
+    
+    .progress {
+        text-align: center;
+        &.labor {
+            display: inline-flex;
+            background: none;
+            position: relative;
+            top: .1875rem;
+            width: 10rem;
+            margin: 0 .5rem;
+        }
+        .progress-bar-title {
+            position: absolute;
+            text-align: center;
+            overflow: hidden;
+            line-height: 1rem;
+            font-size: 1rem;
+            right: 0;
+            left: 0;
+            top: 0;
+            margin: 0;
+        }
+    }
 }
 
 div.menu {
@@ -97,6 +123,8 @@ div.city {
     
     .workers {
         margin: 0 .5rem;
+        display: inline-block;
+        text-align: center;
     }
     
     div.info_bar {
@@ -321,6 +349,9 @@ div.research {
     }
     &.steelmill {
         background-image: url(svg/steelmill.svg);
+    }
+    &.university {
+        background-image: url(svg/university.svg);
     }
     &.hut {
         background-image: url(svg/hut.svg);

@@ -252,7 +252,7 @@ function defineBuildings() {
                 name: 'Cement Plant',
                 svg: 'cementfactory',
                 require: { minerals: 2, knowledge: 5 },
-                description: 'The cemenet plant consumes stone and produces cement.',
+                description: 'The cement plant consumes stone and produces cement.',
                 foreman: true,
                 manager: true,
                 labor: 'factory',
@@ -546,6 +546,30 @@ function defineBuildings() {
                     else {
                         town['storage_cap'] += 100;
                     }
+                }
+            }
+        ]
+    };
+    
+    building['university'] = {
+        type: 'unique',
+        limit: 1,
+        allow: { all: true },
+        rank: [
+            {
+                name: 'University',
+                svg: 'university',
+                require: { education: 1 },
+                description: 'Allows citizens to educate themselves and staff jobs which require specialized knowledge.',
+                staff: true,
+                labor: 'professor',
+                labor_cap: 2,
+                cost: { 
+                    money: 1000,
+                    lumber: 100,
+                    cement: 100,
+                    steel: 50,
+                    copper: 50
                 }
             }
         ]

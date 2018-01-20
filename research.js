@@ -82,6 +82,14 @@ function defineTech() {
             cost: { 
                 money: 25000
             }
+        },
+        {
+            name: 'Accounting',
+            require: { education: 1 },
+            description: 'Learn the fundamentals of accounting and how it can help you manage your assets.',
+            cost: { 
+                money: 50000
+            }
         }
     ];
     
@@ -172,6 +180,20 @@ function defineTech() {
             description: 'Learn how to manage a factory with a manager who automatically sells excess materials.',
             cost: { 
                 money: 25000
+            }
+        }
+    ];
+    
+    research['status_reports'] = [
+        {
+            name: 'Labor Reports',
+            require: { government: 1 },
+            description: 'Get easy tooltip updates which help you keep informed about your labor distribution.',
+            cost: { 
+                money: 100
+            },
+            effect: function () {
+                loadCityMap(0);
             }
         }
     ];
@@ -541,6 +563,17 @@ function defineTech() {
             },
             effect: function () {
                 global.resource.lumber.yield = 2;
+            }
+        }
+    ];
+    
+    research['education'] = [
+        {
+            name: 'Education',
+            require: { knowledge: 30 },
+            description: "What came first, the teacher or the pupil? We're not sure how the first educator came to be without an education either but this research aims to find out.",
+            cost: { 
+                money: 2000
             }
         }
     ];

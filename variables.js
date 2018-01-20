@@ -7,8 +7,6 @@ var building = {};
 var research = {};
 var city = [{
     storage: {},
-    unique: {},
-    factory: {},
     mine: []
 }];
 var global = {
@@ -159,5 +157,19 @@ var jobs = {
         desc: 'Bureaucrats process red tape for your citizens. Their job function is unclear but they sure do generate a lot of mysterious revenue.',
         tax: 5,
         skilled: false
+    },
+    professor: { 
+        title: 'Professors',
+        desc: 'Professors train your citizens in higher education allowing them to hold jobs which require specialized skills.',
+        tax: 3,
+        skilled: true,
+        train: 60
+    },
+    accountant: { 
+        title: 'Accountant',
+        desc: 'The accountant keeps track of your workforce in a ledger so you can more easily manage your assets.',
+        tax: 8,
+        skilled: true,
+        train: 300
     }
 };
