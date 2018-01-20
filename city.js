@@ -697,7 +697,7 @@ function drawCityStorage(id,res) {
         var harvesting = false;
         clicker.on('click',function(e){
             e.preventDefault();
-            if (harvesting === true) {
+            if (harvesting === true || intervals[res]) {
                 return false;
             }
             harvesting = true;
