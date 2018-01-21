@@ -49,6 +49,21 @@ $(function() {
         });
     });
     
+    $('.c-tab').on('click', function (e) {
+        var obj = $(this);
+        $('.c-tab').each(function () {
+            if (obj.attr('href') === $(this).attr('href')) {
+                return;
+            }
+            if (!$(this).hasClass('collapsed')) {
+                $(this).addClass('collapsed');
+                var href = $(this).attr('href');
+                $(href).removeClass('show');
+                $(href).removeClass('active');
+            }
+        });
+    });
+    
     // Start game loop
     mainLoop();
 });
@@ -295,6 +310,64 @@ function mainLoop() {
                     $('#storage' + id + ' .' + key).remove();
                 }
             });
+            
+            if (city[id]['city_hall']['accountant'] && city[id]['city_hall']['accountant'] >= 1) {
+                $('#ledger_button').css('display','inline-block');
+                $('#city_ledger' + id).empty();
+                Object.keys(city[id]).forEach(function (key) {
+                    if (key !== 'mine' && building[key]) {
+                        var entry = $('<div></div>');
+                        var rank = city[id][key].rank;
+                        
+                        var title = $('<span></span>');
+                        var struct = $('<span>' + building[key]['rank'][rank]['name'] + '</span>');
+                        title.append(struct);
+                        entry.append(title);
+                        var count = 0;
+                        
+                        if (building[key]['type'] === 'storage') {
+                            count++;
+                            var owned = $('<span>Owned: ' + city[id][key].owned + '</span>');
+                            entry.append(owned);
+                        }
+                        else {
+                            var tax_revenue = 0;
+                            Object.keys(city[id][key]).forEach(function (prop) {
+                                if (prop === 'workers') {
+                                    count++;
+                                    var workforce = $('<span>' + jobs[building[key]['rank'][rank].labor].title + ': ' + city[id][key][prop] + '/' + building[key]['rank'][rank].labor_cap + '</span>');
+                                    entry.append(workforce);
+                                    tax_revenue += (jobs[building[key]['rank'][rank].labor].tax * city[id][key][prop]); 
+                                }
+                                else if (jobs[prop]) {
+                                    count++;
+                                    var workforce = $('<span>' + jobs[prop].title + ': ' + city[id][key][prop] + '/1</span>');
+                                    entry.append(workforce);
+                                    tax_revenue += (jobs[prop].tax * city[id][key][prop]);
+                                }
+                            });
+                            if (global['economics'] >= 2) {
+                                tax_revenue *= city[id]['tax_rate'];
+                                if (global['economics'] >= 4) {
+                                    tax_revenue *= 2;
+                                }
+                                var income_tax = $('<span>Tax: $' + tax_revenue + '/min</span>');
+                                title.append(income_tax);
+                            }
+                        }
+                        
+                        if (count % 2 === 1) {
+                            var padding = $('<span>&nbsp;</span>');
+                            entry.append(padding);
+                        }
+                        
+                        $('#city_ledger' + id).append(entry);
+                    }
+                });
+            }
+            else {
+                $('#ledger_button').css('display','none');
+            }
         }
         
         // Check for opening features
@@ -328,7 +401,7 @@ function showTech(techKey,techLevel) {
             tech.append(row);
         }
         else {
-            if (t_cost > city[0].storage[cost]) {
+            if (!city[0]['storage'][cost] || t_cost > city[0].storage[cost]) {
                 afford = ' unaffordable';
             }
             var res = $('<span class="resource">' + nameCase(cost) + '</span>');

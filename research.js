@@ -121,6 +121,44 @@ function defineTech() {
                 city[0].scale = 30;
                 loadCityMap(0);
             }
+        },
+        {
+            name: 'Compass',
+            require: { knowledge: 32 },
+            description: 'Invent the compass which lets you navigate further away without getting lost, increases the zone of influence of your capital.',
+            cost: { 
+                money: 100000,
+                iron: 100
+            },
+            effect: function () {
+                city[0].size = 5;
+                city[0].scale = 25;
+                loadCityMap(0);
+            }
+        },
+        {
+            name: 'Star Charts',
+            require: { astrology: 1, knowledge: 45 },
+            description: 'Learn to make star charts which aid navigation, increases the zone of influence of your capital.',
+            cost: { 
+                money: 1000000
+            },
+            effect: function () {
+                city[0].size = 6;
+                city[0].scale = 20;
+                loadCityMap(0);
+            }
+        }
+    ];
+    
+    research['astrology'] = [
+        {
+            name: 'Astrology',
+            require: { economics: 1, knowledge: 38 },
+            description: 'Learn about celestial objects and how to track their movements.',
+            cost: { 
+                money: 250000
+            }
         }
     ];
     

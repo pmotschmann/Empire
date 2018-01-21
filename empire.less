@@ -69,6 +69,38 @@ div.menu {
     }
 }
 
+div.ledger {
+    flex-flow: row wrap;
+    margin-top: 1rem;
+    
+    > div {
+        width: 20rem;
+        margin: 0 .5rem 1rem;
+        
+        span {
+            display: inline-block;
+            padding-left: .5rem;
+            background-color: #ddd;
+            width: 50%;
+        }
+        
+        :first-child {
+            width: 100%;
+            background-color: #ccc;
+            
+            span {
+                width: 50%;
+                background: none;
+                padding: 0;
+            }
+            
+            :nth-child(2) {
+                padding-left: .25rem;
+            }
+        }
+    }
+}
+
 svg {
     path {
         cursor: pointer;

@@ -49,6 +49,7 @@ function loadCity() {
         loadCityStorage(i);
         loadInfoBar(i);
         loadCityMap(i);
+        loadCityLedger(i);
     }
 }
 
@@ -354,7 +355,7 @@ function loadUniqueBuilding(town, x, y, z, type, rank) {
             else {
                 var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
                 var t_cost = inflation(town,type,building[type]['rank'][rank + 1]['cost'][cost]);
-                if (t_cost > town['storage'][cost]) {
+                if (!town['storage'][cost] || t_cost > town['storage'][cost]) {
                     afford = ' unaffordable';
                 }
                 var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
@@ -592,7 +593,7 @@ function showBlueprint(container, town, type, rank, clear, x, y, z, offsets) {
                 else {
                     var res = $('<span class="resource col">' + nameCase(cost) + '</span>');
                     var t_cost = inflation(town,type,building[type]['rank'][rank]['cost'][cost]);
-                    if (t_cost > town['storage'][cost]) {
+                    if (!town['storage'][cost] || t_cost > town['storage'][cost]) {
                         afford = ' unaffordable';
                     }
                     var price = $('<span class="cost col' + afford + '" data-' + cost + '="' + t_cost + '">' + t_cost + '</span>');
@@ -657,6 +658,12 @@ function loadCityMap(id) {
     $('#map_pane').append(map);
     var svg = SVG('city_map' + id);
     hexGrid(city[id],svg);
+}
+
+function loadCityLedger(id) {
+    $('#ledger_pane').empty();
+    var ledger = $('<div id="city_ledger' + id + '" class="ledger d-flex"></div>');
+    $('#ledger_pane').append(ledger);
 }
 
 function loadCityStorage(id) {
