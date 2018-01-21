@@ -201,6 +201,50 @@ function hexGrid(town, svg) {
                 }
             }
         }
+        else if (doodads[i].i === 'sign') {
+            if (global['status_reports']) {
+                obj.attr('data-index',i);
+                obj.on('mouseover',function(e){
+                    var index = $(this).data('index');
+                    $('#info-box').css('display','block');
+                    $('#info-box').css('top',e.pageY-$('#info-box').height()-30);
+                    $('#info-box').css('left',e.pageX-($('#info-box').width())/2);
+                    $('#info-box').empty();
+                    
+                    var report = $('<div></div>');
+                    var prospect_id = String(doodads[index].mx) + String(doodads[index].my) + String(doodads[index].mz);
+                    var mineral = Object.keys(town.prospecting_offer[prospect_id]).reduce(function(a, b){ return town.prospecting_offer[prospect_id][a] > town.prospecting_offer[prospect_id][b] ? a : b });
+                    
+                    var prefix = '';
+                    if (town['prospecting_offer'][prospect_id][mineral] > 50000) {
+                        prefix = 'Rich ';
+                    }
+                    else if (town['prospecting_offer'][prospect_id][mineral] > 5000) {
+                        prefix = 'Adundent ';
+                    }
+                    else if (town['prospecting_offer'][prospect_id][mineral] > 1000) {
+                        prefix = '';
+                    }
+                    else if (town['prospecting_offer'][prospect_id][mineral] > 500) {
+                        prefix = 'Poor ';
+                    }
+                    else {
+                        prefix = 'Worthless ';
+                    }
+                    
+                    var title = $('<div>Prospective ' + prefix + ' ' + nameCase(mineral) + ' Mine</div>');
+                    report.append(title);
+                    
+                    $('#info-box').append(report);
+                });
+                obj.on('mouseleave',function(e){
+                    $('#info-box').css('display','none');
+                });
+            }
+            else {
+                obj.attr('title','Prospected Location');
+            }
+        }
         
         obj.on('click', function(e) {
             e.preventDefault();
@@ -347,6 +391,9 @@ function calcContent(doodads, town, svg, element, mx, my, mz, s, x, y) {
                 entity['i'] = 'warehouse';
                 entity['s'] = 1.25;
                 break;
+            case 'sign':
+                entity['i'] = 'sign';
+                break;
             case 'tree0': // Tree type 0 
                 entity['i'] = 'tree0';
                 break;
@@ -395,6 +442,18 @@ function drawHexAt(doodads, town, svg, s, x, y, mx, my, mz) {
     hex.data('z',mz);
     
     calcContent(doodads, town, svg, hex, mx, my, mz, s, x, y);
+    
+    if (town.prospecting_offer[String(mx)+String(my)+String(mz)]) {
+        doodads.push({
+            i: 'sign',
+            x: x - (s / 2),
+            y: y - (s / 2),
+            s: 1,
+            mx: mx,
+            my: my,
+            mz: mz
+        });
+    }
     
     hex.on('mouseover',function(e){
         this.fill({ color: '#0c8' });
