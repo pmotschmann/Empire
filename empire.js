@@ -370,6 +370,52 @@ function mainLoop() {
                         $('#city_ledger' + id).append(entry);
                     }
                 });
+                for (var m=0; m<city[id].mine.length; m++) {
+                    var entry = $('<div></div>');
+                    city[id].mine[m].name;
+                    var rank = city[id].mine[m].rank;
+                    
+                    var title = $('<span></span>');
+                    var mine = $('<span>' + city[id].mine[m].name + '</span>');
+                    title.append(mine);
+                    entry.append(title);
+                    
+                    var tax_revenue = 0;
+                    var workforce = $('<span>' + jobs[building['mine']['rank'][rank].labor].title + ': ' + city[id].mine[m]['workers'] + '/' + building['mine']['rank'][rank].labor_cap + '</span>');
+                    entry.append(workforce);
+                    tax_revenue += (jobs[building['mine']['rank'][rank].labor].tax * city[id].mine[m]['workers']); 
+                    
+                    if (global['overseer'] >= 2) {
+                        var manager = $('<span>' + jobs['manager'].title + ': ' + city[id].mine[m]['manager'] + '/1</span>');
+                        entry.append(manager);
+                        tax_revenue += (jobs['manager'].tax * city[id].mine[m]['manager']); 
+                    }
+                    else {
+                        var padding = $('<span>&nbsp;</span>');
+                        entry.append(padding);
+                    }
+                    
+                    var count = 0;
+                    Object.keys(city[id].mine[m].resources).forEach(function (mineral) {
+                        var res = $('<span>' + nameCase(mineral) + ': ' + city[id].mine[m].resources[mineral] + '</span>');
+                        entry.append(res);
+                    });
+                    if (global['economics'] >= 2) {
+                        tax_revenue *= city[id]['tax_rate'];
+                        if (global['economics'] >= 4) {
+                            tax_revenue *= 2;
+                        }
+                        var income_tax = $('<span>Tax: $' + tax_revenue + '/min</span>');
+                        title.append(income_tax);
+                    }
+                    
+                    if (count % 2 === 1) {
+                        var padding = $('<span>&nbsp;</span>');
+                        entry.append(padding);
+                    }
+                    
+                    $('#city_ledger' + id).append(entry);
+                }
             }
             else {
                 $('#ledger_button').css('display','none');
