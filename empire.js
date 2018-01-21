@@ -76,6 +76,7 @@ function mainLoop() {
                 city[id]['timer'] = 60;
             }
             city[id]['timer'] -= 1;
+            var redraw = false;
             
             var employed = 0;
             var revenue = 0;
@@ -108,7 +109,7 @@ function mainLoop() {
                     city[id].map[mine.x][mine.y][mine.z] = [];
                     city[id]['mine'].splice(key, 1);
                     
-                    loadCityMap(id);
+                    redraw = true;
                 }
             }
             
@@ -244,6 +245,7 @@ function mainLoop() {
                     });
                     city[id]['prospecting_offer'][prospect_id] = mine;
                     tileInfo(city[id], city[id].prospect_id.x, city[id].prospect_id.y, city[id].prospect_id.z);
+                    redraw = true;
                 }
             }
             
@@ -282,6 +284,7 @@ function mainLoop() {
             }
             
             // Ensure storage is displayed accurately
+            var redraw_storage = false;
             Object.keys(city[id]['storage']).forEach(function (key) { 
                 if (global['resource'][key] && global['resource'][key].unlocked && $('#storage' + id + ' .' + key).length && global['resource'][key].manual) {
                     // Do nothing
@@ -299,7 +302,7 @@ function mainLoop() {
                     vue['storage' + id].$destroy();
                     delete vue['storage' + id];
                     $('#storage' + id).empty();
-                    loadCityStorage(id);
+                    redraw_storage = true;
                 }
                 else if (city[id]['storage'][key] === 0 || isNaN(city[id]['storage'][key]) || city[id]['storage'][key] === null) {
                     delete city[id]['storage'][key];
@@ -310,6 +313,9 @@ function mainLoop() {
                     $('#storage' + id + ' .' + key).remove();
                 }
             });
+            if (redraw_storage) {
+                loadCityStorage(id);
+            }
             
             if (city[id]['city_hall']['accountant'] && city[id]['city_hall']['accountant'] >= 1) {
                 $('#ledger_button').css('display','inline-block');
@@ -367,6 +373,9 @@ function mainLoop() {
             }
             else {
                 $('#ledger_button').css('display','none');
+            }
+            if (redraw) {
+                loadCityMap(id);
             }
         }
         

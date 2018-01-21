@@ -884,6 +884,7 @@ function loadProspect(modal, id, x, y, z) {
                 e.preventDefault();
                 delete town.prospecting_offer[prospect_id];
                 tileInfo(town, x, y, z);
+                loadCityMap(id);
             });
         }
         else {
@@ -940,6 +941,7 @@ function loadProspect(modal, id, x, y, z) {
                 e.preventDefault();
                 delete town.prospecting_offer[prospect_id];
                 tileInfo(town, x, y, z);
+                loadCityMap(id);
             });
             
             construct.on('click',function(e){

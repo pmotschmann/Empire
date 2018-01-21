@@ -232,7 +232,7 @@ function hexGrid(town, svg) {
                         prefix = 'Worthless ';
                     }
                     
-                    var title = $('<div>Prospective ' + prefix + ' ' + nameCase(mineral) + ' Mine</div>');
+                    var title = $('<div>Prospective ' + prefix + nameCase(mineral) + ' Mine</div>');
                     report.append(title);
                     
                     $('#info-box').append(report);
