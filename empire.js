@@ -34,6 +34,8 @@ $(function() {
     // Set current research
     loadTech();
     
+    $('#expedition_button').css('display','none');
+    
     if (!global['economics']) {
         $('#city_info .money').hide();
     }
@@ -99,11 +101,15 @@ function mainLoop() {
                     city[id]['citizen']['idle'] += mine['workers'];
                     $('#' + mine['id']).remove();
                     Object.keys(mine['resources']).forEach(function (res) {
-                        unwatch[mine['id'] + res]();
-                        delete unwatch[mine['id'] + res];
+                        if (unwatch[mine['id'] + res]) {
+                            unwatch[mine['id'] + res]();
+                            delete unwatch[mine['id'] + res];
+                        }
                     });
-                    unwatch[mine['id'] + 'workers']();
-                    delete unwatch[mine['id'] + 'workers'];
+                    if (unwatch[mine['id'] + 'workers']) {
+                        unwatch[mine['id'] + 'workers']();
+                        delete unwatch[mine['id'] + 'workers'];
+                    }
                     delete vue[mine['id'] + 'workers'];
                     delete vue[mine['id']];
                     city[id].map[mine.x][mine.y][mine.z] = [];
