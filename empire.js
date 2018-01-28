@@ -34,8 +34,9 @@ $(function() {
     // Set current research
     loadTech();
     
-    $('#expedition_button').css('display','none');
-    
+    //if (!global['expedition']) {
+        $('#expedition_button').hide();
+    //}
     if (!global['economics']) {
         $('#city_info .money').hide();
     }
@@ -179,23 +180,17 @@ function mainLoop() {
             var storage_cap = 100;
             if (city[id]['shed']) {
                 if (global['packing'] >= 1) {
-                    building.shed.rank[0].description = 'A simple shed to store resources, increases city storage limit by 25.';
-                    building.shed.rank[1].description = 'A simple shed to store resources, increases city storage limit by 25.';
                     storage_cap += (city[id]['shed'].owned * 25);
                 }
                 else {
-                    building.shed.rank[0].description = 'A simple shed to store resources, increases city storage limit by 20.';
-                    building.shed.rank[1].description = 'A simple shed to store resources, increases city storage limit by 20.';
                     storage_cap += (city[id]['shed'].owned * 20);
                 }
             }
             if (city[id]['warehouse']) {
                 if (global['packing'] >= 2) {
-                    building.warehouse.rank[0].description = 'A large storage building, increases city storage limit by 125.';
                     storage_cap += (city[id]['warehouse'].owned * 125);
                 }
                 else {
-                    building.warehouse.rank[0].description = 'A large storage building, increases city storage limit by 100.';
                     storage_cap += (city[id]['warehouse'].owned * 100);
                 }
             }

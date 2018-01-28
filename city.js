@@ -10,13 +10,13 @@ function loadCity() {
         // Player starts with a starter mine
         city[0]['id'] = 0;
         city[0]['mine'] = [];
-        city[0]['biome'] = 'grassland';
+        city[0]['biome'] = 'capital';
         city[0]['tax_rate'] = 1;
         city[0]['timer'] = 60;
         city[0]['storage_cap'] = 100;
         city[0]['prospecting'] = false;
         city[0]['storage'] = { lumber: 0, stone: 0 };
-        city[0]['map'] = generateMap('grassland',10);
+        city[0]['map'] = generateMap('capital',10);
         city[0]['size'] = 2;
         city[0]['scale'] = 50;
         city[0]['quota'] = {};
@@ -29,6 +29,7 @@ function loadCity() {
             rank: 0
         };
     }
+    city[0]['biome'] = 'capital';
     
     if (!city[0]['map']) {
         upgrade_save();
@@ -45,7 +46,9 @@ function loadCity() {
     for (var i=0; i < city.length; i++) {
         var storages = $('<div id="storage' + i + '" class="storages d-flex"></div>');
         $('#storage_pane').append(storages);
-        
+        var map = $('<div id="city_map' + i + '" class="map d-flex"></div>');
+        $('#map_pane').append(map);
+    
         loadCityStorage(i);
         loadInfoBar(i);
         loadCityMap(i);
@@ -86,14 +89,19 @@ function tileInfo(town, x, y, z) {
 }
 
 function unoccupiedSpace(town, x, y, z) {
-    $('#modalTitle').html(nameCase(town.biome));
+    var name = town.biome;
+    if (biomes[name]['name']) {
+        name = biomes[name]['name']
+    }
+    
+    $('#modalTitle').html(nameCase(name));
     $('#modalContent').empty();
     
     if (isDeveloped(town.map, x+1, y-1, z) || isDeveloped(town.map, x-1, y+1, z) || isDeveloped(town.map, x+1, y, z-1) || isDeveloped(town.map, x-1, y, z+1) || isDeveloped(town.map, x, y+1, z-1) || isDeveloped(town.map, x, y-1, z+1)) {
         loadBlueprints(town, x, y, z);
     }
     else {
-        var wilds = $('<div>Wild ' + town.biome + ' too far from your settlement to develop.</div>');
+        var wilds = $('<div>Wild ' + name + ' too far from your settlement to develop.</div>');
         $('#modalContent').append(wilds);
     }
 }
@@ -653,15 +661,12 @@ function showBlueprint(container, town, type, rank, clear, x, y, z, offsets) {
 }
 
 function loadCityMap(id) {
-    $('#map_pane').empty();
-    var map = $('<div id="city_map' + id + '" class="map d-flex"></div>');
-    $('#map_pane').append(map);
+    $('#city_map' + id).empty();
     var svg = SVG('city_map' + id);
     hexGrid(city[id],svg);
 }
 
 function loadCityLedger(id) {
-    $('#ledger_pane').empty();
     var ledger = $('<div id="city_ledger' + id + '" class="ledger d-flex"></div>');
     $('#ledger_pane').append(ledger);
 }

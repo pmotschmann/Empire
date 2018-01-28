@@ -24,7 +24,8 @@ var gatherRateTable = {
 };
 
 var biomes = {
-    grassland: {
+    capital: {
+        name: 'grassland',
         desc: 'Grasslands are temparte climates dominated by large fields of grass, they make favorable farmland and are easy to develop settlements in.',
         cost: 1.0,
         growth: 1.0,
@@ -35,6 +36,23 @@ var biomes = {
             iron: 0.7,
             coal: 0.4
         },
+        explore: false,
+        tile_color: '#59ae69'
+    },
+    grassland: {
+        desc: 'Grasslands are temparte climates dominated by large fields of grass, they make favorable farmland and are easy to develop settlements in.',
+        cost: 1.0,
+        growth: 1.2,
+        lumber: 1.0,
+        stone: 1.0,
+        minerals: {
+            copper: 0.65,
+            iron: 0.7,
+            coal: 0.4,
+            aluminium: 0.3,
+            gold: 0.1
+        },
+        explore: true,
         tile_color: '#59ae69'
     },
     desert: {
@@ -51,6 +69,7 @@ var biomes = {
             titanium: 0.2
         },
         oil: 0.5,
+        explore: true,
         tile_color: '#59ae69'
     },
     mountain: {
@@ -68,6 +87,7 @@ var biomes = {
             titanium: 0.3
         },
         oil: 0.05,
+        explore: true,
         tile_color: '#59ae69'
     },
     forest: {
@@ -83,6 +103,7 @@ var biomes = {
             aluminium: 0.15,
             gold: 0.1
         },
+        explore: true,
         tile_color: '#59ae69'
     },
     wetland: {
@@ -99,6 +120,7 @@ var biomes = {
             aluminium: 0.2,
             titanium: 0.15
         },
+        explore: true,
         tile_color: '#59ae69'
     }
 };

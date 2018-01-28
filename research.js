@@ -256,6 +256,9 @@ function defineTech() {
             description: 'Learn the logistics of mounting an expedition to find new lands, and how to exploit them.',
             cost: { 
                 money: 10000
+            },
+            effect: function () {
+                //$('#expedition_button').show();
             }
         }
     ];

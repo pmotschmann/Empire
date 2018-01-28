@@ -148,6 +148,7 @@ function defineBuildings() {
         type: 'factory',
         limit: 1,
         allow: {
+            capital: true,
             grassland: true,
             mountain: true,
             forest: true,
@@ -294,7 +295,7 @@ function defineBuildings() {
         }
     };
     
-    // Adds a one time bonus to farm effectiveness
+    // Used to smelt metals into useful ignots
     building['blast_furnance'] = {
         type: 'unique',
         limit: 1,
@@ -470,7 +471,11 @@ function defineBuildings() {
                 name: 'Storage Shed',
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1 },
-                description: 'A simple shed to store resources, increases city storage limit by 25.',
+                description: function(){ 
+                    return global['packing'] >= 1 
+                        ? 'A simple shed to store resources, increases city storage limit by 25.' 
+                        : 'A simple shed to store resources, increases city storage limit by 20.'; 
+                }(),
                 limit: 12,
                 tile_limit: 12,
                 cost: { 
@@ -491,7 +496,11 @@ function defineBuildings() {
                 name: 'Storage Shed',
                 svg: 'shed',
                 require: { minerals: 2, warehouse: 1, tech: 3 },
-                description: 'A sturdy shed to store resources, increases city storage limit by 25.',
+                description: function(){ 
+                    return global['packing'] >= 1 
+                        ? 'A simple shed to store resources, increases city storage limit by 25.' 
+                        : 'A simple shed to store resources, increases city storage limit by 20.'; 
+                }(),
                 tile_limit: 12,
                 cost: { 
                     money: 75,
@@ -524,7 +533,11 @@ function defineBuildings() {
                 name: 'Warehouse',
                 svg: 'warehouse',
                 require: { minerals: 2, warehouse: 2, tech: 3 },
-                description: 'A large storage building, increases city storage limit by 125.',
+                description: function(){ 
+                    return global['packing'] >= 2 
+                        ? 'A large storage building, increases city storage limit by 125.' 
+                        : 'A large storage building, increases city storage limit by 100.'; 
+                }(),
                 tile_limit: 4,
                 cost: { 
                     money: 500,
